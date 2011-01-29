@@ -20,6 +20,7 @@ import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import org.droidkit.R;
@@ -29,6 +30,7 @@ public class NumberPickerPreference extends DialogPreference {
     private NumberPicker mPicker;
     private int mStartRange;
     private int mEndRange;
+    private int mDefault;
     
     public NumberPickerPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -36,7 +38,10 @@ public class NumberPickerPreference extends DialogPreference {
         TypedArray arr = context.obtainStyledAttributes(attrs, R.styleable.droidkit);
         mStartRange = arr.getInteger(R.styleable.droidkit_startRange, 0);
         mEndRange = arr.getInteger(R.styleable.droidkit_endRange, 200);
+        mDefault = arr.getInteger(R.styleable.droidkit_defaultValue, 0);
         
+        arr.recycle();
+                        
         setDialogLayoutResource(R.layout.number_picker_pref);
                 
         arr.recycle();
@@ -78,6 +83,6 @@ public class NumberPickerPreference extends DialogPreference {
     }
     
     private int getValue() {
-        return getSharedPreferences().getInt(getKey(), 25);
+        return getSharedPreferences().getInt(getKey(), mDefault);
     }
 }

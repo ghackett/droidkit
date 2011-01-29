@@ -20,5 +20,6 @@
     <declare-styleable name="droidkit">
         <attr name="startRange" format="integer" />
         <attr name="endRange" format="integer" />
+		<attr name="defaultValue" format="integer" />
     </declare-styleable>
 </resources>
