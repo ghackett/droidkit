@@ -16,22 +16,33 @@
 package org.droidkit.widget;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.droidkit.R;
+
 public class TabItem extends RelativeLayout {
+    public static final int TYPE_INTENT = 0x1;
+    public static final int TYPE_VIEW = 0x2;
+    
     ImageView mIcon;
     TextView mLabel;
+    Intent mContentIntent;
+    View mContentView;
     
     String mTag;
     
     int mSelectedTextColor = 0x242424;
     int mUnselectedTextColor = 0xFFFFFF;
+    int mBackgroundId = R.drawable.default_tab_bg;
     
     public TabItem(Context context) {
         super(context);
@@ -56,6 +67,8 @@ public class TabItem extends RelativeLayout {
         LayoutParams labelParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         labelParams.addRule(CENTER_HORIZONTAL, TRUE);
         labelParams.addRule(ALIGN_PARENT_BOTTOM, TRUE);
+        
+        setBackgroundResource(mBackgroundId);
         
         mLabel.setPadding(0, 0, 0, 6);
         addView(mLabel, labelParams);
@@ -102,7 +115,8 @@ public class TabItem extends RelativeLayout {
     }
     
     public void setBackground(int id) {
-        setBackgroundResource(id);
+        mBackgroundId = id;
+        setBackgroundResource(mBackgroundId);
     }
     
     public void setTabSelected(boolean selected) {
@@ -112,6 +126,34 @@ public class TabItem extends RelativeLayout {
         } else {
             setSelected(false);
             mLabel.setTextColor(mUnselectedTextColor);
+        }
+    }
+    
+    public void setContent(Intent intent) {
+        mContentIntent = intent;
+    }
+    
+    public void setContent(View view) {
+        mContentView = view;
+    }
+    
+    public View getContentView() {
+        return mContentView;
+    }
+    
+    public Intent getContentIntent() {
+        return mContentIntent;
+    }
+    
+    public int getContentType() {
+        if (mContentIntent == null && mContentView == null) {
+            return -1;
+        }
+        
+        if (mContentIntent == null && mContentView != null) {
+            return TYPE_VIEW;
+        } else {
+            return TYPE_INTENT;
         }
     }
 }

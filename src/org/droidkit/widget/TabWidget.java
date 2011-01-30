@@ -18,6 +18,8 @@ package org.droidkit.widget;
 import android.app.LocalActivityManager;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -37,17 +39,19 @@ public class TabWidget extends RelativeLayout {
     
     public TabWidget(Context context) {
         super(context);
+        init();
     }
     
     public TabWidget(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init();
     }
     
     private void init() {
         setFocusableInTouchMode(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         
-        mTabBar = new TabBar(getContext());
+        mTabBar = new TabBar(getContext(), this);
         mContent = new LinearLayout(getContext());
         mShadow = new ImageView(getContext());
         
@@ -75,6 +79,19 @@ public class TabWidget extends RelativeLayout {
         TabItem tab = mTabBar.getTabs().get(index);
         tab.setSelected(true);
         
+        if (tab.getContentType() == TabItem.TYPE_INTENT) {
+            loadIntentContent(tab);
+        } else {
+            loadViewContent(tab);
+        }
+    }
+    
+    private void loadIntentContent(TabItem tab) {
+        final Window win = mLocalActivityManager.startActivity(tab.getTag(), tab.getContentIntent());
+        final View wd = win != null ? win.getDecorView() : null;
+    }
+    
+    private void loadViewContent(TabItem tab) {
         
     }
     

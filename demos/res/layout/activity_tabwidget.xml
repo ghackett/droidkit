@@ -16,15 +16,14 @@
  * limitations under the License.
  */
  -->
-<PreferenceScreen xmlns:droidkit="http://schemas.android.com/apk/res/org.droidkit.demos"
-     xmlns:android="http://schemas.android.com/apk/res/android">
-     
-     <org.droidkit.preference.NumberPickerPreference
-         android:key="demo.number.preference"
-         android:title="Demo Number Picker"
-         android:summary="Implement a num picker pref"
-		 droidkit:defaultValue="15"
-         droidkit:startRange="-50"
-         droidkit:endRange="50" />
-         
-</PreferenceScreen>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:droidkit="http://schemas.android.com/apk/res/org.droidkit.demos"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+	<org.droidkit.widget.TabWidget
+		android:id="@+id/tab_widget"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent" />
+
+</LinearLayout>

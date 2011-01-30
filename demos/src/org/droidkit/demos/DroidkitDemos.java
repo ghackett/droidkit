@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -41,7 +42,9 @@ public class DroidkitDemos extends ListActivity {
         super.onCreate(savedInstanceState);
         
         Intent intent = getIntent();
-        String path = intent.getStringExtra("org.droidkit.demos.Path");
+        String path = intent.getStringExtra("org.droidkit.demos.PATH");
+        
+        Log.d("DroidKitDemos", "Browsing dir: " + path);
         
         if (path == null) {
             path = "";
@@ -82,9 +85,12 @@ public class DroidkitDemos extends ListActivity {
             CharSequence labelSeq = info.loadLabel(pm);
             String label = labelSeq != null ? labelSeq.toString() : info.activityInfo.name;
             
-            if (prefix.length() == 0 || label.startsWith(prefix)) {
+            if (info.activityInfo.packageName.startsWith("org.droidkit.demos") && (prefix.length() == 0 || label.startsWith(prefix))) {
                 String[] labelPath = label.split("/");
                 String nextLabel = prefixPath == null ? labelPath[0] : labelPath[prefixPath.length];
+                
+                Log.d("DroidKitDemos", "Label: " + label);
+                Log.d("DroidKitDemos", "Label next: " + nextLabel);
                 
                 if ((prefixPath != null ? prefixPath.length : 0) == labelPath.length - 1) {
                     addItem(data, nextLabel, activityIntent(info.activityInfo.applicationInfo.packageName,
@@ -125,9 +131,11 @@ public class DroidkitDemos extends ListActivity {
     }
     
     protected Intent browseIntent(String path) {
+        Log.d("DroidKitDemos", "Browse: " + path);
+        
         Intent result = new Intent();
         result.setClass(this, DroidkitDemos.class);
-        result.putExtra("org.droidkit.demos.Path", path);
+        result.putExtra("org.droidkit.demos.PATH", path);
         return result;
     }
     

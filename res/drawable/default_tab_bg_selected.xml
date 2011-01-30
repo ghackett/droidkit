@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2010 Mike Novak <michael.novakjr@gmail.com>
+ * Copyright (C) 2010-2011 Mike Novak <michael.novakjr@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
  * limitations under the License.
  */
  -->
-<PreferenceScreen xmlns:droidkit="http://schemas.android.com/apk/res/org.droidkit.demos"
-     xmlns:android="http://schemas.android.com/apk/res/android">
-     
-     <org.droidkit.preference.NumberPickerPreference
-         android:key="demo.number.preference"
-         android:title="Demo Number Picker"
-         android:summary="Implement a num picker pref"
-		 droidkit:defaultValue="15"
-         droidkit:startRange="-50"
-         droidkit:endRange="50" />
-         
-</PreferenceScreen>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient 
+        android:startColor="#FFFFFF" 
+        android:endColor="#A6A6A6"
+        android:angle="270"
+        android:dither="true" />
+
+    <corners android:radius="0dp" />
+</shape>

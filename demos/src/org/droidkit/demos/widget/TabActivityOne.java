@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
 /*
- * Copyright (C) 2010-2011 Mike Novak <michael.novakjr@gmail.com>
+ * Copyright (C) 2010-2011 Michael Novak <michael.novakjr@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-<TextView  
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    android:text="Hello World, DroidkitDemos" />
-</LinearLayout>
+package org.droidkit.demos.widget;
 
+import android.app.Activity;
+import android.os.Bundle;
+
+import org.droidkit.demos.R;
+
+public class TabActivityOne extends Activity {
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+}
