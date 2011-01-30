@@ -21,9 +21,23 @@
     android:layout_height="fill_parent"
     android:padding="10dip">
     
-    <org.droidkit.widget.NumberPicker
-        android:id="@+id/pref_num_picker"
+    <SeekBar android:id="@+id/pref_seekbar" 
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+        android:layout_height="wrap_content" />
+
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        
+        <TextView android:id="@+id/seekvalue_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+            
+        <TextView android:id="@+id/pref_seekvalue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     
+    </LinearLayout>
+        
 </LinearLayout>

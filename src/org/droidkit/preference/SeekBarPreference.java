@@ -20,63 +20,63 @@ import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import org.droidkit.R;
-import org.droidkit.widget.NumberPicker;
 
-public class NumberPickerPreference extends DialogPreference {
-    private NumberPicker mPicker;
-    private int mStartRange;
-    private int mEndRange;
-    private int mDefault;
+public class SeekBarPreference extends DialogPreference implements SeekBar.OnSeekBarChangeListener {
+    private SeekBar mSeekbar;
+    private TextView mSeekbarLabel;
+    private TextView mSeekbarValue;
     
-    public NumberPickerPreference(Context context, AttributeSet attrs, int defStyle) {
+    private int mDefault;
+    private int mMaxValue;
+    
+    public SeekBarPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         
-        if (attrs == null) {
-            return;
-        }
-        
         TypedArray arr = context.obtainStyledAttributes(attrs, R.styleable.droidkit);
-        mStartRange = arr.getInteger(R.styleable.droidkit_startRange, 0);
-        mEndRange = arr.getInteger(R.styleable.droidkit_endRange, 200);
         mDefault = arr.getInteger(R.styleable.droidkit_defaultValue, 0);
+        mMaxValue = arr.getInteger(R.styleable.droidkit_maxValue, 100);
         
         arr.recycle();
-                        
-        setDialogLayoutResource(R.layout.number_picker_pref);                
+        
+        setDialogLayoutResource(R.layout.seekbar_pref);
     }
     
-    public NumberPickerPreference(Context context, AttributeSet attrs) {
+    public SeekBarPreference(Context context, AttributeSet attrs) {
         this(context, attrs, android.R.attr.dialogPreferenceStyle);
     }
     
-    public NumberPickerPreference(Context context) {
+    public SeekBarPreference(Context context) {
         this(context, null);
     }
     
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
-        mPicker = (NumberPicker) view.findViewById(R.id.pref_num_picker);
-        mPicker.setRange(mStartRange, mEndRange);
-        mPicker.setCurrent(getValue());
+        mSeekbar = (SeekBar) view.findViewById(R.id.pref_seekbar);
+        mSeekbar.setMax(mMaxValue);
+        mSeekbar.setProgress(getValue());
+        mSeekbar.setOnSeekBarChangeListener(this);
+        
+        mSeekbarLabel = (TextView) view.findViewById(R.id.seekvalue_label);
+        mSeekbarLabel.setText(getTitle() + ": ");
+        
+        mSeekbarValue = (TextView) view.findViewById(R.id.pref_seekvalue);
+        mSeekbarValue.setText(String.valueOf(getValue()));
     }
     
     public void onClick(DialogInterface dialog, int which) {
         switch (which) {
         case DialogInterface.BUTTON_POSITIVE:
-            saveValue(mPicker.getCurrent());
+            saveValue(mSeekbar.getProgress());
             break;
         default:
             break;
         }
-    }
-    
-    public void setRange(int start, int end) {
-        mPicker.setRange(start, end);
     }
     
     private void saveValue(int val) {
@@ -86,5 +86,19 @@ public class NumberPickerPreference extends DialogPreference {
     
     private int getValue() {
         return getSharedPreferences().getInt(getKey(), mDefault);
+    }
+    
+    /* SeekBar listener methods. */
+    
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        mSeekbarValue.setText(String.valueOf(progress));
+    }
+    
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        /* thanks Java. */
+    }
+    
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        /* thanks Java. */
     }
 }
