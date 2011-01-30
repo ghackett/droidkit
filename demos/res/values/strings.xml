@@ -20,4 +20,5 @@
     <string name="app_name">Droidkit Demos</string>
     <string name="num_picker_sample">Preference/Number Picker Preference</string>
 	<string name="sample_tab_widget">Widget/Tab Widget (Activity)</string>
+	<string name="sample_tab_widget_view">Widget/Tab Widget (View)</string>
 </resources>

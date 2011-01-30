@@ -47,6 +47,14 @@
 			</intent-filter>
 		</activity>
 		
+		<activity android:name=".widget.SampleTabWidgetView" android:label="@string/sample_tab_widget_view"
+			android:theme="@android:style/Theme.Light">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.SAMPLE_CODE" />
+			</intent-filter>
+		</activity>
+		
 		<activity android:name=".widget.TabActivityOne" android:label="Activity One" />
 		<activity android:name=".widget.TabActivityTwo" android:label="Activity Two" />
     </application>

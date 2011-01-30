@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
@@ -137,6 +138,11 @@ public class TabItem extends RelativeLayout {
     
     public void setContent(View view) {
         mContentView = view;
+    }
+    
+    public void setContent(int resId) {
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        setContent(inflater.inflate(resId, null, false));
     }
     
     public View getContentView() {
