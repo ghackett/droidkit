@@ -89,9 +89,6 @@ public class DroidkitDemos extends ListActivity {
                 String[] labelPath = label.split("/");
                 String nextLabel = prefixPath == null ? labelPath[0] : labelPath[prefixPath.length];
                 
-                Log.d("DroidKitDemos", "Label: " + label);
-                Log.d("DroidKitDemos", "Label next: " + nextLabel);
-                
                 if ((prefixPath != null ? prefixPath.length : 0) == labelPath.length - 1) {
                     addItem(data, nextLabel, activityIntent(info.activityInfo.applicationInfo.packageName,
                             info.activityInfo.name));
@@ -130,9 +127,7 @@ public class DroidkitDemos extends ListActivity {
         return result;
     }
     
-    protected Intent browseIntent(String path) {
-        Log.d("DroidKitDemos", "Browse: " + path);
-        
+    protected Intent browseIntent(String path) {        
         Intent result = new Intent();
         result.setClass(this, DroidkitDemos.class);
         result.putExtra("org.droidkit.demos.PATH", path);

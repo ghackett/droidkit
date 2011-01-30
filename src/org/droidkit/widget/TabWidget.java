@@ -79,7 +79,7 @@ public class TabWidget extends RelativeLayout {
         }
         
         TabItem tab = mTabBar.getTabs().get(index);
-        tab.setSelected(true);
+        tab.setTabSelected(true);
         
         if (tab.getContentType() == TabItem.TYPE_INTENT) {
             loadIntentContent(tab);

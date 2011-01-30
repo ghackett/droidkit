@@ -21,6 +21,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -41,8 +43,8 @@ public class TabItem extends RelativeLayout {
     
     String mTag;
     
-    int mSelectedTextColor = 0x242424;
-    int mUnselectedTextColor = 0xFFFFFF;
+    static int sSelectedTextColor = Color.parseColor("#242424");
+    static int sUnselectedTextColor = Color.parseColor("#FFFFFF");
     int mBackgroundId = R.drawable.default_tab_bg;
     
     public TabItem(Context context) {
@@ -72,9 +74,11 @@ public class TabItem extends RelativeLayout {
         setBackgroundResource(mBackgroundId);
         
         mLabel.setPadding(0, 0, 0, 6);
-        mLabel.setTextColor(mUnselectedTextColor);
+        mLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.0f);
+        mLabel.setTextColor(sUnselectedTextColor);
         
         addView(mLabel, labelParams);
+        Log.d("Droidkit", "TextView created.");
     }
     
     public void setTag(String tag) {
@@ -92,22 +96,23 @@ public class TabItem extends RelativeLayout {
     public void setText(String text) {
         if (mTag == null) mTag = text;
         mLabel.setText(text);
+        Log.d("Droidkit", "Set text called: " + text);
     }
     
     public void setSelectedTextColor(String color) {
-        mSelectedTextColor = Color.parseColor(color);
+        sSelectedTextColor = Color.parseColor(color);
     }
     
     public void setSelectedTextColor(int color) {
-        mSelectedTextColor = color;
+        sSelectedTextColor = color;
     }
     
     public void setUnselectedTextColor(String color) {
-        mUnselectedTextColor = Color.parseColor(color);
+        sUnselectedTextColor = Color.parseColor(color);
     }
     
     public void setUnselectedTextColor(int color) {
-        mUnselectedTextColor = color;
+        sUnselectedTextColor = color;
     }
     
     public void setIcon(int id) {
@@ -125,10 +130,10 @@ public class TabItem extends RelativeLayout {
     
     public void setTabSelected(boolean selected) {
         if (selected) {
-            mLabel.setTextColor(mSelectedTextColor);
+            mLabel.setTextColor(sSelectedTextColor);
             setSelected(true);
         } else {
-            mLabel.setTextColor(mUnselectedTextColor);
+            mLabel.setTextColor(sUnselectedTextColor);
             setSelected(false);
         }
     }
