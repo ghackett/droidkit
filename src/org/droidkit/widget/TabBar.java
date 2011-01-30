@@ -18,6 +18,7 @@ package org.droidkit.widget;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -42,9 +43,12 @@ class TabBar extends LinearLayout {
     private void init() {
         mTabItems = new Vector<TabItem>();
         
-        mItemParams = new LayoutParams(0, 64, 1.0f);
-        mItemParams.leftMargin = -3;
-        mItemParams.rightMargin = -3;
+        float height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64.0f, getContext().getResources().getDisplayMetrics());
+        float margin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, -3.0f, getContext().getResources().getDisplayMetrics());
+        
+        mItemParams = new LayoutParams(0, new Float(height).intValue(), 1.0f);
+        mItemParams.leftMargin = new Float(margin).intValue();
+        mItemParams.rightMargin = new Float(margin).intValue();
     }
     
     public Vector<TabItem> getTabs() {

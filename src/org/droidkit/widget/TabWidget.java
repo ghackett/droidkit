@@ -18,6 +18,7 @@ package org.droidkit.widget;
 import android.app.LocalActivityManager;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -61,14 +62,17 @@ public class TabWidget extends RelativeLayout {
         mContent.setId(CONTENT_ID);
         mShadow.setImageResource(R.drawable.shadow_gradient);
         
-        LayoutParams tabBarParams = new LayoutParams(LayoutParams.FILL_PARENT, 64);
+        float height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64.0f, getContext().getResources().getDisplayMetrics());
+        
+        LayoutParams tabBarParams = new LayoutParams(LayoutParams.FILL_PARENT, new Float(height).intValue());
         addView(mTabBar, tabBarParams);
         
         LayoutParams contentParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
         contentParams.addRule(BELOW, TAB_BAR_ID);
         addView(mContent, contentParams);
         
-        LayoutParams shadowParams = new LayoutParams(LayoutParams.FILL_PARENT, 5);
+        float shadow = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5.0f, getContext().getResources().getDisplayMetrics());
+        LayoutParams shadowParams = new LayoutParams(LayoutParams.FILL_PARENT, new Float(shadow).intValue());
         shadowParams.addRule(ALIGN_TOP, CONTENT_ID);
         addView(mShadow, shadowParams);
     }
@@ -118,6 +122,14 @@ public class TabWidget extends RelativeLayout {
         if (mChildView != v) {
             mChildView = v;
             mContent.addView(mChildView, new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        }
+    }
+    
+    public void showShadow(boolean show) {
+        if (show) {
+            mShadow.setVisibility(VISIBLE);
+        } else {
+            mShadow.setVisibility(GONE);
         }
     }
     

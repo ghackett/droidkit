@@ -57,14 +57,16 @@ public class TabItem extends RelativeLayout {
         init();
     }
     
-    private void init() {
+    private void init() {        
         mIcon = new ImageView(getContext());
         mLabel = new TextView(getContext());
         
         LayoutParams iconParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         iconParams.addRule(CENTER_HORIZONTAL, TRUE);
         
-        mIcon.setPadding(0, 10, 0, 0);
+        float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10.f, getContext().getResources().getDisplayMetrics());
+        
+        mIcon.setPadding(0, new Float(padding).intValue(), 0, 0);
         addView(mIcon, iconParams);
         
         LayoutParams labelParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -73,7 +75,9 @@ public class TabItem extends RelativeLayout {
         
         setBackgroundResource(mBackgroundId);
         
-        mLabel.setPadding(0, 0, 0, 6);
+        padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6.f, getContext().getResources().getDisplayMetrics());
+        
+        mLabel.setPadding(0, 0, 0, new Float(padding).intValue());
         mLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.0f);
         mLabel.setTextColor(sUnselectedTextColor);
         
