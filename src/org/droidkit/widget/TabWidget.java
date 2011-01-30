@@ -19,6 +19,7 @@ import android.app.LocalActivityManager;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,6 +32,7 @@ public class TabWidget extends RelativeLayout {
     private TabBar mTabBar;
     private LinearLayout mContent;
     private ImageView mShadow;
+    private View mChildView;
     
     private int mCurrentIndex = -1;
     
@@ -81,14 +83,27 @@ public class TabWidget extends RelativeLayout {
         
         if (tab.getContentType() == TabItem.TYPE_INTENT) {
             loadIntentContent(tab);
+            mCurrentIndex = index;
         } else {
             loadViewContent(tab);
+            mCurrentIndex = index;
         }
     }
     
     private void loadIntentContent(TabItem tab) {
         final Window win = mLocalActivityManager.startActivity(tab.getTag(), tab.getContentIntent());
         final View wd = win != null ? win.getDecorView() : null;
+        
+        if (mChildView != null && mChildView != wd) {
+            if (mChildView.getParent() != null) {
+                mContent.removeView(mChildView);
+            }
+        }
+        
+        if (mChildView != wd) {
+            mChildView = wd;
+            mContent.addView(mChildView, new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        }
     }
     
     private void loadViewContent(TabItem tab) {

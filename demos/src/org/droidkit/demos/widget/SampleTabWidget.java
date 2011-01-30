@@ -45,6 +45,7 @@ public class SampleTabWidget extends ActivityGroup {
         
         mTabWidget.addTab(item);
         mTabWidget.addTab(tabTwo);
+        
         mTabWidget.setSelectedTab(0);
     }
 }

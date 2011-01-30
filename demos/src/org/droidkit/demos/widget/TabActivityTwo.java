@@ -25,6 +25,6 @@ public class TabActivityTwo extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.tab_two);
     }
 }

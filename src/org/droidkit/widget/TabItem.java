@@ -57,6 +57,7 @@ public class TabItem extends RelativeLayout {
     private void init() {
         mIcon = new ImageView(getContext());
         mLabel = new TextView(getContext());
+        mLabel.setTextColor(mUnselectedTextColor);
         
         LayoutParams iconParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         iconParams.addRule(CENTER_HORIZONTAL, TRUE);
