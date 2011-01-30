@@ -37,6 +37,7 @@ public class TabItem extends RelativeLayout {
     public static final int TYPE_VIEW = 0x2;
     
     ImageView mIcon;
+    ImageView mBackground;
     TextView mLabel;
     Intent mContentIntent;
     View mContentView;
@@ -60,7 +61,11 @@ public class TabItem extends RelativeLayout {
     private void init() {        
         mIcon = new ImageView(getContext());
         mLabel = new TextView(getContext());
+        mBackground = new ImageView(getContext());
                 
+        LayoutParams bgParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+        addView(mBackground, bgParams);
+        
         LayoutParams iconParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         iconParams.addRule(CENTER_HORIZONTAL, TRUE);
         
@@ -73,7 +78,7 @@ public class TabItem extends RelativeLayout {
         labelParams.addRule(CENTER_HORIZONTAL, TRUE);
         labelParams.addRule(ALIGN_PARENT_BOTTOM, TRUE);
         
-        setBackgroundResource(mBackgroundId);
+        mBackground.setBackgroundResource(mBackgroundId);
         
         padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6.0f, getContext().getResources().getDisplayMetrics());
         
@@ -127,7 +132,7 @@ public class TabItem extends RelativeLayout {
     
     public void setBackground(int id) {
         mBackgroundId = id;
-        setBackgroundResource(mBackgroundId);
+        mBackground.setBackgroundResource(mBackgroundId);
     }
     
     public void setTabSelected(boolean selected) {
