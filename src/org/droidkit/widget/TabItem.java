@@ -58,7 +58,6 @@ public class TabItem extends RelativeLayout {
     private void init() {
         mIcon = new ImageView(getContext());
         mLabel = new TextView(getContext());
-        mLabel.setTextColor(mUnselectedTextColor);
         
         LayoutParams iconParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         iconParams.addRule(CENTER_HORIZONTAL, TRUE);
@@ -73,6 +72,8 @@ public class TabItem extends RelativeLayout {
         setBackgroundResource(mBackgroundId);
         
         mLabel.setPadding(0, 0, 0, 6);
+        mLabel.setTextColor(mUnselectedTextColor);
+        
         addView(mLabel, labelParams);
     }
     
@@ -124,11 +125,11 @@ public class TabItem extends RelativeLayout {
     
     public void setTabSelected(boolean selected) {
         if (selected) {
-            setSelected(true);
             mLabel.setTextColor(mSelectedTextColor);
+            setSelected(true);
         } else {
-            setSelected(false);
             mLabel.setTextColor(mUnselectedTextColor);
+            setSelected(false);
         }
     }
     

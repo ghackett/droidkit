@@ -35,10 +35,12 @@ public class SampleTabWidgetView extends Activity {
         
         TabItem item = new TabItem(this);
         item.setText("Activity One");
+        item.setIcon(R.drawable.ic_tab_favorite);
         item.setContent(R.layout.tab_one);
         
         TabItem tabTwo = new TabItem(this);
         tabTwo.setText("Activity Two");
+        tabTwo.setIcon(R.drawable.ic_tab_favorite);
         tabTwo.setContent(R.layout.tab_two);
         
         mTabWidget.addTab(item);

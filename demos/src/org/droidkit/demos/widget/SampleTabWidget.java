@@ -37,10 +37,12 @@ public class SampleTabWidget extends ActivityGroup {
         
         TabItem item = new TabItem(this);
         item.setText("Activity One");
+        item.setIcon(R.drawable.ic_tab_favorite);
         item.setContent(new Intent(this, TabActivityOne.class));
         
         TabItem tabTwo = new TabItem(this);
         tabTwo.setText("Activity Two");
+        tabTwo.setIcon(R.drawable.ic_tab_favorite);
         tabTwo.setContent(new Intent(this, TabActivityTwo.class));
         
         mTabWidget.addTab(item);
