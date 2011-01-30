@@ -78,7 +78,6 @@ public class TabItem extends RelativeLayout {
         mLabel.setTextColor(sUnselectedTextColor);
         
         addView(mLabel, labelParams);
-        Log.d("Droidkit", "TextView created.");
     }
     
     public void setTag(String tag) {
@@ -96,7 +95,6 @@ public class TabItem extends RelativeLayout {
     public void setText(String text) {
         if (mTag == null) mTag = text;
         mLabel.setText(text);
-        Log.d("Droidkit", "Set text called: " + text);
     }
     
     public void setSelectedTextColor(String color) {
