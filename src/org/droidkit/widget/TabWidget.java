@@ -107,7 +107,18 @@ public class TabWidget extends RelativeLayout {
     }
     
     private void loadViewContent(TabItem tab) {
+        View v = tab.getContentView();
         
+        if (mChildView != null) {
+            if (mChildView.getParent() != null) {
+                mContent.removeView(mChildView);
+            }
+        }
+        
+        if (mChildView != v) {
+            mChildView = v;
+            mContent.addView(mChildView, new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        }
     }
     
     public void addTab(TabItem item) {

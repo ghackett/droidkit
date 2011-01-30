@@ -88,6 +88,7 @@ public class TabItem extends RelativeLayout {
     }
     
     public void setText(String text) {
+        if (mTag == null) mTag = text;
         mLabel.setText(text);
     }
     
