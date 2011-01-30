@@ -60,7 +60,7 @@ public class TabItem extends RelativeLayout {
     private void init() {        
         mIcon = new ImageView(getContext());
         mLabel = new TextView(getContext());
-        
+                
         LayoutParams iconParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         iconParams.addRule(CENTER_HORIZONTAL, TRUE);
         
@@ -75,7 +75,7 @@ public class TabItem extends RelativeLayout {
         
         setBackgroundResource(mBackgroundId);
         
-        padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6.f, getContext().getResources().getDisplayMetrics());
+        padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6.0f, getContext().getResources().getDisplayMetrics());
         
         mLabel.setPadding(0, 0, 0, new Float(padding).intValue());
         mLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.0f);
