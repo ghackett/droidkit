@@ -34,6 +34,7 @@ public class TabWidget extends RelativeLayout {
     private LinearLayout mContent;
     private ImageView mShadow;
     private View mChildView;
+    private OnTabChangeListener mListener;
     
     private int mCurrentIndex = -1;
     
@@ -77,6 +78,10 @@ public class TabWidget extends RelativeLayout {
         addView(mShadow, shadowParams);
     }
     
+    public void setOnTabChangeListener(OnTabChangeListener listener) {
+        mListener = listener;
+    }
+    
     public void setSelectedTab(int index) {
         if (mCurrentIndex == index) {
             return;
@@ -91,6 +96,10 @@ public class TabWidget extends RelativeLayout {
         } else {
             loadViewContent(tab);
             mCurrentIndex = index;
+        }
+        
+        if (mListener != null) {
+            mListener.onTabChanged(tab);
         }
     }
     
@@ -139,5 +148,9 @@ public class TabWidget extends RelativeLayout {
     
     public void setup(LocalActivityManager activityGroup) {
         mLocalActivityManager = activityGroup;
+    }
+    
+    public interface OnTabChangeListener {
+        public void onTabChanged(TabItem tab);
     }
 }
