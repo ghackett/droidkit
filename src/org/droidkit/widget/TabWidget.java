@@ -68,7 +68,7 @@ public class TabWidget extends RelativeLayout {
         LayoutParams tabBarParams = new LayoutParams(LayoutParams.FILL_PARENT, new Float(height).intValue());
         addView(mTabBar, tabBarParams);
         
-        LayoutParams contentParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+        LayoutParams contentParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
         contentParams.addRule(BELOW, TAB_BAR_ID);
         addView(mContent, contentParams);
         
