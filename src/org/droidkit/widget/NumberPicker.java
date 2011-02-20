@@ -432,7 +432,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     }
     
     public void afterTextChanged(Editable str) {
-        if (str.toString().equals("")) {
+        if (str.toString().trim().equals("") || str.toString().trim().equals("-")) {
             return;
         }
         
