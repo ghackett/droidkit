@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2010 Mike Novak <michael.novakjr@gmail.com>
+ * Copyright (C) 2010-2011 Mike Novak <michael.novakjr@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,13 @@
       package="org.droidkit.demos"
       android:versionCode="1"
       android:versionName="1.0">
+      
+    <supports-screens 
+        android:anyDensity="true"
+        android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="true" />
+              
     <application android:label="@string/app_name" android:icon="@drawable/icon">
         
         <!-- Main list activity for the demo app. -->
@@ -38,5 +45,31 @@
                 <category android:name="android.intent.category.SAMPLE_CODE" />
             </intent-filter>
         </activity>
+        
+        <activity android:name=".preference.SampleSeekBarPreference" android:label="@string/seekbar_sample">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
+
+		<activity android:name=".widget.SampleTabWidget" android:label="@string/sample_tab_widget"
+			android:theme="@android:style/Theme.Light">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.SAMPLE_CODE" />
+			</intent-filter>
+		</activity>
+		
+		<activity android:name=".widget.SampleTabWidgetView" android:label="@string/sample_tab_widget_view"
+			android:theme="@android:style/Theme.Light">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.SAMPLE_CODE" />
+			</intent-filter>
+		</activity>
+		
+		<activity android:name=".widget.TabActivityOne" android:label="Activity One" />
+		<activity android:name=".widget.TabActivityTwo" android:label="Activity Two" />
     </application>
 </manifest> 

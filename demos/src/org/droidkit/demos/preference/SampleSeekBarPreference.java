@@ -21,7 +21,7 @@ import android.preference.PreferenceManager;
 
 import org.droidkit.demos.R;
 
-public class SampleNumPicker extends PreferenceActivity {
+public class SampleSeekBarPreference extends PreferenceActivity {
     PreferenceManager mPreferenceManager;
     
     @Override
@@ -32,6 +32,6 @@ public class SampleNumPicker extends PreferenceActivity {
         mPreferenceManager.setSharedPreferencesName("droidkit.demos.prefs");
         mPreferenceManager.setSharedPreferencesMode(MODE_PRIVATE);
         
-        addPreferencesFromResource(R.xml.num_pick_prefs);
+        addPreferencesFromResource(R.xml.seekbar_prefs);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Mike Novak <michael.novakjr@gmail.com>
+ * Copyright (C) 2010-2011 Michael Novak <michael.novakjr@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.droidkit.demos.preference;
+package org.droidkit.demos.widget;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 
 import org.droidkit.demos.R;
 
-public class SampleNumPicker extends PreferenceActivity {
-    PreferenceManager mPreferenceManager;
+public class TabActivityOne extends Activity {
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        mPreferenceManager = getPreferenceManager();
-        mPreferenceManager.setSharedPreferencesName("droidkit.demos.prefs");
-        mPreferenceManager.setSharedPreferencesMode(MODE_PRIVATE);
-        
-        addPreferencesFromResource(R.xml.num_pick_prefs);
+        setContentView(R.layout.tab_one);
     }
 }
