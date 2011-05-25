@@ -3,10 +3,12 @@ package org.droidkit;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -72,6 +74,20 @@ public class DroidKit {
     
     public static int getPixels(int dip) {
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, getDisplayMetrics());
+    }
+    
+    public static boolean isHoneycomb() {
+        // Can use static final constants like HONEYCOMB, declared in later versions
+        // of the OS since they are inlined at compile time. This is guaranteed behavior.
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+    }
+
+    public static boolean isHoneycombTablet() {
+        // Can use static final constants like HONEYCOMB, declared in later versions
+        // of the OS since they are inlined at compile time. This is guaranteed behavior.
+        return isHoneycomb() && (getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK)
+                == Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
     
     
