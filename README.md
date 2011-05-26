@@ -2,6 +2,7 @@ To get the most use out of DroidKit, you must manage its lifecycle inside your a
 
 Example Application Class:
 
+<code>
 package com.my.android.app;
 
 import org.droidkit.DroidKit;
@@ -20,9 +21,9 @@ public class MyApp extends android.app.Application {
         super.onTerminate();
     }
 }
-
+</code>
 Then set your Application's class name in your AndroidManifest.xml by adding 
 
 android:name="com.my.android.app.MyApp"
 
-to the <application> tag.
+to the &lt;application&gt; tag.
