@@ -19,7 +19,16 @@ import java.util.zip.ZipInputStream;
 import android.content.Context;
 
 public class IOTricks {
-
+    
+    public static final int DEFAULT_BUFFER_SIZE = 1048;
+    public static final String DEFAULT_CHARSET_NAME = "UTF-8";
+    
+    public interface ProgressListener {
+        public void onProgressUpdate(int totalBytesRead);
+    }
+    
+    
+    
     // "http://example.com/icons/icon.jpg" => "http-example.com-icons-icon.jpg"
     // Used when caching images to local storage
     public static String sanitizeFileName(String url) {
@@ -71,15 +80,6 @@ public class IOTricks {
             total += len;
         }
         return total;
-    }
-    
-    
-    
-    public static final int DEFAULT_BUFFER_SIZE = 1048;
-    public static final String DEFAULT_CHARSET_NAME = "UTF-8";
-    
-    public interface ProgressListener {
-        public void onProgressUpdate(int totalBytesRead);
     }
     
     
