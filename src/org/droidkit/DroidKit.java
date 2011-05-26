@@ -1,5 +1,8 @@
 package org.droidkit;
 
+import java.io.File;
+import java.util.Locale;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,14 +12,21 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
 public class DroidKit {
     
+    private static final String SDCARD_PATH_FORMAT = "Android/data/%s";
+    
     private static Context sApplicationContext = null;
     private static ContentResolver sContentResolver = null;
+    private static String sPackageName = null;
+    private static Float sScreenDensity = null;
+    private static Float sTextScale = null;
+    private static File sExternalStorageDirectory = null;
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
@@ -27,6 +37,10 @@ public class DroidKit {
     public static void onApplicationTerminate() {
         sApplicationContext = null;
         sContentResolver = null;
+        sPackageName = null;
+        sScreenDensity = null;
+        sTextScale = null;
+        sExternalStorageDirectory = null;
     }
     
     public static Context getContext() {
@@ -38,6 +52,34 @@ public class DroidKit {
             sContentResolver = sApplicationContext.getContentResolver();
         }
         return sContentResolver;
+    }
+    
+    public static String getPackageName() {
+        if (sPackageName == null) {
+            sPackageName = sApplicationContext.getPackageName();
+        }
+        return sPackageName;
+    }
+    
+    public static float getScreenDensity() {
+        if (sScreenDensity == null) {
+            sScreenDensity = getDisplayMetrics().density;
+        }
+        return sScreenDensity.floatValue();
+    }
+    
+    public static float getTextScale() {
+        if (sTextScale == null) {
+            sTextScale = getDisplayMetrics().scaledDensity;
+        }
+        return sTextScale.floatValue();
+    }
+    
+    public static File getExternalStorageDirectory() {
+        if (sExternalStorageDirectory == null) {
+            sExternalStorageDirectory = new File(Environment.getExternalStorageDirectory(), String.format(Locale.US, SDCARD_PATH_FORMAT, getPackageName()));
+        }
+        return sExternalStorageDirectory;
     }
     
     public static Resources getResources() {

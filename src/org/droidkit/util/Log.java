@@ -96,4 +96,75 @@ public class Log {
             android.util.Log.v(tag, message);
         }
     }
+    
+    /**
+     * Prints a debug message to the Android console log. The message will only
+     * print if the log level set on the device is at least at DEBUG for the
+     * provided tag.
+     * 
+     * @param message The message to print to the log.
+     * @since 1
+     */
+    public static void d(String tag, String message, Throwable t) {
+        if (android.util.Log.isLoggable(tag, android.util.Log.DEBUG)) {
+            android.util.Log.d(tag, message, t);
+        }
+    }
+
+    /**
+     * Prints an info message to the Android console log. The message will only
+     * print if the log level set on the device is at least at INFO for the
+     * provided tag.
+     * 
+     * @param message The message to print to the log.
+     * @since 1
+     */
+    public static void i(String tag, String message, Throwable t) {
+        if (android.util.Log.isLoggable(tag, android.util.Log.INFO)) {
+            android.util.Log.d(tag, message, t);
+        }
+    }
+
+    /**
+     * Prints a warning message to the Android console log. The message will
+     * only print if the log level set on the device is at least at WARN for the
+     * provided tag.
+     * 
+     * @param message The message to print to the log.
+     * @since 1
+     */
+    public static void w(String tag, String message, Throwable t) {
+        if (android.util.Log.isLoggable(tag, android.util.Log.WARN)) {
+            android.util.Log.w(tag, message, t);
+        }
+    }
+
+    /**
+     * Prints an error message to the Android console log. The message will only
+     * print if the log level set on the device is at least at ERROR for the
+     * provided tag.
+     * 
+     * @param message The message to print to the log.
+     * @since 1
+     */
+    public static void e(String tag, String message, Throwable t) {
+        if (android.util.Log.isLoggable(tag, android.util.Log.ERROR)) {
+            android.util.Log.e(tag, message, t);
+        }
+    }
+
+    /**
+     * Prints a verbose message to the Android console log. The message will
+     * only print if the log level set on the device is at least VERBOSE for the
+     * provided tag..
+     * 
+     * @param message The message to print to the log.
+     * @since 1
+     */
+    public static void v(String tag, String message, Throwable t) {
+        if (android.util.Log.isLoggable(tag, android.util.Log.VERBOSE)) {
+            android.util.Log.v(tag, message, t);
+        }
+    }
+
 }
