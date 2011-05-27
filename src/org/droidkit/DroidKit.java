@@ -3,8 +3,10 @@ package org.droidkit;
 import java.io.File;
 import java.util.Locale;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -116,6 +118,23 @@ public class DroidKit {
     
     public static int getPixels(int dip) {
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, getDisplayMetrics());
+    }
+    
+    public static void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        sApplicationContext.registerReceiver(receiver, filter);
+    }
+    
+    public static boolean tryUnregisterReceiver(BroadcastReceiver receiver) {
+        try {
+            sApplicationContext.unregisterReceiver(receiver);
+            return true;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+    
+    public static Object getSystemService(String name) {
+        return sApplicationContext.getSystemService(name);
     }
     
     public static boolean isHoneycomb() {
