@@ -1,4 +1,4 @@
-package org.droidkit.util;
+package org.droidkit.util.tricks;
 
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;

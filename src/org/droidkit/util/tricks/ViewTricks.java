@@ -1,4 +1,4 @@
-package org.droidkit.util;
+package org.droidkit.util.tricks;
 
 import android.text.SpannableString;
 import android.text.Spanned;

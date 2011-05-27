@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.droidkit.util;
+package org.droidkit.util.tricks;
 
 /**
  * A wrapper for the Android Log class that throttles the types of messages

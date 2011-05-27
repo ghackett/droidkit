@@ -22,7 +22,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import org.droidkit.util.Resources;
+import org.droidkit.util.tricks.Resources;
 
 import java.util.Vector;
 

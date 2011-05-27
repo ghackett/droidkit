@@ -1,4 +1,4 @@
-package org.droidkit.util;
+package org.droidkit.util.tricks;
 
 public class ArrayTricks {
 	

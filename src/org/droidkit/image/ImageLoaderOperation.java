@@ -9,7 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.droidkit.util.IOTricks;
+import org.droidkit.util.tricks.IOTricks;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

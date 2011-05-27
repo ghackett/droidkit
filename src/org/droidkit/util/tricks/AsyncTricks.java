@@ -1,4 +1,4 @@
-package org.droidkit.util;
+package org.droidkit.util.tricks;
 
 /*
  * Copyright (C) 2009, 2010 Sebastian Delmont <sd@notso.net>

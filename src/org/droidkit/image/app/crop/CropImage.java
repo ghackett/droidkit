@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import org.droidkit.R;
-import org.droidkit.util.ImageTricks;
+import org.droidkit.util.tricks.ImageTricks;
 
 import android.app.Activity;
 import android.app.Dialog;

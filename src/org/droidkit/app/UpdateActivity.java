@@ -32,8 +32,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.droidkit.util.Resources;
-import org.droidkit.util.Log;
+import org.droidkit.util.tricks.Log;
+import org.droidkit.util.tricks.Resources;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

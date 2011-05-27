@@ -29,11 +29,10 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.util.ExceptionUtils;
-import org.droidkit.util.Base64;
-import org.droidkit.util.ExceptionTricks;
-import org.droidkit.util.IOTricks;
-import org.droidkit.util.IOTricks.ProgressListener;
+import org.droidkit.util.tricks.Base64;
+import org.droidkit.util.tricks.ExceptionTricks;
+import org.droidkit.util.tricks.IOTricks;
+import org.droidkit.util.tricks.IOTricks.ProgressListener;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

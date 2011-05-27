@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.droidkit.util.IOTricks;
+import org.droidkit.util.tricks.IOTricks;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;

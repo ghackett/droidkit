@@ -1,4 +1,4 @@
-package org.droidkit.util;
+package org.droidkit.util.tricks;
 
 import org.json.JSONObject;
 

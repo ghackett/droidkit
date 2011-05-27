@@ -1,4 +1,4 @@
-package org.droidkit.util;
+package org.droidkit.util.tricks;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;

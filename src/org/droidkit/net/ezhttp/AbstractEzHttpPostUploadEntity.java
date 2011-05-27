@@ -1,6 +1,5 @@
 package org.droidkit.net.ezhttp;
 
-import com.episode6.android.common.http.EzHttpRequest;
 
 
 public abstract class AbstractEzHttpPostUploadEntity implements EzHttpRequest.EzHttpPostUploadEntity {
