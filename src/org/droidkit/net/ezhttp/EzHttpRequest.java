@@ -155,6 +155,7 @@ public class EzHttpRequest implements ProgressListener {
 	private int mReqType;
 	private int mTimeoutSecs;
 	private boolean mIsRaw;
+	private int mNumberOfRetrysToAttempt;
 	
 	private String mStringEntity;
 	private String mStringEntityType;
@@ -203,6 +204,7 @@ public class EzHttpRequest implements ProgressListener {
 		mTotalBytes = 1;
 		mCurrentFile = 0;
 		mUploadingFiles = false;
+		mNumberOfRetrysToAttempt = 1;
 	}
 	
 	
@@ -219,6 +221,9 @@ public class EzHttpRequest implements ProgressListener {
 	public void setIsRaw(boolean isRaw) {
 		mIsRaw = isRaw;
 	}
+	public void setNumberOfRetrysToAttempt(int numberOfRetrysToAttempt) {
+	    mNumberOfRetrysToAttempt = numberOfRetrysToAttempt;
+	}
 	
 	public String getUrl() {
 		return mUrl;
@@ -231,6 +236,9 @@ public class EzHttpRequest implements ProgressListener {
 	}
 	public boolean isRaw() {
 		return mIsRaw;
+	}
+	public int getNumberOfRetrysToAttempt() {
+	    return mNumberOfRetrysToAttempt;
 	}
 	
 	
@@ -406,14 +414,30 @@ public class EzHttpRequest implements ProgressListener {
 	}
 	
 	public EzHttpResponse executeInSync() {
+	    if (mNumberOfRetrysToAttempt <= 0)
+	        throw new RuntimeException("Could not execute EzHttpRequest to " + mUrl + " because the numberOfRetrysToAttempt was set to " + mNumberOfRetrysToAttempt);
+	    
+	    
 		EzHttpResponse response = null;
 		long time = System.currentTimeMillis();
-		try {
-			response = execute();
-		} catch (Throwable t) {
-			t.printStackTrace();
-			response = generateExceptionResponse(t);
+		
+		int tryCount = 0;
+		while (tryCount < mNumberOfRetrysToAttempt && (response == null || response.wasSuccess() == false)) {
+		    tryCount++;
+		    
+		    try {
+		        response = execute();
+		    } catch (Throwable t) {
+		        t.printStackTrace();
+		        
+		        if (tryCount == mNumberOfRetrysToAttempt) {
+		            response = generateExceptionResponse(t);
+		        }
+		    }
 		}
+
+		
+		
 		response.mRequestTime = System.currentTimeMillis() - time;
 		response.onExecuteComplete();
 		return response;
@@ -519,6 +543,7 @@ public class EzHttpRequest implements ProgressListener {
 			ezResponse.mResponseCode = -1;
 			ezResponse.mResponseReasonPhrase = e.getMessage();
 			ezResponse.mResponseText = ExceptionTricks.getThrowableTraceAsString(e);
+			ezResponse.deleteRawFile();
 		}
 		
 		return ezResponse;
@@ -530,9 +555,8 @@ public class EzHttpRequest implements ProgressListener {
 		} else {
 			mUploadingFiles = false;
 			mTotalBytes = ezResponse.getResponseContentLength();
-			File dataFile = File.createTempFile(TMP_FILE_PREFIX, null, DroidKit.getContext().getCacheDir());
-			IOTricks.copyInputStreamToFile(httpInputStream, dataFile, IOTricks.DEFAULT_BUFFER_SIZE, true, true, this);
-			ezResponse.mResponseFile = dataFile;
+			ezResponse.mResponseFile = File.createTempFile(TMP_FILE_PREFIX, null, DroidKit.getContext().getCacheDir());
+			IOTricks.copyInputStreamToFile(httpInputStream, ezResponse.mResponseFile, IOTricks.DEFAULT_BUFFER_SIZE, true, true, this);
 		}
 	}
 	
@@ -628,6 +652,7 @@ public class EzHttpRequest implements ProgressListener {
 			ezResponse.mResponseCode = -1;
 			ezResponse.mResponseReasonPhrase = e.getMessage();
 			ezResponse.mResponseText = ExceptionTricks.getThrowableTraceAsString(e);
+			ezResponse.deleteRawFile();
 		}
 		
 		return ezResponse;
@@ -763,7 +788,7 @@ public class EzHttpRequest implements ProgressListener {
 			return mRequest.isRaw();
 		}
 		public void deleteRawFile() {
-			if (wasSuccess() && isRaw() && mResponseFile != null) {
+			if (mResponseFile != null && mResponseFile.exists()) {
 				mResponseFile.delete();
 			}
 		}
