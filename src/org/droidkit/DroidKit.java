@@ -20,6 +20,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 
 public class DroidKit {
     
@@ -32,6 +33,7 @@ public class DroidKit {
     private static Float sTextScale = null;
     private static File sExternalStorageDirectory = null;
     private static File sBestStorageDirectory = null;
+    private static LayoutInflater sLayoutInflater = null;
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
@@ -46,6 +48,8 @@ public class DroidKit {
         sScreenDensity = null;
         sTextScale = null;
         sExternalStorageDirectory = null;
+        sBestStorageDirectory = null;
+        sLayoutInflater = null;
     }
     
     public static Context getContext() {
@@ -92,6 +96,13 @@ public class DroidKit {
             sBestStorageDirectory = new File(StorageTricks.findWritableDirectoryWithMostFreeSpace(getContext(), includeAppDirectory), String.format(Locale.US, SDCARD_PATH_FORMAT, getPackageName()));
         }
         return sBestStorageDirectory;
+    }
+    
+    public static LayoutInflater getLayoutInflater() {
+        if (sLayoutInflater == null) {
+            sLayoutInflater = LayoutInflater.from(sApplicationContext);
+        }
+        return sLayoutInflater;
     }
     
     public static Resources getResources() {
