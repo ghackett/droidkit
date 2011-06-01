@@ -16,7 +16,7 @@ import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import android.content.Context;
+import org.droidkit.DroidKit;
 
 public class IOTricks {
     
@@ -283,8 +283,8 @@ public class IOTricks {
         return getTextFromFile(new File(filePath));
     }
     
-    public static String getTextFromResource(Context c, int resId) {
-        return getTextFromStream(c.getResources().openRawResource(resId), true, null);
+    public static String getTextFromRawResource(int resId) {
+        return getTextFromStream(DroidKit.getResources().openRawResource(resId), true, null);
     }
     
     
@@ -297,21 +297,21 @@ public class IOTricks {
      * RESOURCE METHODS
      */
     
-    public static void copyRawResourceToOutputStream(Context c, int fromResId, OutputStream to) {
-        copyRawResourceToOutputStream(c, fromResId, to, DEFAULT_BUFFER_SIZE);
+    public static void copyRawResourceToOutputStream(int fromResId, OutputStream to) {
+        copyRawResourceToOutputStream(fromResId, to, DEFAULT_BUFFER_SIZE);
     }
     
-    public static void copyRawResourceToOutputStream(Context c, int fromResId, OutputStream to, int bufferSize) {
-        InputStream from = c.getResources().openRawResource(fromResId);
+    public static void copyRawResourceToOutputStream(int fromResId, OutputStream to, int bufferSize) {
+        InputStream from = DroidKit.getResources().openRawResource(fromResId);
         copyInputStreamToOutputStream(from, to, bufferSize, true, true, null);
     }
     
-    public static void copyRawResourceToFile(Context c, int fromResId, File destFile, boolean overwrite) {
-        copyRawResourceToFile(c, fromResId, destFile, DEFAULT_BUFFER_SIZE, overwrite);
+    public static void copyRawResourceToFile(int fromResId, File destFile, boolean overwrite) {
+        copyRawResourceToFile(fromResId, destFile, DEFAULT_BUFFER_SIZE, overwrite);
     }
     
-    public static void copyRawResourceToFile(Context c, int fromResId, File destFile, int bufferSize, boolean overwrite) {
-        InputStream from = c.getResources().openRawResource(fromResId);
+    public static void copyRawResourceToFile(int fromResId, File destFile, int bufferSize, boolean overwrite) {
+        InputStream from = DroidKit.getResources().openRawResource(fromResId);
         copyInputStreamToFile(from, destFile, bufferSize, true, overwrite, null);
     }
     

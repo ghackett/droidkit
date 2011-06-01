@@ -10,6 +10,7 @@ public class StorageTricks {
 	
 	private static final String EMMC_DIR_1 = "/emmc";
 	private static final String EMMC_DIR_2 = "/mnt/emmc";
+	private static final String NO_MEDIA_FILE_NAME = ".nomedia";
 	
 	
 	public static String getEmmcDirectory() {
@@ -80,6 +81,18 @@ public class StorageTricks {
 
 		return new File(rtr);
 		
+	}
+	
+	public static void addNoMediaFileToDirectory(File dir) {
+	    try {
+    	    if (dir.exists() && dir.canWrite()) {
+    	        File noMedia = new File(dir, NO_MEDIA_FILE_NAME);
+    	        if (!noMedia.exists())
+    	            noMedia.createNewFile();
+    	    }
+	    } catch (Throwable t) {
+	        t.printStackTrace();
+	    }
 	}
 	
 }

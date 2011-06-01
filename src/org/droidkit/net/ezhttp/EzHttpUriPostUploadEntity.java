@@ -3,25 +3,23 @@ package org.droidkit.net.ezhttp;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import android.content.ContentResolver;
-import android.content.Context;
+import org.droidkit.DroidKit;
+
 import android.net.Uri;
 
 public class EzHttpUriPostUploadEntity extends AbstractEzHttpPostUploadEntity {
 	
 	private Uri mUri;
-	private ContentResolver mContentResolver;
 
-	public EzHttpUriPostUploadEntity(Context c, Uri uri, String paramName, String postFileName, String contentType) {
+	public EzHttpUriPostUploadEntity(Uri uri, String paramName, String postFileName, String contentType) {
 		super(paramName, postFileName, contentType);
 		mUri = uri;
-		mContentResolver = c.getContentResolver();
 	}
 
 	@Override
 	public InputStream getInputStream() {
 		try {
-			return mContentResolver.openInputStream(mUri);
+			return DroidKit.getContentResolver().openInputStream(mUri);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		}

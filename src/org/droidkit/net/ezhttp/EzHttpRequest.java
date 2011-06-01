@@ -29,6 +29,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
+import org.droidkit.DroidKit;
 import org.droidkit.util.tricks.Base64;
 import org.droidkit.util.tricks.ExceptionTricks;
 import org.droidkit.util.tricks.IOTricks;
@@ -79,40 +80,40 @@ public class EzHttpRequest implements ProgressListener {
 	}
 	
 	public static class EzRequestFactory {
-		public static EzHttpRequest createGetRequest(Context c, String url, boolean isRaw, int requestCode) {
-			EzHttpRequest req = new EzHttpRequest(c, url, REQ_GET, isRaw, requestCode);
+		public static EzHttpRequest createGetRequest(String url, boolean isRaw, int requestCode) {
+			EzHttpRequest req = new EzHttpRequest(url, REQ_GET, isRaw, requestCode);
 			return req;
 		}
 		
-		public static EzHttpRequest createPutRequest(Context c, String url, boolean isRaw, int requestCode) {
-			EzHttpRequest req = new EzHttpRequest(c, url, REQ_PUT, isRaw, requestCode);
+		public static EzHttpRequest createPutRequest(String url, boolean isRaw, int requestCode) {
+			EzHttpRequest req = new EzHttpRequest(url, REQ_PUT, isRaw, requestCode);
 			return req;
 		}
 
-		public static EzHttpRequest createDeleteRequest(Context c, String url, boolean isRaw, int requestCode) {
-			EzHttpRequest req = new EzHttpRequest(c, url, REQ_DEL, isRaw, requestCode);
+		public static EzHttpRequest createDeleteRequest(String url, boolean isRaw, int requestCode) {
+			EzHttpRequest req = new EzHttpRequest(url, REQ_DEL, isRaw, requestCode);
 			return req;
 		}
 		
-		public static EzHttpRequest createHeadRequest(Context c, String url, boolean isRaw, int requestCode) {
-			EzHttpRequest req = new EzHttpRequest(c, url, REQ_HEAD, isRaw, requestCode);
+		public static EzHttpRequest createHeadRequest(String url, boolean isRaw, int requestCode) {
+			EzHttpRequest req = new EzHttpRequest(url, REQ_HEAD, isRaw, requestCode);
 			return req;
 		}
 		
-		public static EzHttpRequest createPostRequest(Context c, String url, boolean isRaw, int requestCode) {
-			EzHttpRequest req = new EzHttpRequest(c, url, REQ_POST, isRaw, requestCode);
+		public static EzHttpRequest createPostRequest(String url, boolean isRaw, int requestCode) {
+			EzHttpRequest req = new EzHttpRequest(url, REQ_POST, isRaw, requestCode);
 			return req;
 		}
 		
-		public static EzHttpRequest createMultipartPostRequest(Context c, String url, boolean isRaw, int requestCode) {
-			EzHttpRequest req = new EzHttpRequest(c, url, REQ_POST_MULTIPART, isRaw, requestCode);
+		public static EzHttpRequest createMultipartPostRequest(String url, boolean isRaw, int requestCode) {
+			EzHttpRequest req = new EzHttpRequest(url, REQ_POST_MULTIPART, isRaw, requestCode);
 			req.addHeader(HTTP.CONTENT_TYPE, VAL_POST_MULTIPART_CONTENT_TYPE);
 			req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
 			return req;
 		}
 
-		public static EzHttpRequest createPostStringEntityRequest(Context c, String url, boolean isRaw, int requestCode, String entity, String entityType, String entityEncoding) {
-			EzHttpRequest req = new EzHttpRequest(c, url, REQ_POST_STRING_ENT, isRaw, requestCode);
+		public static EzHttpRequest createPostStringEntityRequest(String url, boolean isRaw, int requestCode, String entity, String entityType, String entityEncoding) {
+			EzHttpRequest req = new EzHttpRequest(url, REQ_POST_STRING_ENT, isRaw, requestCode);
 			req.setStringEntity(entity, entityType, entityEncoding);
 			return req;
 		}
@@ -122,7 +123,6 @@ public class EzHttpRequest implements ProgressListener {
 	
 	private static final String TMP_FILE_PREFIX = "ez_http_response";
 	
-	private Context mContext;
 	private String mUrl;
 	private int mReqType;
 	private int mTimeoutSecs;
@@ -150,12 +150,11 @@ public class EzHttpRequest implements ProgressListener {
 	private int mCurrentFile;
 	private boolean mUploadingFiles;
 	
-	protected EzHttpRequest(Context c, String url, int reqType, boolean isRaw, int requestCode) {
+	protected EzHttpRequest(String url, int reqType, boolean isRaw, int requestCode) {
 		mUrl = url;
 		mReqType = reqType;
 		mIsRaw = isRaw;
 		mTimeoutSecs = DEFAULT_TIMEOUT_SECS;
-		mContext = c;
 		
 		mStringEntity = null;
 		mStringEntityType = null;
@@ -171,7 +170,6 @@ public class EzHttpRequest implements ProgressListener {
 		mFinishedListener = null;
 		mProgressListener = null;
 		
-//		mResponseProcessor = null;
 		mResponseHandler = null;
 		
 		mTotalBytes = 1;
@@ -181,9 +179,6 @@ public class EzHttpRequest implements ProgressListener {
 	
 	
 	
-	public void setContext(Context c) {
-		mContext = c;
-	}
 	public void setUrl(String url) {
 		mUrl = url;
 	}
@@ -197,9 +192,6 @@ public class EzHttpRequest implements ProgressListener {
 		mIsRaw = isRaw;
 	}
 	
-	public Context getContext() {
-		return mContext;
-	}
 	public String getUrl() {
 		return mUrl;
 	}
@@ -423,7 +415,6 @@ public class EzHttpRequest implements ProgressListener {
 			}
 		}
 		
-//		Log.d("EzHttpReq", "performing http request - " + url);
 		
 		try {
 			switch(mReqType) {
@@ -485,7 +476,7 @@ public class EzHttpRequest implements ProgressListener {
 			if (lastMod != null) {
 				try {
 					ezResponse.mResponseLastModTime = DateUtils.parseDate(lastMod.getValue()).getTime();
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 			}
@@ -493,11 +484,8 @@ public class EzHttpRequest implements ProgressListener {
 
 			handleResponseInputStream(ezResponse, entity.getContent());
 			
-//			if (!isRaw())
-//				Log.d("EzHttpReq", "server response = " + ezResponse.getResponseText());
 			
-		} catch (Exception e) {
-//			Log.e(TAG, "Error performing requst to url: " + getUrl());
+		} catch (Throwable e) {
 			e.printStackTrace();
 			ezResponse.mSuccess = false;
 			ezResponse.mResponseCode = -1;
@@ -514,8 +502,7 @@ public class EzHttpRequest implements ProgressListener {
 		} else {
 			mUploadingFiles = false;
 			mTotalBytes = ezResponse.getResponseContentLength();
-//			Log.e(TAG, "Context is " + (mContext == null ? "null" : "not null"));
-			File dataFile = File.createTempFile(TMP_FILE_PREFIX, null, mContext.getCacheDir());
+			File dataFile = File.createTempFile(TMP_FILE_PREFIX, null, DroidKit.getContext().getCacheDir());
 			IOTricks.copyInputStreamToFile(httpInputStream, dataFile, IOTricks.DEFAULT_BUFFER_SIZE, true, true, this);
 			ezResponse.mResponseFile = dataFile;
 		}
@@ -607,7 +594,7 @@ public class EzHttpRequest implements ProgressListener {
 			handleResponseInputStream(ezResponse, conn.getInputStream());
 			
 			
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			ezResponse.mSuccess = false;
 			ezResponse.mResponseCode = -1;
@@ -774,10 +761,10 @@ public class EzHttpRequest implements ProgressListener {
 			if (!mSuccess || !isRaw()) {
 				try {
 					b.append(new JSONObject(mResponseText).toString(4));
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					try {
 						b.append(new JSONArray(mResponseText).toString(4));
-					} catch (Exception e2) {
+					} catch (Throwable e2) {
 						b.append(cnull(mResponseText));
 					}
 				}

@@ -3,6 +3,8 @@ package org.droidkit;
 import java.io.File;
 import java.util.Locale;
 
+import org.droidkit.util.tricks.StorageTricks;
+
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -29,6 +31,7 @@ public class DroidKit {
     private static Float sScreenDensity = null;
     private static Float sTextScale = null;
     private static File sExternalStorageDirectory = null;
+    private static File sBestStorageDirectory = null;
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
@@ -82,6 +85,13 @@ public class DroidKit {
             sExternalStorageDirectory = new File(Environment.getExternalStorageDirectory(), String.format(Locale.US, SDCARD_PATH_FORMAT, getPackageName()));
         }
         return sExternalStorageDirectory;
+    }
+    
+    public static File getBestStorageDirectory(boolean includeAppDirectory) {
+        if (sBestStorageDirectory == null) {
+            sBestStorageDirectory = new File(StorageTricks.findWritableDirectoryWithMostFreeSpace(getContext(), includeAppDirectory), String.format(Locale.US, SDCARD_PATH_FORMAT, getPackageName()));
+        }
+        return sBestStorageDirectory;
     }
     
     public static Resources getResources() {
