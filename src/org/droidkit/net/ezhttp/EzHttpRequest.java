@@ -117,6 +117,35 @@ public class EzHttpRequest implements ProgressListener {
 			req.setStringEntity(entity, entityType, entityEncoding);
 			return req;
 		}
+		
+		
+		public static EzHttpRequest createGetRequest(String url, boolean isRaw) {
+		    return createGetRequest(url, isRaw, -1);
+		}
+
+		public static EzHttpRequest createPutRequest(String url, boolean isRaw) {
+		    return createPutRequest(url, isRaw, -1);
+		}
+
+		public static EzHttpRequest createDeleteRequest(String url, boolean isRaw) {
+		    return createDeleteRequest(url, isRaw, -1);
+		}
+
+		public static EzHttpRequest createHeadRequest(String url, boolean isRaw) {
+		    return createHeadRequest(url, isRaw, -1);
+		}
+
+		public static EzHttpRequest createPostRequest(String url, boolean isRaw) {
+		    return createPostRequest(url, isRaw, -1);
+		}
+
+		public static EzHttpRequest createMultipartPostRequest(String url, boolean isRaw) {
+		    return createMultipartPostRequest(url, isRaw, -1);
+		}
+
+		public static EzHttpRequest createPostStringEntityRequest(String url, boolean isRaw, String entity, String entityType, String entityEncoding) {
+		    return createPostStringEntityRequest(url, isRaw, -1, entity, entityType, entityEncoding);
+		}
 	}
 	
 	public static final int DEFAULT_TIMEOUT_SECS = 60;
