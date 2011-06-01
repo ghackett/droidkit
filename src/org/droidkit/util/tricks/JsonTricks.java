@@ -1,8 +1,8 @@
-package org.droidkit.util;
+package org.droidkit.util.tricks;
 
 import org.json.JSONObject;
 
-public class DKJsonTricks {
+public class JsonTricks {
     public static JSONObject getJSONObject(JSONObject json, String... path) {
         return getJSONObject(json, path, 0, path.length - 1);
     }

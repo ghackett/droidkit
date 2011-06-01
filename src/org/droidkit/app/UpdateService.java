@@ -35,7 +35,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.droidkit.util.Resources;
+import org.droidkit.util.tricks.Resources;
 //import org.droidkit.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;

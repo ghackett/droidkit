@@ -1,11 +1,11 @@
-package org.droidkit.util;
+package org.droidkit.util.tricks;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-public class DKTextTricks {
+public class TextTricks {
     public static String joinWithPrefix(String prefix, String[] list, String separator) {
         StringBuffer join = new StringBuffer();
         int count = list.length;
