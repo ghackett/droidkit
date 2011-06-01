@@ -2,15 +2,19 @@ package org.droidkit.ref;
 
 import java.util.HashMap;
 
+import org.droidkit.ref.SoftCacheManager.SoftCacheInterface;
+
 import android.graphics.Bitmap;
 
-public class SoftBitmapCache {
+public class SoftBitmapCache implements SoftCacheInterface {
     protected HashMap<String, BitmapSoftReference> mCache;
     
     public SoftBitmapCache() {
         mCache = new HashMap<String, BitmapSoftReference>();
+        SoftCacheManager.registerCache(this);
     }
     
+    @Override
     public void clearCache() {
         mCache.clear();
     }

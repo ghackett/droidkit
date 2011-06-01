@@ -3,18 +3,22 @@ package org.droidkit.ref;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
 
+import org.droidkit.ref.SoftCacheManager.SoftCacheInterface;
+
 /**
  * A helper class used to cache objects inside SoftReferences
  * @author ghackett
  *
  */
-public class SoftCache<T> {
+public class SoftCache<T> implements SoftCacheInterface {
     protected HashMap<String, SoftReference<T>> mCache;
     
     public SoftCache() {
         mCache = new HashMap<String, SoftReference<T>>();
+        SoftCacheManager.registerCache(this);
     }
     
+    @Override
     public void clearCache() {
         mCache.clear();
     }
