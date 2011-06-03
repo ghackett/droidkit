@@ -113,6 +113,11 @@ public class DroidKit {
         return getResources().getDisplayMetrics();
     }
     
+    public static boolean isDeviceInPortraitMode() {
+        DisplayMetrics metrics = getDisplayMetrics();
+        return metrics.heightPixels > metrics.widthPixels;
+    }
+    
     public static SharedPreferences getSharedPreferences() {
         return PreferenceManager.getDefaultSharedPreferences(sApplicationContext);
     }
