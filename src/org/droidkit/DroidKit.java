@@ -118,6 +118,11 @@ public class DroidKit {
         return metrics.heightPixels > metrics.widthPixels;
     }
     
+    public static boolean isDeviceInLandscapeMode() {
+        DisplayMetrics metrics = getDisplayMetrics();
+        return metrics.widthPixels >= metrics.heightPixels;
+    }
+    
     public static SharedPreferences getSharedPreferences() {
         return PreferenceManager.getDefaultSharedPreferences(sApplicationContext);
     }
