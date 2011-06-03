@@ -10,6 +10,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -25,6 +26,7 @@ import android.view.LayoutInflater;
 public class DroidKit {
     
     private static final String SDCARD_PATH_FORMAT = "Android/data/%s";
+    private static final String ANDROID_MARKET_PACKAGE_NAME = "com.android.vending";
     
     private static Context sApplicationContext = null;
     private static ContentResolver sContentResolver = null;
@@ -34,6 +36,7 @@ public class DroidKit {
     private static File sExternalStorageDirectory = null;
     private static File sBestStorageDirectory = null;
     private static LayoutInflater sLayoutInflater = null;
+    private static Boolean sCanAcceptPush = null;
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
@@ -50,6 +53,7 @@ public class DroidKit {
         sExternalStorageDirectory = null;
         sBestStorageDirectory = null;
         sLayoutInflater = null;
+        sCanAcceptPush = null;
     }
     
     public static Context getContext() {
@@ -149,6 +153,28 @@ public class DroidKit {
     
     public static int getPixels(int dip) {
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, getDisplayMetrics());
+    }
+    
+    public static boolean isApplicationInstalled(String packageName) {
+        boolean isInstalled = false;
+        try {
+            sApplicationContext.getPackageManager().getPackageInfo(packageName, 0);
+            isInstalled = true;
+        } catch (NameNotFoundException e) {
+            isInstalled = false;
+        }
+        return isInstalled;
+    }
+    
+    public static boolean canDeviceAcceptPushNotifications() {
+        if (sCanAcceptPush == null) {
+            if (Build.VERSION.SDK_INT < 8) {
+                sCanAcceptPush = false;
+            } else {
+                sCanAcceptPush = isApplicationInstalled(ANDROID_MARKET_PACKAGE_NAME);
+            }
+        }
+        return sCanAcceptPush;
     }
     
     public static void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
