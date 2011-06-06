@@ -8,6 +8,7 @@ import org.droidkit.util.tricks.StorageTricks;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -107,6 +108,10 @@ public class DroidKit {
             sLayoutInflater = LayoutInflater.from(sApplicationContext);
         }
         return sLayoutInflater;
+    }
+    
+    public static void sendBroadcast(Intent intent) {
+        sApplicationContext.sendBroadcast(intent);
     }
     
     public static Resources getResources() {
