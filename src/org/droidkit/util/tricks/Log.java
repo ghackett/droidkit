@@ -15,6 +15,9 @@
  */
 package org.droidkit.util.tricks;
 
+import android.content.Intent;
+import android.os.Bundle;
+
 /**
  * A wrapper for the Android Log class that throttles the types of messages
  * pushed to the console. The goal is to only have error messages print by
@@ -97,74 +100,87 @@ public class Log {
         }
     }
     
-    /**
-     * Prints a debug message to the Android console log. The message will only
-     * print if the log level set on the device is at least at DEBUG for the
-     * provided tag.
-     * 
-     * @param message The message to print to the log.
-     * @since 1
-     */
+
+    
+    
+    
+    
     public static void d(String tag, String message, Throwable t) {
         if (android.util.Log.isLoggable(tag, android.util.Log.DEBUG)) {
             android.util.Log.d(tag, message, t);
         }
     }
 
-    /**
-     * Prints an info message to the Android console log. The message will only
-     * print if the log level set on the device is at least at INFO for the
-     * provided tag.
-     * 
-     * @param message The message to print to the log.
-     * @since 1
-     */
+
     public static void i(String tag, String message, Throwable t) {
         if (android.util.Log.isLoggable(tag, android.util.Log.INFO)) {
             android.util.Log.d(tag, message, t);
         }
     }
 
-    /**
-     * Prints a warning message to the Android console log. The message will
-     * only print if the log level set on the device is at least at WARN for the
-     * provided tag.
-     * 
-     * @param message The message to print to the log.
-     * @since 1
-     */
+
     public static void w(String tag, String message, Throwable t) {
         if (android.util.Log.isLoggable(tag, android.util.Log.WARN)) {
             android.util.Log.w(tag, message, t);
         }
     }
-
-    /**
-     * Prints an error message to the Android console log. The message will only
-     * print if the log level set on the device is at least at ERROR for the
-     * provided tag.
-     * 
-     * @param message The message to print to the log.
-     * @since 1
-     */
+    
     public static void e(String tag, String message, Throwable t) {
         if (android.util.Log.isLoggable(tag, android.util.Log.ERROR)) {
             android.util.Log.e(tag, message, t);
         }
     }
+    
+    public static void e(String tag, String message, Intent i) {
+        if (android.util.Log.isLoggable(tag, android.util.Log.ERROR)) {
+            android.util.Log.e(tag, message + "\n" + describeIntent(i));
+        }
+    }
 
-    /**
-     * Prints a verbose message to the Android console log. The message will
-     * only print if the log level set on the device is at least VERBOSE for the
-     * provided tag..
-     * 
-     * @param message The message to print to the log.
-     * @since 1
-     */
     public static void v(String tag, String message, Throwable t) {
         if (android.util.Log.isLoggable(tag, android.util.Log.VERBOSE)) {
             android.util.Log.v(tag, message, t);
         }
+    }
+    
+    private static String describeIntent(Intent i) {
+        if (i == null)
+            return "Intent is null";
+        
+        StringBuilder builder = new StringBuilder("Intent\n");
+        
+        builder.append("ACTION: ");
+        builder.append(i.getAction());
+        builder.append("\n");
+        
+        builder.append("DATA: ");
+        builder.append(i.getDataString());
+        builder.append("\n");
+        
+        builder.append("DATA TYPE: ");
+        builder.append(i.getType());
+        builder.append("\n");
+        
+        builder.append("PACKAGE NAME: ");
+        builder.append(i.getPackage());
+        builder.append("\n");
+        
+        builder.append("COMPONENT NAME: ");
+        if (i.getComponent() != null)
+            builder.append(i.getComponent().toString());
+        builder.append("\n");
+        
+        Bundle extras = i.getExtras();
+        if (extras != null) {
+            builder.append("EXTRAS:\n");
+            for (String key : extras.keySet()) {
+                builder.append(key + " = ");
+                builder.append(String.valueOf(extras.get(key)));
+                builder.append("\n");
+            }
+        }
+        
+        return builder.toString();
     }
 
 }
