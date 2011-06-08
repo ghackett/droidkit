@@ -93,12 +93,18 @@ public class DroidKit {
         if (sExternalStorageDirectory == null) {
             sExternalStorageDirectory = new File(Environment.getExternalStorageDirectory(), String.format(Locale.US, SDCARD_PATH_FORMAT, getPackageName()));
         }
+        if (!sExternalStorageDirectory.exists()) {
+            sExternalStorageDirectory.mkdirs();
+        }
         return sExternalStorageDirectory;
     }
     
     public static File getBestStorageDirectory(boolean includeAppDirectory) {
         if (sBestStorageDirectory == null) {
             sBestStorageDirectory = new File(StorageTricks.findWritableDirectoryWithMostFreeSpace(getContext(), includeAppDirectory), String.format(Locale.US, SDCARD_PATH_FORMAT, getPackageName()));
+        }
+        if (!sBestStorageDirectory.exists()) {
+            sBestStorageDirectory.mkdirs();
         }
         return sBestStorageDirectory;
     }
