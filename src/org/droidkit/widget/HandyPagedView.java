@@ -153,6 +153,17 @@ public class HandyPagedView extends FrameLayout {
 		}
 	}
 	
+	private void postPageChanged() {
+	    mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                pageChanged();
+            }
+	        
+	    });
+	}
+	
 	private void pageChanged() {
 		if (getScrollX() == getWidth()) {
 			//stayed on the same page, no need to continue
@@ -543,7 +554,7 @@ public class HandyPagedView extends FrameLayout {
 			mIsBeingScrolled = false;
 			
 			if (getScrollX() % getWidth() == 0) {
-				pageChanged();
+				postPageChanged();
 				return;
 			}
 			
