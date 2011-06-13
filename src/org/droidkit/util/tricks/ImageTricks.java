@@ -14,7 +14,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -332,5 +339,85 @@ public class ImageTricks {
             return dataUri; 
         }
         return null;
+    }
+    
+    
+    public static Bitmap roundCorners(int imgResId, int widthDp, int heightDp, int cornerDp) {
+        try {
+            return roundCorners(DroidKit.getBitmap(imgResId, widthDp, heightDp), cornerDp, true);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public static Bitmap roundCorners(int imgResId, int dp) {
+        try {
+            return roundCorners(DroidKit.getBitmap(imgResId), dp, true);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public static Bitmap roundCorners(String file, int widthDp, int heightDp, int cornerDp) {
+        try {
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.outWidth = DroidKit.getPixels(widthDp);
+            opts.outHeight = DroidKit.getPixels(heightDp);
+            Bitmap b = BitmapFactory.decodeFile(file, opts);
+            return roundCorners(b, cornerDp, true);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public static Bitmap roundCorners(String file, int dp) {
+        try {
+            Bitmap b = BitmapFactory.decodeFile(file);
+            return roundCorners(b, dp, true);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public static Bitmap roundCorners(Bitmap bitmap, int dp, boolean recycleOriginal) {
+        Bitmap output = null;
+        try {
+            output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
+            Canvas canvas = new Canvas(output);
+            
+            final int color = 0xff424242;
+            final Paint paint = new Paint();
+            final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+            final RectF rectF = new RectF(rect);
+            final float roundPx = DroidKit.getPixels(dp);
+
+            paint.setAntiAlias(true);
+            
+            canvas.drawARGB(0, 0, 0, 0);
+            paint.setColor(color);
+            
+            final Paint strokePaint = new Paint();
+            strokePaint.setAntiAlias(true);
+            strokePaint.setStyle(Paint.Style.STROKE);
+            strokePaint.setColor(0xffffffff);
+            strokePaint.setStrokeWidth(2.0f);
+            
+            canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+
+            paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+            canvas.drawBitmap(bitmap, rect, rect, paint);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+        }
+        
+        if (output != null && recycleOriginal) {
+            bitmap.recycle();
+        }
+        
+        return output;
     }
 }
