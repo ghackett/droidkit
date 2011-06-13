@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -38,6 +39,7 @@ public class DroidKit {
     private static File sBestStorageDirectory = null;
     private static LayoutInflater sLayoutInflater = null;
     private static Boolean sCanAcceptPush = null;
+    private static PackageInfo sPackageInfo = null;
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
@@ -55,6 +57,7 @@ public class DroidKit {
         sBestStorageDirectory = null;
         sLayoutInflater = null;
         sCanAcceptPush = null;
+        sPackageInfo = null;
     }
     
     public static Context getContext() {
@@ -114,6 +117,25 @@ public class DroidKit {
             sLayoutInflater = LayoutInflater.from(sApplicationContext);
         }
         return sLayoutInflater;
+    }
+    
+    public static PackageInfo getPackageInfo() {
+        if (sPackageInfo == null) {
+            try {
+                sPackageInfo = sApplicationContext.getPackageManager().getPackageInfo(getPackageName(), 0);
+            } catch (NameNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return sPackageInfo;
+    }
+    
+    public static String getVersionName() {
+        return getPackageInfo().versionName;
+    }
+    
+    public static int getVersionCode() {
+        return getPackageInfo().versionCode;
     }
     
     public static void sendBroadcast(Intent intent) {
