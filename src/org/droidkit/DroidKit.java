@@ -180,6 +180,13 @@ public class DroidKit {
         return getResources().getDrawable(resource);
     }
 
+    public static Bitmap getBitmap(int resource, int widthDp, int heightDp) {
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.outWidth = getPixels(widthDp);
+        opts.outHeight = getPixels(heightDp);
+        return BitmapFactory.decodeResource(getResources(), resource, opts);
+    }
+    
     public static Bitmap getBitmap(int resource) {
         return BitmapFactory.decodeResource(getResources(), resource);
     }
