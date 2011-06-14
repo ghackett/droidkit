@@ -29,6 +29,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 
 import java.io.BufferedReader;
@@ -49,9 +52,20 @@ public class HttpUtils {
     public static final int METHOD_POST = 0x2;
     public static final int METHOD_PUT = 0x3;
     public static final int METHOD_DELETE = 0x4;
+    
+    public static final int DEFAULT_TIMEOUT_SECONDS = 60;
 
     public static String executeRequest(String url, int method, String body, Bundle params, Bundle headers) throws HttpConnectionException, HttpResponseException {
-        DefaultHttpClient client = new DefaultHttpClient();
+        return executeRequest(url, method, body, params, headers, DEFAULT_TIMEOUT_SECONDS);
+    }
+    
+    public static String executeRequest(String url, int method, String body, Bundle params, Bundle headers, int timeoutSeconds) throws HttpConnectionException, HttpResponseException {
+        //GH - added timeout param and set to default of 60
+        HttpParams connParams = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(connParams, timeoutSeconds*1000);
+        HttpConnectionParams.setSoTimeout(connParams, timeoutSeconds*1000);
+        DefaultHttpClient client = new DefaultHttpClient(connParams);
+        
         HttpResponse httpResponse;
         String response = null;
 
