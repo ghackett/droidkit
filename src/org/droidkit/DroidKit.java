@@ -3,6 +3,8 @@ package org.droidkit;
 import java.io.File;
 import java.util.Locale;
 
+import org.droidkit.ref.SoftCacheManager;
+import org.droidkit.util.LazyLoader;
 import org.droidkit.util.tricks.StorageTricks;
 
 import android.content.BroadcastReceiver;
@@ -58,6 +60,8 @@ public class DroidKit {
         sLayoutInflater = null;
         sCanAcceptPush = null;
         sPackageInfo = null;
+        LazyLoader.shutdownInstance();
+        SoftCacheManager.clearAllCaches();
     }
     
     public static Context getContext() {
