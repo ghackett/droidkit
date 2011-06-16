@@ -135,7 +135,7 @@ public class HttpUtils {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             response = read(httpResponse.getEntity().getContent());
 
-            if (statusCode != HttpStatus.SC_OK) {
+            if (statusCode > HttpStatus.SC_MULTIPLE_CHOICES) {
                 throw new HttpResponseException(statusCode, response);
             }
         } catch (ClientProtocolException e) {
