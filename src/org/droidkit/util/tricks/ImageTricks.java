@@ -383,6 +383,19 @@ public class ImageTricks {
         }
     }
     
+    public static Bitmap roundCorners(Bitmap bitmap, int widthDp, int heightDp, int cornerDp, boolean recycleOriginal) {
+        try {
+            Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, DroidKit.getPixels(widthDp), DroidKit.getPixels(heightDp), false);
+            if (recycleOriginal)
+                bitmap.recycle();
+            return roundCorners(newBitmap, cornerDp, true);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+        
+    
     public static Bitmap roundCorners(Bitmap bitmap, int dp, boolean recycleOriginal) {
         Bitmap output = null;
         try {

@@ -44,8 +44,8 @@ public class LazyLoader {
         if (task == null)
             return;
         
+        task.getView().setTag(task.getViewTag());
         if (task.shouldAddTask()) {
-            task.getView().setTag(task.getViewTag());
             synchronized (mTaskQueue) {
                 for (int i = 0; i<mTaskQueue.size();) {
                     LazyLoaderTask waitingTask = mTaskQueue.get(i);
@@ -119,7 +119,7 @@ public class LazyLoader {
                         }
                     }
                     
-                    if (task != null) {
+                    if (task != null && task.getView() != null && task.getViewTag().equals((String)task.getView().getTag())) {
                         try {
                             task.loadInBackground();
                             mUiHandler.post(new UINotifierTask(task));
