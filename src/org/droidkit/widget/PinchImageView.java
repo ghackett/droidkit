@@ -25,6 +25,7 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 	private int mScrollX = 0;
 	private int mScrollY = 0;
 	private float mCurrentScale = 1.0f;
+	private float mPreviousScale = 1.0f;
 
 	public PinchImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -137,8 +138,15 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
-		canvas.scale(mCurrentScale, mCurrentScale, getWidth()/2, getHeight()/2);
+		float px = getWidth()/2;
+		float py = getHeight()/2;
+		canvas.scale(mCurrentScale, mCurrentScale, px, py);
 		canvas.translate(mScrollX, mScrollY);
+		
+		if (mCurrentScale != mPreviousScale) {
+			
+		}
+		
 		super.onDraw(canvas);
 	}
 	
@@ -168,7 +176,10 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 			invalidate();
 	}
 	
+	
+	
 	public void scaleTo(float scale, boolean invalidate) {
+		mPreviousScale = mCurrentScale;
 		mCurrentScale = scale;
 		if (invalidate)
 			invalidate();
@@ -182,10 +193,27 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 		
 		//TODO: need better edge checking, not only is this wrong but it also only does one side
 		
-		if (mScrollX < 0)
-			targetX = 0;
-		if (mScrollY < 0)
-			targetY = 0;
+		int viewWidth = getWidth();
+		int viewHeight = getHeight();
+		int trueWidth = getTrueWidth();
+		int trueHeight = getTrueHeight();
+		int dw = trueWidth - viewWidth;
+		int dh = trueHeight - viewHeight;
+		int hdw = dw/2;
+		int hdh = dh/2;
+		int minX = -hdw;
+		int minY = -hdh;
+		int maxX = hdw;
+		int maxY = hdh;
+		
+		if (mScrollX < minX)
+			targetX = minX;
+		if (mScrollY < minY)
+			targetY = minY;
+		if (mScrollX > maxX)
+			targetX = maxX;
+		if (mScrollY > maxY)
+			targetY = maxY;
 		
 		if (targetX != mScrollX || targetY != mScrollY)
 			scrollTo(targetX, targetY);
