@@ -7,6 +7,8 @@ import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
@@ -14,9 +16,8 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.ImageView;
 
-public class PinchImageView extends ImageView implements OnScaleGestureListener, OnGestureListener, OnDoubleTapListener, OnTouchListener  {
+public class PinchImageView extends View implements OnScaleGestureListener, OnGestureListener, OnDoubleTapListener, OnTouchListener  {
 	private static final String TAG = "PinchImageView";
 	
 	private ScaleGestureDetector mScaleGestureDetector;
@@ -25,15 +26,15 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 	
 	private int mScrollX = 0;
 	private int mScrollY = 0;
-	private float mCurrentScale = 1.0f;
-	private float mPreviousScale = 1.0f;
+	private float mCurrentScale = -1.0f;
+	private float mPreviousScale = -1.0f;
 	
-	private int mMinX = 0;
-	private int mMaxX = 0;
-	private int mMinY = 0;
-	private int mMaxY = 0;
+	private float mMinScale = 1.0f;
 	
-//	private Bitmap mBitmap = null;
+	
+	private Bitmap mBitmap = null;
+	private int mBitmapWidth = 0;
+	private int mBitmapHeight = 0;
 
 	public PinchImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -58,23 +59,47 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 		mNormalGestureDetector.setOnDoubleTapListener(this);
 		setOnTouchListener(this);
 		mScroller = new Scroller(getContext());
-		setScaleType(ScaleType.FIT_CENTER);
+//		setScaleType(ScaleType.FIT_CENTER);
 	}
 	
 	
-//	
-//
+	
+
 //	@Override
-//	public void setImageBitmap(Bitmap bm) {
-//		mBitmapWidth = bm.getWidth();
-//		mBitmapHeight = bm.getHeight();
+	public void setImageBitmap(Bitmap bm) {
+		if (bm == null) {
+			mBitmapHeight = 0;
+			mBitmapWidth = 0;
+		} else {
+			mBitmapWidth = bm.getWidth();
+			mBitmapHeight = bm.getHeight();
+		}
+		mBitmap = bm;
 //		super.setImageBitmap(bm);
-//	}
+		resetMinScale();
+	}
+	
+	public void resetMinScale() {
+		if (mBitmapWidth > 0 && getWidth() > 0) {
+			float wScale = (float)getWidth()/(float)mBitmapWidth;
+			float hScale = (float)getHeight()/(float)mBitmapHeight;
+			mMinScale = Math.min(wScale, hScale);
+			postCheckEdges();
+		}
+	}
+	
+	
+
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+		resetMinScale();
+	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if ((!mScaleGestureDetector.isInProgress()) && event.getAction() == event.ACTION_UP) {
-			getHandler().post(mCheckEdgesRunnable);
+			postCheckEdges();
 		} else {
 			getHandler().removeCallbacks(mCheckEdgesRunnable);
 		}
@@ -156,47 +181,69 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
+		if (mBitmap == null) {
+			super.onDraw(canvas);
+			return;
+		}
 		
-		
-		float scrollX = -mScrollX/mCurrentScale;
-		float scrollY = -mScrollY/mCurrentScale;
-		
-		
-		float px = ((getWidth()/2)); //-mScrollX);
-		float py = ((getHeight()/2)); //-mScrollY);
-		
-		
-		
-//		float px = (-mScrollX + (getWidth()/2))/mPreviousScale;
-//		float py = (-mScrollY + (getHeight()/2))/mPreviousScale;
-//		canvas.translate(px, py);
-		canvas.scale(mCurrentScale, mCurrentScale, px, py);
-		canvas.translate(scrollX, scrollY);
-		
-		mPreviousScale = mCurrentScale;
-		
-		Log.e(TAG, "scrollX: " + mScrollX + " mScrollY: " + mScrollY);
-		
-//		if (mCurrentScale != mPreviousScale) {
-//			//try getting previous scaled size and current scaled size, finding the diff,
-//			//then adjusting min and max vars proportionaly on either side? 
-//			Log.e(TAG, "prevScale: " + mPreviousScale + " curScale:" + mCurrentScale);
-//			int oldWidth = (int) (getWidth()*mPreviousScale);
-//			int newWidth = (int) (getWidth()*mCurrentScale);
-//			int wdiff = newWidth - oldWidth;
-//			Log.e(TAG, "oldWidth: " + oldWidth + " newWidth: " + newWidth + " wdiff: " + wdiff);
-//			float leftPercent = px / oldWidth;
-//			int leftNewPixels = (int) (leftPercent*wdiff);
-//			int rightNewPixels = wdiff-leftNewPixels;
-//			Log.e(TAG, "leftPercent = " + leftPercent + " leftNewPixels: " + leftNewPixels + " rightNewPixels: " + rightNewPixels) ;
-//			
-//			mMinX-=(leftNewPixels*mCurrentScale);
-//			mMaxX+=(rightNewPixels*mCurrentScale);
-//			
-//			mPreviousScale = mCurrentScale;
-//		}
-		
+		canvas.drawBitmap(mBitmap, null, getImageRect(), null);
 		super.onDraw(canvas);
+		
+	}
+	
+	private void logRect(String msg, RectF r) {
+		Log.e(TAG, msg + " - RECT: l:" + r.left + " r:" + r.right + " t:" + r.top + " b:" + r.bottom + " center:" + r.centerX() + ", " + r.centerY());
+	}
+	
+	private void translateRect(RectF r, float dx, float dy) {
+		r.left+=dx;
+		r.right+=dx;
+		r.top+=dy;
+		r.bottom+=dy;
+	}
+
+	
+	public RectF getImageRect() {
+		
+		RectF viewPort = new RectF(0, 0, getWidth(), getHeight());
+		RectF prevRect = getPreviousScaleImageRect();
+		
+		if (mPreviousScale == mCurrentScale)
+			return prevRect;
+		
+		
+		float scaleFactor = mCurrentScale / mPreviousScale;
+		logRect("before trans", prevRect);
+		translateRect(prevRect, -viewPort.centerX(), -viewPort.centerY());
+		logRect("after trans", prevRect);
+		
+		float newWidth = prevRect.width()*scaleFactor;
+		float newHeight = prevRect.height()*scaleFactor;
+		float oldViewportCenterX = prevRect.left;
+		float oldViewPortCenterY = prevRect.top;
+		
+		RectF newRect = new RectF(0, 0, newWidth, newHeight);
+		translateRect(newRect, oldViewportCenterX*scaleFactor, oldViewPortCenterY*scaleFactor);
+		translateRect(newRect, viewPort.centerX(), viewPort.centerY());
+				
+		mScrollX = (int) -newRect.left;
+		mScrollY = (int) -newRect.top;
+
+		mPreviousScale = mCurrentScale;
+		return newRect;
+
+	}
+	
+	public RectF getPreviousScaleImageRect() {
+		float scaledWidth = mBitmapWidth*mPreviousScale;
+		float scaledHeight = mBitmapHeight*mPreviousScale;
+		
+		RectF r = new RectF();
+		r.left = -mScrollX;
+		r.top = -mScrollY;
+		r.bottom = (int) (r.top+scaledHeight);
+		r.right = (int) (r.left+scaledWidth);
+		return r;
 	}
 	
 	
@@ -236,45 +283,55 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 	public void scaleBy(float ds, boolean invalidate) {
 		scaleTo(mCurrentScale*ds, invalidate);
 	}
+	
+	public void postCheckEdges() {
+		if (getHandler() != null) {
+			getHandler().removeCallbacks(mCheckEdgesRunnable);
+			getHandler().post(mCheckEdgesRunnable);
+		} else {
+			checkEdges();
+		}
+	}
 	public void checkEdges() {
 		
-		if (mCurrentScale < 1.0f)
-			scaleTo(1.0f, false);
+		if (mCurrentScale < mMinScale) {
+			scaleTo(mMinScale, true);
+			postCheckEdges();
+			return;
+		}
+		
 		
 		int targetX = mScrollX;
 		int targetY = mScrollY;
 		
 		//TODO: need better edge checking, not only is this wrong but it also only does one side
 		
-		int viewWidth = getWidth();
-		int viewHeight = getHeight();
-		int trueWidth = getTrueWidth();
-		int trueHeight = getTrueHeight();
-		int dw = trueWidth - viewWidth;
-		int dh = trueHeight - viewHeight;
-		int hdw = dw/2;
-		int hdh = dh/2;
-		mMinX = -hdw;
-		mMinY = -hdh;
-		mMaxX = hdw;
-		mMaxY = hdh;
+		float scaledWidth = mBitmapWidth*mCurrentScale;
+		float scaledHeight = mBitmapHeight*mCurrentScale;
+		int minX = 0; //(int) (getWidth() - scaledWidth);
+		int maxX = (int) (scaledWidth - getWidth());
+		int minY = 0;
+		int maxY = (int) (scaledHeight - getHeight());
 		
+		if (mScrollX < minX)
+			targetX = minX;
+		if (mScrollY < minY)
+			targetY = minY;
+		if (mScrollX > maxX)
+			targetX = maxX;
+		if (mScrollY > maxY)
+			targetY = maxY;
 		
-		if (mScrollX < mMinX)
-			targetX = mMinX;
-		if (mScrollY < mMinY)
-			targetY = mMinY;
-		if (mScrollX > mMaxX)
-			targetX = mMaxX;
-		if (mScrollY > mMaxY)
-			targetY = mMaxY;
+		Log.e(TAG, "minX = " + minX + " maxX = " + maxX + " mScrollX = " + mScrollX);
 		
-		if (targetX != mScrollX || targetY != mScrollY)
+		if (targetX != mScrollX || targetY != mScrollY) {
 			scrollTo(targetX, targetY, false);
+			postInvalidate();
+		}
 		
 		
 		
-		postInvalidate();
+		
 	}
 	
 	
