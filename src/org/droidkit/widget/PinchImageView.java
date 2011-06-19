@@ -5,6 +5,7 @@ import org.droidkit.util.tricks.Log;
 import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -26,6 +27,13 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 	private int mScrollY = 0;
 	private float mCurrentScale = 1.0f;
 	private float mPreviousScale = 1.0f;
+	
+	private int mMinX = 0;
+	private int mMaxX = 0;
+	private int mMinY = 0;
+	private int mMaxY = 0;
+	
+//	private Bitmap mBitmap = null;
 
 	public PinchImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -53,6 +61,16 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 		setScaleType(ScaleType.FIT_CENTER);
 	}
 	
+	
+//	
+//
+//	@Override
+//	public void setImageBitmap(Bitmap bm) {
+//		mBitmapWidth = bm.getWidth();
+//		mBitmapHeight = bm.getHeight();
+//		super.setImageBitmap(bm);
+//	}
+
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if ((!mScaleGestureDetector.isInProgress()) && event.getAction() == event.ACTION_UP) {
@@ -100,10 +118,10 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 		if (mScaleGestureDetector.isInProgress())
 			return false;
 		
-		int dx = (int)(distanceX/mCurrentScale);
-		int dy = (int)(distanceY/mCurrentScale);
+		int dx = (int)(distanceX); ///mCurrentScale);
+		int dy = (int)(distanceY); ///mCurrentScale);
 		
-		scrollBy(-dx, -dy);
+		scrollBy(dx, dy);
 		
 		return true;
 	}
@@ -138,14 +156,45 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
-		float px = getWidth()/2;
-		float py = getHeight()/2;
-		canvas.scale(mCurrentScale, mCurrentScale, px, py);
-		canvas.translate(mScrollX, mScrollY);
 		
-		if (mCurrentScale != mPreviousScale) {
-			
-		}
+		
+		float scrollX = -mScrollX/mCurrentScale;
+		float scrollY = -mScrollY/mCurrentScale;
+		
+		
+		float px = ((getWidth()/2)); //-mScrollX);
+		float py = ((getHeight()/2)); //-mScrollY);
+		
+		
+		
+//		float px = (-mScrollX + (getWidth()/2))/mPreviousScale;
+//		float py = (-mScrollY + (getHeight()/2))/mPreviousScale;
+//		canvas.translate(px, py);
+		canvas.scale(mCurrentScale, mCurrentScale, px, py);
+		canvas.translate(scrollX, scrollY);
+		
+		mPreviousScale = mCurrentScale;
+		
+		Log.e(TAG, "scrollX: " + mScrollX + " mScrollY: " + mScrollY);
+		
+//		if (mCurrentScale != mPreviousScale) {
+//			//try getting previous scaled size and current scaled size, finding the diff,
+//			//then adjusting min and max vars proportionaly on either side? 
+//			Log.e(TAG, "prevScale: " + mPreviousScale + " curScale:" + mCurrentScale);
+//			int oldWidth = (int) (getWidth()*mPreviousScale);
+//			int newWidth = (int) (getWidth()*mCurrentScale);
+//			int wdiff = newWidth - oldWidth;
+//			Log.e(TAG, "oldWidth: " + oldWidth + " newWidth: " + newWidth + " wdiff: " + wdiff);
+//			float leftPercent = px / oldWidth;
+//			int leftNewPixels = (int) (leftPercent*wdiff);
+//			int rightNewPixels = wdiff-leftNewPixels;
+//			Log.e(TAG, "leftPercent = " + leftPercent + " leftNewPixels: " + leftNewPixels + " rightNewPixels: " + rightNewPixels) ;
+//			
+//			mMinX-=(leftNewPixels*mCurrentScale);
+//			mMaxX+=(rightNewPixels*mCurrentScale);
+//			
+//			mPreviousScale = mCurrentScale;
+//		}
 		
 		super.onDraw(canvas);
 	}
@@ -188,6 +237,10 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 		scaleTo(mCurrentScale*ds, invalidate);
 	}
 	public void checkEdges() {
+		
+		if (mCurrentScale < 1.0f)
+			scaleTo(1.0f, false);
+		
 		int targetX = mScrollX;
 		int targetY = mScrollY;
 		
@@ -201,22 +254,27 @@ public class PinchImageView extends ImageView implements OnScaleGestureListener,
 		int dh = trueHeight - viewHeight;
 		int hdw = dw/2;
 		int hdh = dh/2;
-		int minX = -hdw;
-		int minY = -hdh;
-		int maxX = hdw;
-		int maxY = hdh;
+		mMinX = -hdw;
+		mMinY = -hdh;
+		mMaxX = hdw;
+		mMaxY = hdh;
 		
-		if (mScrollX < minX)
-			targetX = minX;
-		if (mScrollY < minY)
-			targetY = minY;
-		if (mScrollX > maxX)
-			targetX = maxX;
-		if (mScrollY > maxY)
-			targetY = maxY;
+		
+		if (mScrollX < mMinX)
+			targetX = mMinX;
+		if (mScrollY < mMinY)
+			targetY = mMinY;
+		if (mScrollX > mMaxX)
+			targetX = mMaxX;
+		if (mScrollY > mMaxY)
+			targetY = mMaxY;
 		
 		if (targetX != mScrollX || targetY != mScrollY)
-			scrollTo(targetX, targetY);
+			scrollTo(targetX, targetY, false);
+		
+		
+		
+		postInvalidate();
 	}
 	
 	
