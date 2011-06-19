@@ -15,6 +15,7 @@ import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.View.OnTouchListener;
 
 public class PinchImageView extends View implements OnScaleGestureListener, OnGestureListener, OnDoubleTapListener, OnTouchListener  {
@@ -28,6 +29,9 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	private int mScrollY = 0;
 	private float mCurrentScale = -1.0f;
 	private float mPreviousScale = -1.0f;
+	
+	private int mMinFlingVelocity;
+	private int mMaxFlingVelocity;
 	
 	private float mMinScale = 1.0f;
 	
@@ -59,6 +63,9 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		mNormalGestureDetector.setOnDoubleTapListener(this);
 		setOnTouchListener(this);
 		mScroller = new Scroller(getContext());
+		final ViewConfiguration viewConfig = ViewConfiguration.get(getContext());
+		viewConfig.getScaledMaximumFlingVelocity();
+		viewConfig.getScaledMinimumFlingVelocity();
 //		setScaleType(ScaleType.FIT_CENTER);
 	}
 	
@@ -164,10 +171,10 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		if (mScaleGestureDetector.isInProgress())
 			return false;
 
-		if (mCurrentScale < 2.5f)
-			scaleTo(2.5f, true);
+		if (mCurrentScale != 2.0f)
+			scaleTo(2.0f, true);
 		else
-			scaleTo(1.0f, true);
+			scaleTo(mMinScale, true);
 		return true;
 	}
 
@@ -181,7 +188,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
-		if (mBitmap == null) {
+		if (mBitmap == null || getWidth() == 0) {
 			super.onDraw(canvas);
 			return;
 		}
@@ -313,14 +320,24 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		int minY = 0;
 		int maxY = (int) (scaledHeight - getHeight());
 		
-		if (mScrollX < minX)
-			targetX = minX;
-		if (mScrollY < minY)
-			targetY = minY;
-		if (mScrollX > maxX)
-			targetX = maxX;
-		if (mScrollY > maxY)
-			targetY = maxY;
+		if (scaledWidth <= getWidth()) {
+			targetX = (int) -((getWidth()-scaledWidth)/2);
+		} else {
+			if (mScrollX < minX)
+				targetX = minX;
+			if (mScrollX > maxX)
+				targetX = maxX;
+		}
+		
+		if (scaledHeight <= getHeight()) {
+			targetY = (int) -((getHeight()-scaledHeight)/2);
+		} else {
+			if (mScrollY < minY)
+				targetY = minY;
+			if (mScrollY > maxY)
+				targetY = maxY;
+		}
+		
 		
 		Log.e(TAG, "minX = " + minX + " maxX = " + maxX + " mScrollX = " + mScrollX);
 		
