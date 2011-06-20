@@ -153,6 +153,14 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		int dx = (int)(distanceX);
 		int dy = (int)(distanceY);
 		
+		
+		TargetScrollPoint target = new TargetScrollPoint(mScrollX+dx, mScrollY+dy);
+		if (target.hasXChanged() && !target.hasYChanged()) {
+			dx = 0;
+		} else if ((!target.hasXChanged()) && target.hasYChanged()) {
+			dy = 0;
+		}
+		
 		scrollBy(dx, dy);
 		
 		return true;
@@ -244,33 +252,15 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			postInvalidate();
 		} else {
 			
-			int targetX = mScrollX;
-			int targetY = mScrollY;
-			
-			int maxX = getMaxScrollX();
-			int maxY = getMaxScrollY();
-			
-			if (mScrollX < 0) {
-				targetX = 0;
-			}
-			if (mScrollX > maxX) {
-				targetX = maxX;
-			}
-			if (mScrollY < 0) {
-				targetY = 0;
-			}
-			if (mScrollY > maxY) {
-				targetY = maxY;
-			}
-			
-			if (targetX != mScrollX && targetY != mScrollY) {
+			TargetScrollPoint target = new TargetScrollPoint(mScrollX, mScrollY);
+			if (target.hasXChanged() && target.hasYChanged()) {
 				//corner pull, smooth scroll
-				smoothScrollTo(targetX, targetY);
+				smoothScrollTo(target.targetX, target.targetY);
 			} else {
-				//else normal fling
 				mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, 0, getMaxScrollX(), 0, getMaxScrollY());
 				postInvalidate();
 			}
+
 		}
 	}
 	
@@ -350,49 +340,77 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			return;
 		}
 		
-		
-		int targetX = mScrollX;
-		int targetY = mScrollY;
-		
-		
-		float scaledWidth = mBitmapWidth*mCurrentScale;
-		float scaledHeight = mBitmapHeight*mCurrentScale;
-		int minX = 0; 
-		int maxX = getMaxScrollX();
-		int minY = 0;
-		int maxY = getMaxScrollY();
-		
-		
-		if (scaledWidth <= getWidth()) {
-			targetX = (int) -((getWidth()-scaledWidth)/2);
-			
-		} else {
-			if (mScrollX < minX)
-				targetX = minX;
-			if (mScrollX > maxX)
-				targetX = maxX;
-		}
-		
-		if (scaledHeight <= getHeight()) {
-			targetY = (int) -((getHeight()-scaledHeight)/2);
-		} else {
-			if (mScrollY < minY)
-				targetY = minY;
-			if (mScrollY > maxY)
-				targetY = maxY;
-		}
-		
-		if (targetX != mScrollX || targetY != mScrollY) {
-			if (Math.abs(targetX-mScrollX) <= 3 && Math.abs(targetY-mScrollY) <= 3) {
-				scrollTo(targetX, targetY, false);
+		TargetScrollPoint target = new TargetScrollPoint(mScrollX, mScrollY);
+		if (target.hasXChanged() || target.hasYChanged()) {
+			if (target.isXDiffTooLowForSmoothScroll() && target.isYDiffTooLowForSmoothScroll()) {
+				scrollTo(target.targetX, target.targetY, false);
 				postInvalidate();
 			} else {
-				smoothScrollTo(targetX, targetY);
+				smoothScrollTo(target.targetX, target.targetY);
 			}
 		}
 		
 	}
-	
+
+	private class TargetScrollPoint {
+		int startX;
+		int startY;
+		int targetX;
+		int targetY;
+		
+		public TargetScrollPoint(int starterX, int starterY) {
+			startX = starterX;
+			startY = starterY;
+			targetX = startX;
+			targetY = startY;
+			
+			float scaledWidth = mBitmapWidth*mCurrentScale;
+			float scaledHeight = mBitmapHeight*mCurrentScale;
+			int minX = 0; 
+			int maxX = getMaxScrollX();
+			int minY = 0;
+			int maxY = getMaxScrollY();
+			
+			if (scaledWidth <= getWidth()) {
+				targetX = (int) -((getWidth()-scaledWidth)/2);
+				
+			} else {
+				if (startX < minX)
+					targetX = minX;
+				if (startX > maxX)
+					targetX = maxX;
+			}
+			
+			if (scaledHeight <= getHeight()) {
+				targetY = (int) -((getHeight()-scaledHeight)/2);
+			} else {
+				if (startY < minY)
+					targetY = minY;
+				if (startY > maxY)
+					targetY = maxY;
+			}
+		}
+		
+		public boolean hasXChanged() {
+			return startX != targetX;
+		}
+		public boolean hasYChanged() {
+			return startY != targetY;
+		}
+		
+		public boolean isXDiffTooLowForSmoothScroll() {
+			return Math.abs(targetX-startX) <= 3;
+		}
+		
+		public boolean isYDiffTooLowForSmoothScroll() {
+			return Math.abs(targetY-startY) <= 3;
+		}
+		
+		@Override
+		public String toString() {
+			return "TargetScrollPoint: start:" + startX + "," + startY + " target:" + targetX + "," + targetY;
+		}
+	}
 	
 	private Runnable mCheckEdgesRunnable = new Runnable() {
 		
