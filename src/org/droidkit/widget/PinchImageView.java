@@ -224,15 +224,21 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		float scaledHeight = mBitmapHeight*mCurrentScale;
 
 		if (scaledWidth <= getWidth() && scaledHeight <= getHeight()) {
+			//if whole bitmap is smaller than or equal to the viewport, just do an edge check
 			postCheckEdges();
 			return;
 		} else if (scaledWidth <= getWidth()) {
-			int scrollTarget = (velocityY > 0 ? getMaxScrollY() : 0);
-			smoothScrollTo((int) -((getWidth()-scaledWidth)/2), scrollTarget);
+			//else if bitmap width is shorter that viewport width, only fling the y axis
+			scrollTo((int) -((getWidth()-scaledWidth)/2), mScrollY, false);
+			mScroller.fling(mScrollX, mScrollY, 0, (int)velocityY, mScrollX, mScrollX, 0, getMaxScrollY());
+			postInvalidate();
 		} if (scaledHeight <= getHeight()) {
-			int scrollTarget = (velocityX > 0 ? getMaxScrollX() : 0);
-			smoothScrollTo(scrollTarget, (int) -((getHeight()-scaledHeight)/2));
+			//else if bitmap height is shorter than viewport height, only fling the x axis
+			scrollTo(mScrollX, (int)-((getHeight()-scaledHeight)/2), false);
+			mScroller.fling(mScrollX, mScrollY, (int)velocityX, 0, 0, getMaxScrollX(), mScrollY, mScrollY);
+			postInvalidate();
 		} else {
+			//else normal fling
 			mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, 0, getMaxScrollX(), 0, getMaxScrollY());
 			postInvalidate();
 		}
