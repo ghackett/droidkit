@@ -19,6 +19,7 @@ import android.view.View.OnTouchListener;
 public class PinchImageView extends View implements OnScaleGestureListener, OnGestureListener, OnDoubleTapListener, OnTouchListener  {
 	private static final String TAG = "PinchImageView";
 	
+	
 	private ScaleGestureDetector mScaleGestureDetector;
 	private GestureDetector mNormalGestureDetector;
 	private Scroller mScroller;
@@ -177,10 +178,12 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		final int tapX = (int) e.getX();
 		final int tapY = (int) e.getY();
 		
-		if (mCurrentScale != 1.5f)
-			mTargetScale = 1.5f;
+		if (mCurrentScale >= 2.0f)
+			mTargetScale = mMinScale < 1.0f ? mMinScale : 1.0f;
+		else if (mCurrentScale >= 1.0f)
+			mTargetScale = 2.0f;
 		else
-			mTargetScale = mMinScale;
+			mTargetScale = 1.0f;
 		
 		getHandler().post(new Runnable() {
 			
