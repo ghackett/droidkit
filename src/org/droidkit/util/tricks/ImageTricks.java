@@ -18,6 +18,8 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Path.Direction;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -341,6 +343,14 @@ public class ImageTricks {
         return null;
     }
     
+    public static Bitmap roundCorners(int imgResId, int widthDp, int heightDp, int cornerDp, int strokeColor) {
+        try {
+            return roundCorners(DroidKit.getBitmap(imgResId, widthDp, heightDp), cornerDp, true, strokeColor);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     
     public static Bitmap roundCorners(int imgResId, int widthDp, int heightDp, int cornerDp) {
         try {
@@ -360,6 +370,19 @@ public class ImageTricks {
         }
     }
     
+    public static Bitmap roundCorners(String file, int widthDp, int heightDp, int cornerDp, int strokeColor) {
+        try {
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.outWidth = DroidKit.getPixels(widthDp);
+            opts.outHeight = DroidKit.getPixels(heightDp);
+            Bitmap b = BitmapFactory.decodeFile(file, opts);
+            return roundCorners(b, cornerDp, true, strokeColor);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     public static Bitmap roundCorners(String file, int widthDp, int heightDp, int cornerDp) {
         try {
             BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -373,10 +396,32 @@ public class ImageTricks {
         }
     }
     
+    public static Bitmap roundCorners(String file, int dp, int strokeColor) {
+        try {
+            Bitmap b = BitmapFactory.decodeFile(file);
+            return roundCorners(b, dp, true, strokeColor);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     public static Bitmap roundCorners(String file, int dp) {
         try {
             Bitmap b = BitmapFactory.decodeFile(file);
             return roundCorners(b, dp, true);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public static Bitmap roundCorners(Bitmap bitmap, int widthDp, int heightDp, int cornerDp, boolean recycleOriginal, int strokeColor) {
+        try {
+            Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, DroidKit.getPixels(widthDp), DroidKit.getPixels(heightDp), false);
+            if (recycleOriginal)
+                bitmap.recycle();
+            return roundCorners(newBitmap, cornerDp, true, strokeColor);
         } catch (OutOfMemoryError e) {
             e.printStackTrace();
             return null;
@@ -395,34 +440,58 @@ public class ImageTricks {
         }
     }
         
-    
     public static Bitmap roundCorners(Bitmap bitmap, int dp, boolean recycleOriginal) {
+        return roundCorners(bitmap, dp, recycleOriginal, false, 0);
+    }
+    
+    public static Bitmap roundCorners(Bitmap bitmap, int dp, boolean recycleOriginal, int strokeColor) {
+        return roundCorners(bitmap, dp, recycleOriginal, true, strokeColor);
+    }
+    
+    private static Bitmap roundCorners(Bitmap bitmap, int dp, boolean recycleOriginal, boolean drawStroke, int strokeColor) {
         Bitmap output = null;
         try {
-            output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
-            Canvas canvas = new Canvas(output);
+            Bitmap image = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
+            Bitmap border = null;
+            int borderWidth = 2; // DroidKit.getPixels(2);
+            Rect imageSrcRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+//            Rect imageDestRect = new Rect(borderWidth, borderWidth, bitmap.getWidth()-borderWidth, bitmap.getHeight()-borderWidth);
             
+            
+            final float roundPx = DroidKit.getPixels(dp);
             final int color = 0xff424242;
             final Paint paint = new Paint();
-            final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-            final RectF rectF = new RectF(rect);
-            final float roundPx = DroidKit.getPixels(dp);
-
+            Canvas imageCanvas = new Canvas(image);
             paint.setAntiAlias(true);
-            
-            canvas.drawARGB(0, 0, 0, 0);
+            imageCanvas.drawARGB(0, 0, 0, 0);
             paint.setColor(color);
-            
-            final Paint strokePaint = new Paint();
-            strokePaint.setAntiAlias(true);
-            strokePaint.setStyle(Paint.Style.STROKE);
-            strokePaint.setColor(0xffffffff);
-            strokePaint.setStrokeWidth(2.0f);
-            
-            canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+            imageCanvas.drawRoundRect(new RectF(imageSrcRect), roundPx, roundPx, paint);
 
             paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-            canvas.drawBitmap(bitmap, rect, rect, paint);
+            imageCanvas.drawBitmap(bitmap, imageSrcRect, imageSrcRect, paint);
+            
+            if (drawStroke) {
+                RectF borderRect = new RectF(0, 0, bitmap.getWidth()+(borderWidth*2), bitmap.getHeight()+(borderWidth*2));
+                border = Bitmap.createBitmap(bitmap.getWidth()+(borderWidth*2), bitmap.getHeight()+(borderWidth*2), Config.ARGB_8888);
+                Canvas finalCanvas = new Canvas(border);
+                final Paint strokePaint = new Paint();
+                strokePaint.setAntiAlias(true);
+                strokePaint.setColor(strokeColor);
+                strokePaint.setStrokeWidth(borderWidth);
+                finalCanvas.drawRoundRect(borderRect, roundPx, roundPx, strokePaint);
+                
+                Rect innerBitmapRect = new Rect(borderWidth, borderWidth, bitmap.getWidth()+borderWidth, bitmap.getHeight()+borderWidth);
+                finalCanvas.drawBitmap(image, imageSrcRect, innerBitmapRect, null);
+                
+                image.recycle();
+                image = null;
+                
+                output = border;
+            } else {
+                output = image;
+            }
+
+            
         } catch (OutOfMemoryError e) {
             e.printStackTrace();
         }

@@ -175,6 +175,10 @@ public class DroidKit {
     public static String getString(int resource, Object... formatArgs) {
         return sApplicationContext.getString(resource, formatArgs);
     }
+    
+    public static int getColor(int colorResId) {
+        return getResources().getColor(colorResId);
+    }
 
     public static int getResourceId(String name) {
         return getResources().getIdentifier(name, null, sApplicationContext.getPackageName());
