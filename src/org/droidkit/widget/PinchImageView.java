@@ -182,26 +182,23 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		if (!mScroller.isFinished())
 			mScroller.abortAnimation();
 		
-//		getHandler().removeCallbacks(mCheckEdgesRunnable);
-//		float scaledWidth = mBitmapWidth*mCurrentScale;
-//		float scaledHeight = mBitmapHeight*mCurrentScale;
-//		int minX = 0; //(int) (getWidth() - scaledWidth);
-//		int maxX = getMaxScrollX();
-//		int minY = 0;
-//		int maxY = getMaxScrollY();
-//		
-//		if (mScrollX <= minX || mScrollX >= maxX) {
-//			velocityY = 0;
-//		}
-//		if (mScrollY <= minY || mScrollY >= maxY) {
-//			velocityY = 0;
-//		}
+		float scaledWidth = mBitmapWidth*mCurrentScale;
+		float scaledHeight = mBitmapHeight*mCurrentScale;
+
+		if (scaledWidth <= getWidth() && scaledHeight <= getHeight()) {
+			postCheckEdges();
+			return;
+		} else if (scaledWidth <= getWidth()) {
+			int scrollTarget = (velocityY > 0 ? getMaxScrollY() : 0);
+			smoothScrollTo((int) -((getWidth()-scaledWidth)/2), scrollTarget);
+		} if (scaledHeight <= getHeight()) {
+			int scrollTarget = (velocityX > 0 ? getMaxScrollX() : 0);
+			smoothScrollTo(scrollTarget, (int) -((getHeight()-scaledHeight)/2));
+		} else {
+			mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, 0, getMaxScrollX(), 0, getMaxScrollY());
+			postInvalidate();
+		}
 		
-//		Log.e(TAG, "scrollX = " + mScrollX + ", mScrollY = " + mScrollY);
-		
-//		mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, -mFlingBumper, getMaxScrollX()+mFlingBumper, -mFlingBumper, getMaxScrollY()+mFlingBumper);
-		mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, 0, getMaxScrollX(), 0, getMaxScrollY());
-		postInvalidate();
 	}
 
 	@Override
