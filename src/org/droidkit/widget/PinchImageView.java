@@ -177,8 +177,8 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		final int tapX = (int) e.getX();
 		final int tapY = (int) e.getY();
 		
-		if (mCurrentScale != 2.0f)
-			mTargetScale = 2.0f;
+		if (mCurrentScale != 1.5f)
+			mTargetScale = 1.5f;
 		else
 			mTargetScale = mMinScale;
 		
@@ -222,6 +222,8 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		
 		float scaledWidth = mBitmapWidth*mCurrentScale;
 		float scaledHeight = mBitmapHeight*mCurrentScale;
+		
+		
 
 		if (scaledWidth <= getWidth() && scaledHeight <= getHeight()) {
 			//if whole bitmap is smaller than or equal to the viewport, just do an edge check
@@ -238,9 +240,34 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			mScroller.fling(mScrollX, mScrollY, (int)velocityX, 0, 0, getMaxScrollX(), mScrollY, mScrollY);
 			postInvalidate();
 		} else {
-			//else normal fling
-			mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, 0, getMaxScrollX(), 0, getMaxScrollY());
-			postInvalidate();
+			
+			int targetX = mScrollX;
+			int targetY = mScrollY;
+			
+			int maxX = getMaxScrollX();
+			int maxY = getMaxScrollY();
+			
+			if (mScrollX < 0) {
+				targetX = 0;
+			}
+			if (mScrollX > maxX) {
+				targetX = maxX;
+			}
+			if (mScrollY < 0) {
+				targetY = 0;
+			}
+			if (mScrollY > maxY) {
+				targetY = maxY;
+			}
+			
+			if (targetX != mScrollX && targetY != mScrollY) {
+				//corner pull, smooth scroll
+				smoothScrollTo(targetX, targetY);
+			} else {
+				//else normal fling
+				mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, 0, getMaxScrollX(), 0, getMaxScrollY());
+				postInvalidate();
+			}
 		}
 	}
 	
