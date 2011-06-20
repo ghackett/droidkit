@@ -1,13 +1,13 @@
 package org.droidkit.widget;
 
 
+import org.droidkit.DroidKit;
 import org.droidkit.util.tricks.Log;
 import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -15,8 +15,9 @@ import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
+import android.view.animation.BounceInterpolator;
 
 public class PinchImageView extends View implements OnScaleGestureListener, OnGestureListener, OnDoubleTapListener, OnTouchListener  {
 	private static final String TAG = "PinchImageView";
@@ -24,6 +25,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	private ScaleGestureDetector mScaleGestureDetector;
 	private GestureDetector mNormalGestureDetector;
 	private Scroller mScroller;
+	private Scroller mScaler;
 	
 	private int mScrollX = 0;
 	private int mScrollY = 0;
@@ -32,6 +34,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	
 	private int mMinFlingVelocity;
 	private int mMaxFlingVelocity;
+	private int mFlingBumper;
 	
 	private float mMinScale = 1.0f;
 	
@@ -63,11 +66,15 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		mNormalGestureDetector.setOnDoubleTapListener(this);
 		setOnTouchListener(this);
 		mScroller = new Scroller(getContext());
+		mScaler = new Scroller(getContext());
 		final ViewConfiguration viewConfig = ViewConfiguration.get(getContext());
-		viewConfig.getScaledMaximumFlingVelocity();
-		viewConfig.getScaledMinimumFlingVelocity();
+		mMaxFlingVelocity = viewConfig.getScaledMaximumFlingVelocity();
+		mMinFlingVelocity = viewConfig.getScaledMinimumFlingVelocity();
+		mFlingBumper = DroidKit.getPixels(50);
 //		setScaleType(ScaleType.FIT_CENTER);
 	}
+	
+	
 	
 	
 	
@@ -105,7 +112,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		if ((!mScaleGestureDetector.isInProgress()) && event.getAction() == event.ACTION_UP) {
+		if ((!mScaleGestureDetector.isInProgress()) && (mScroller.isFinished()) && event.getAction() == event.ACTION_UP) {
 			postCheckEdges();
 		} else {
 			getHandler().removeCallbacks(mCheckEdgesRunnable);
@@ -163,7 +170,21 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			float velocityY) {
 		if (mScaleGestureDetector.isInProgress())
 			return false;
+		getHandler().removeCallbacks(mCheckEdgesRunnable);
+//		if ( (velocityX >= mMinFlingVelocity && velocityX <= mMaxFlingVelocity) ||
+//				(velocityY >= mMinFlingVelocity && velocityY <= mMaxFlingVelocity) ) {
+			fling(-velocityX, -velocityY);
+//		}
 		return true;
+	}
+	
+	public void fling(float velocityX, float velocityY) {
+		if (!mScroller.isFinished())
+			mScroller.abortAnimation();
+		
+//		mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, -mFlingBumper, getMaxScrollX()+mFlingBumper, -mFlingBumper, getMaxScrollY()+mFlingBumper);
+		mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, 0, getMaxScrollX(), 0, getMaxScrollY());
+		postInvalidate();
 	}
 
 	@Override
@@ -172,9 +193,9 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			return false;
 
 		if (mCurrentScale != 2.0f)
-			scaleTo(2.0f, true);
+			smoothScaleTo(2.0f);
 		else
-			scaleTo(mMinScale, true);
+			smoothScaleTo(mMinScale);
 		return true;
 	}
 
@@ -257,6 +278,46 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	
 	
 	
+	private float mTargetScale = 0.0f;
+	
+	@Override
+	public void computeScroll() {
+		if (mScaler.computeScrollOffset()) {
+			float curScale = ((float)mScaler.getCurrX()/1000f);
+			
+			scaleTo(curScale, false);
+			postInvalidate();
+		} else if (mScroller.computeScrollOffset()) {
+			int x = mScroller.getCurrX();
+			int y = mScroller.getCurrY();
+			
+			if (x != mScrollX || y != mScrollY) {
+				scrollTo(x, y, false);
+				postInvalidate();
+			} else {
+				mScroller.abortAnimation();
+				if (mTargetScale == 0.0f)
+					postCheckEdges();
+				else {
+					mTargetScale = 0.0f;
+				}
+			}
+		} 
+		super.computeScroll();
+	}
+	
+	public void smoothScrollTo(int x, int y) {
+		smoothScrollBy(x-mScrollX, y-mScrollY);
+	}
+	
+	public void smoothScrollBy(int dx, int dy) {
+		if (!mScroller.isFinished())
+			mScroller.abortAnimation();
+		
+		mScroller.startScroll(mScrollX, mScrollY, dx, dy);
+		postInvalidate();
+	}
+
 	@Override
 	public void scrollBy(int x, int y) {
 		scrollBy(x, y, true);
@@ -280,7 +341,15 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	}
 	
 	
-	
+	public void smoothScaleTo(float scale) {
+		if (!mScaler.isFinished())
+			mScaler.abortAnimation();
+		int start = (int)(mCurrentScale*1000f);
+		int end = (int)(scale*1000f);
+		int diff = end-start;
+		mScaler.startScroll(start, 0, diff, 0);
+		postInvalidate();
+	}
 	public void scaleTo(float scale, boolean invalidate) {
 		mPreviousScale = mCurrentScale;
 		mCurrentScale = scale;
@@ -299,6 +368,15 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			checkEdges();
 		}
 	}
+	
+	public int getMaxScrollX() {
+		return (int)((mBitmapWidth*mCurrentScale) - getWidth());
+	}
+	
+	public int getMaxScrollY() {
+		return (int)((mBitmapHeight*mCurrentScale) - getHeight());
+	}
+	
 	public void checkEdges() {
 		
 		if (mCurrentScale < mMinScale) {
@@ -316,9 +394,9 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		float scaledWidth = mBitmapWidth*mCurrentScale;
 		float scaledHeight = mBitmapHeight*mCurrentScale;
 		int minX = 0; //(int) (getWidth() - scaledWidth);
-		int maxX = (int) (scaledWidth - getWidth());
+		int maxX = getMaxScrollX();
 		int minY = 0;
-		int maxY = (int) (scaledHeight - getHeight());
+		int maxY = getMaxScrollY();
 		
 		if (scaledWidth <= getWidth()) {
 			targetX = (int) -((getWidth()-scaledWidth)/2);
@@ -342,8 +420,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		Log.e(TAG, "minX = " + minX + " maxX = " + maxX + " mScrollX = " + mScrollX);
 		
 		if (targetX != mScrollX || targetY != mScrollY) {
-			scrollTo(targetX, targetY, false);
-			postInvalidate();
+			smoothScrollTo(targetX, targetY);
 		}
 		
 		
@@ -368,18 +445,20 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 
 	@Override
 	public boolean onDown(MotionEvent e) {
-		return false;
+		if (!mScroller.isFinished())
+			mScroller.abortAnimation();
+		return true;
 	}
 	@Override
 	public void onLongPress(MotionEvent e) {
 	}
 	@Override
 	public boolean onDoubleTapEvent(MotionEvent e) {
-		return false;
+		return true;
 	}
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
-		return false;
+		return true;
 	}
 
 
