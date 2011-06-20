@@ -1,7 +1,6 @@
 package org.droidkit.widget;
 
 
-import org.droidkit.DroidKit;
 import org.droidkit.util.tricks.Log;
 import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 
@@ -16,8 +15,6 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewConfiguration;
-import android.view.animation.BounceInterpolator;
 
 public class PinchImageView extends View implements OnScaleGestureListener, OnGestureListener, OnDoubleTapListener, OnTouchListener  {
 	private static final String TAG = "PinchImageView";
@@ -32,12 +29,11 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	private float mCurrentScale = -1.0f;
 	private float mPreviousScale = -1.0f;
 	
-	private int mMinFlingVelocity;
-	private int mMaxFlingVelocity;
-	private int mFlingBumper;
-	
 	private float mMinScale = 1.0f;
 	
+	private float mTargetScale = 0.0f;
+	private boolean mIsScaling = false;
+	private boolean mIsScrolling = false;
 	
 	private Bitmap mBitmap = null;
 	private int mBitmapWidth = 0;
@@ -67,11 +63,6 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		setOnTouchListener(this);
 		mScroller = new Scroller(getContext());
 		mScaler = new Scroller(getContext());
-		final ViewConfiguration viewConfig = ViewConfiguration.get(getContext());
-		mMaxFlingVelocity = viewConfig.getScaledMaximumFlingVelocity();
-		mMinFlingVelocity = viewConfig.getScaledMinimumFlingVelocity();
-		mFlingBumper = DroidKit.getPixels(50);
-//		setScaleType(ScaleType.FIT_CENTER);
 	}
 	
 	
@@ -79,7 +70,6 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	
 	
 
-//	@Override
 	public void setImageBitmap(Bitmap bm) {
 		if (bm == null) {
 			mBitmapHeight = 0;
@@ -89,7 +79,6 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			mBitmapHeight = bm.getHeight();
 		}
 		mBitmap = bm;
-//		super.setImageBitmap(bm);
 		resetMinScale();
 	}
 	
@@ -102,8 +91,6 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		}
 	}
 	
-	
-
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
@@ -112,8 +99,13 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		if ((!mScaleGestureDetector.isInProgress()) && (mScroller.isFinished()) && event.getAction() == event.ACTION_UP) {
+		if ( (!mScaleGestureDetector.isInProgress()) && 
+				(mScroller.isFinished()) && 
+				(mScaler.isFinished()) && 
+				(event.getAction() == MotionEvent.ACTION_UP) ) {
+			
 			postCheckEdges();
+			
 		} else {
 			getHandler().removeCallbacks(mCheckEdgesRunnable);
 		}
@@ -131,9 +123,17 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		return (int)(getHeight()*mCurrentScale);
 	}
 
+	
+	
+	
+	
+	
+	
+	
 	@Override
-	public boolean onScaleBegin(ScaleGestureDetector detector) {
-		
+	public boolean onDown(MotionEvent e) {
+		if (!mScroller.isFinished())
+			mScroller.abortAnimation();
 		return true;
 	}
 	
@@ -144,21 +144,13 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	}
 
 	@Override
-	public void onScaleEnd(ScaleGestureDetector detector) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-	@Override
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
 			float distanceY) {
 		if (mScaleGestureDetector.isInProgress())
 			return false;
 		
-		int dx = (int)(distanceX); ///mCurrentScale);
-		int dy = (int)(distanceY); ///mCurrentScale);
+		int dx = (int)(distanceX);
+		int dy = (int)(distanceY);
 		
 		scrollBy(dx, dy);
 		
@@ -170,37 +162,13 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			float velocityY) {
 		if (mScaleGestureDetector.isInProgress())
 			return false;
+		
 		getHandler().removeCallbacks(mCheckEdgesRunnable);
-//		if ( (velocityX >= mMinFlingVelocity && velocityX <= mMaxFlingVelocity) ||
-//				(velocityY >= mMinFlingVelocity && velocityY <= mMaxFlingVelocity) ) {
-			fling(-velocityX, -velocityY);
-//		}
+		fling(-velocityX, -velocityY);
+
 		return true;
 	}
 	
-	public void fling(float velocityX, float velocityY) {
-		if (!mScroller.isFinished())
-			mScroller.abortAnimation();
-		
-		float scaledWidth = mBitmapWidth*mCurrentScale;
-		float scaledHeight = mBitmapHeight*mCurrentScale;
-
-		if (scaledWidth <= getWidth() && scaledHeight <= getHeight()) {
-			postCheckEdges();
-			return;
-		} else if (scaledWidth <= getWidth()) {
-			int scrollTarget = (velocityY > 0 ? getMaxScrollY() : 0);
-			smoothScrollTo((int) -((getWidth()-scaledWidth)/2), scrollTarget);
-		} if (scaledHeight <= getHeight()) {
-			int scrollTarget = (velocityX > 0 ? getMaxScrollX() : 0);
-			smoothScrollTo(scrollTarget, (int) -((getHeight()-scaledHeight)/2));
-		} else {
-			mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, 0, getMaxScrollX(), 0, getMaxScrollY());
-			postInvalidate();
-		}
-		
-	}
-
 	@Override
 	public boolean onDoubleTap(MotionEvent e) {
 		if (mScaleGestureDetector.isInProgress())
@@ -226,12 +194,212 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		return true;
 	}
 
-	@Override
-	public boolean onSingleTapConfirmed(MotionEvent e) {
-		if (mScaleGestureDetector.isInProgress())
-			return false;
+	
+	
 
-		return true;
+	
+	
+	
+	
+
+	
+
+	public void smoothScrollTo(int x, int y) {
+		smoothScrollBy(x-mScrollX, y-mScrollY);
+	}
+	
+	public void smoothScrollBy(int dx, int dy) {
+		if (!mScroller.isFinished())
+			mScroller.abortAnimation();
+		
+		mScroller.startScroll(mScrollX, mScrollY, dx, dy);
+		postInvalidate();
+	}
+	
+	public void fling(float velocityX, float velocityY) {
+		if (!mScroller.isFinished())
+			mScroller.abortAnimation();
+		
+		float scaledWidth = mBitmapWidth*mCurrentScale;
+		float scaledHeight = mBitmapHeight*mCurrentScale;
+
+		if (scaledWidth <= getWidth() && scaledHeight <= getHeight()) {
+			postCheckEdges();
+			return;
+		} else if (scaledWidth <= getWidth()) {
+			int scrollTarget = (velocityY > 0 ? getMaxScrollY() : 0);
+			smoothScrollTo((int) -((getWidth()-scaledWidth)/2), scrollTarget);
+		} if (scaledHeight <= getHeight()) {
+			int scrollTarget = (velocityX > 0 ? getMaxScrollX() : 0);
+			smoothScrollTo(scrollTarget, (int) -((getHeight()-scaledHeight)/2));
+		} else {
+			mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, 0, getMaxScrollX(), 0, getMaxScrollY());
+			postInvalidate();
+		}
+	}
+	
+	public void smoothScaleTo(float scale) {
+		if (!mScaler.isFinished())
+			mScaler.abortAnimation();
+		int start = (int)(mCurrentScale*1000f);
+		int end = (int)(scale*1000f);
+		int diff = end-start;
+		mScaler.startScroll(start, 0, diff, 0);
+		invalidate();
+	}
+	
+	
+	
+	
+	
+	public void scaleTo(float scale, boolean invalidate) {
+		mPreviousScale = mCurrentScale;
+		mCurrentScale = scale;
+		if (invalidate)
+			invalidate();
+	}
+	public void scaleBy(float ds, boolean invalidate) {
+		scaleTo(mCurrentScale*ds, invalidate);
+	}
+
+	@Override
+	public void scrollBy(int x, int y) {
+		scrollBy(x, y, true);
+	}
+
+	@Override
+	public void scrollTo(int x, int y) {
+		scrollTo(x, y, true);
+	}
+
+	public void scrollBy(int dx, int dy, boolean invalidate) {
+		scrollTo(mScrollX+dx, mScrollY+dy, invalidate);
+	}
+	
+	public void scrollTo(int x, int y, boolean invalidate) {
+		mScrollX = x;
+		mScrollY = y;
+		
+		if (invalidate)
+			invalidate();
+	}
+	
+	public void postCheckEdges() {
+		if (getHandler() != null) {
+			getHandler().removeCallbacks(mCheckEdgesRunnable);
+			getHandler().post(mCheckEdgesRunnable);
+		} else {
+			checkEdges();
+		}
+	}
+	
+	public int getMaxScrollX() {
+		return (int)((mBitmapWidth*mCurrentScale) - getWidth());
+	}
+	
+	public int getMaxScrollY() {
+		return (int)((mBitmapHeight*mCurrentScale) - getHeight());
+	}
+	
+	public void checkEdges() {
+		
+		if (mCurrentScale < mMinScale) {
+			smoothScaleTo(mMinScale);
+			return;
+		}
+		
+		
+		int targetX = mScrollX;
+		int targetY = mScrollY;
+		
+		
+		float scaledWidth = mBitmapWidth*mCurrentScale;
+		float scaledHeight = mBitmapHeight*mCurrentScale;
+		int minX = 0; 
+		int maxX = getMaxScrollX();
+		int minY = 0;
+		int maxY = getMaxScrollY();
+		
+		if (scaledWidth <= getWidth()) {
+			targetX = (int) -((getWidth()-scaledWidth)/2);
+		} else {
+			if (mScrollX < minX)
+				targetX = minX;
+			if (mScrollX > maxX)
+				targetX = maxX;
+		}
+		
+		if (scaledHeight <= getHeight()) {
+			targetY = (int) -((getHeight()-scaledHeight)/2);
+		} else {
+			if (mScrollY < minY)
+				targetY = minY;
+			if (mScrollY > maxY)
+				targetY = maxY;
+		}
+		
+		
+		if (targetX != mScrollX || targetY != mScrollY) {
+			if (Math.abs(targetX-mScrollX) <= 3 && Math.abs(targetY-mScrollY) <= 3) {
+				scrollTo(targetX, targetY, false);
+				postInvalidate();
+			} else {
+				smoothScrollTo(targetX, targetY);
+			}
+		}
+		
+	}
+	
+	
+	private Runnable mCheckEdgesRunnable = new Runnable() {
+		
+		@Override
+		public void run() {
+			checkEdges();
+		}
+	};
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	@Override
+	public void computeScroll() {
+		if (mScaler.computeScrollOffset()) {
+			mIsScaling = true;
+			int newScale = mScaler.getCurrX();
+			
+			scaleTo(((float)newScale/1000f), false);
+			postInvalidate();
+		} else if (mIsScaling) {
+			mIsScaling = false;
+			postCheckEdges();
+			
+		}
+		if (mScroller.computeScrollOffset()) {
+			mIsScrolling = true;
+			int x = mScroller.getCurrX();
+			int y = mScroller.getCurrY();
+			
+			scrollTo(x, y, false);
+			postInvalidate();
+		} else if (mIsScrolling) {
+			mIsScrolling = false;
+			
+			if (mTargetScale == 0.0f)
+				postCheckEdges();
+			else {
+				smoothScaleTo(mTargetScale);
+				mTargetScale = 0.0f;
+			}
+		}
+		super.computeScroll();
 	}
 	
 	@Override
@@ -245,19 +413,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		super.onDraw(canvas);
 		
 	}
-	
-	private void logRect(String msg, RectF r) {
-		Log.e(TAG, msg + " - RECT: l:" + r.left + " r:" + r.right + " t:" + r.top + " b:" + r.bottom + " center:" + r.centerX() + ", " + r.centerY());
-	}
-	
-	private void translateRect(RectF r, float dx, float dy) {
-		r.left+=dx;
-		r.right+=dx;
-		r.top+=dy;
-		r.bottom+=dy;
-	}
 
-	
 	public RectF getImageRect() {
 		
 		RectF viewPort = new RectF(0, 0, getWidth(), getHeight());
@@ -266,11 +422,8 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		if (mPreviousScale == mCurrentScale)
 			return prevRect;
 		
-		
 		float scaleFactor = mCurrentScale / mPreviousScale;
-		logRect("before trans", prevRect);
 		translateRect(prevRect, -viewPort.centerX(), -viewPort.centerY());
-		logRect("after trans", prevRect);
 		
 		float newWidth = prevRect.width()*scaleFactor;
 		float newHeight = prevRect.height()*scaleFactor;
@@ -301,208 +454,35 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		return r;
 	}
 	
-	
-	
-	
-	
-	private float mTargetScale = 0.0f;
-	private boolean mIsScaling = false;
-	private boolean mIsScrolling = false;
-	@Override
-	public void computeScroll() {
-		if (mScaler.computeScrollOffset()) {
-			mIsScaling = true;
-			int newScale = mScaler.getCurrX();
-//			int curScale = (int) (mCurrentScale*1000f);
-			
-			scaleTo(((float)newScale/1000f), false);
-			postInvalidate();
-		} else if (mIsScaling) {
-			mIsScaling = false;
-//			mScaler.abortAnimation();
-			postCheckEdges();
-			
-		}
-		if (mScroller.computeScrollOffset()) {
-			mIsScrolling = true;
-			int x = mScroller.getCurrX();
-			int y = mScroller.getCurrY();
-			
-			scrollTo(x, y, false);
-			postInvalidate();
-		} else if (mIsScrolling) {
-			mIsScrolling = false;
-//			mScroller.abortAnimation();
-			if (mTargetScale == 0.0f)
-				postCheckEdges();
-			else {
-				smoothScaleTo(mTargetScale);
-				mTargetScale = 0.0f;
-			}
-		}
-		super.computeScroll();
-	}
-	
-	public void smoothScrollTo(int x, int y) {
-		smoothScrollBy(x-mScrollX, y-mScrollY);
-	}
-	
-	public void smoothScrollBy(int dx, int dy) {
-		if (!mScroller.isFinished())
-			mScroller.abortAnimation();
-		
-		mScroller.startScroll(mScrollX, mScrollY, dx, dy);
-		postInvalidate();
-	}
-
-	@Override
-	public void scrollBy(int x, int y) {
-		scrollBy(x, y, true);
-	}
-
-	@Override
-	public void scrollTo(int x, int y) {
-		scrollTo(x, y, true);
-	}
-
-	public void scrollBy(int dx, int dy, boolean invalidate) {
-		scrollTo(mScrollX+dx, mScrollY+dy, invalidate);
-	}
-	
-	public void scrollTo(int x, int y, boolean invalidate) {
-		mScrollX = x;
-		mScrollY = y;
-		
-		if (invalidate)
-			invalidate();
+	private void translateRect(RectF r, float dx, float dy) {
+		r.left+=dx;
+		r.right+=dx;
+		r.top+=dy;
+		r.bottom+=dy;
 	}
 	
 	
-	public void smoothScaleTo(float scale) {
-		if (!mScaler.isFinished())
-			mScaler.abortAnimation();
-		int start = (int)(mCurrentScale*1000f);
-		int end = (int)(scale*1000f);
-		int diff = end-start;
-		mScaler.startScroll(start, 0, diff, 0);
-		invalidate();
-	}
-	public void scaleTo(float scale, boolean invalidate) {
-		mPreviousScale = mCurrentScale;
-		mCurrentScale = scale;
-		if (invalidate)
-			invalidate();
-	}
-	public void scaleBy(float ds, boolean invalidate) {
-		scaleTo(mCurrentScale*ds, invalidate);
-	}
-	
-	public void postCheckEdges() {
-		if (getHandler() != null) {
-			getHandler().removeCallbacks(mCheckEdgesRunnable);
-			getHandler().post(mCheckEdgesRunnable);
-		} else {
-			checkEdges();
-		}
-	}
-	
-	public int getMaxScrollX() {
-		return (int)((mBitmapWidth*mCurrentScale) - getWidth());
-	}
-	
-	public int getMaxScrollY() {
-		return (int)((mBitmapHeight*mCurrentScale) - getHeight());
-	}
-	
-	public void checkEdges() {
-		Log.e(TAG, "check edges");
-		
-		if (mCurrentScale < mMinScale) {
-			scaleTo(mMinScale, true);
-			postCheckEdges();
-			return;
-		}
-		
-		
-		int targetX = mScrollX;
-		int targetY = mScrollY;
-		
-		//TODO: need better edge checking, not only is this wrong but it also only does one side
-		
-		float scaledWidth = mBitmapWidth*mCurrentScale;
-		float scaledHeight = mBitmapHeight*mCurrentScale;
-		int minX = 0; //(int) (getWidth() - scaledWidth);
-		int maxX = getMaxScrollX();
-		int minY = 0;
-		int maxY = getMaxScrollY();
-		
-		if (scaledWidth <= getWidth()) {
-			targetX = (int) -((getWidth()-scaledWidth)/2);
-		} else {
-			if (mScrollX < minX)
-				targetX = minX;
-			if (mScrollX > maxX)
-				targetX = maxX;
-		}
-		
-		if (scaledHeight <= getHeight()) {
-			targetY = (int) -((getHeight()-scaledHeight)/2);
-		} else {
-			if (mScrollY < minY)
-				targetY = minY;
-			if (mScrollY > maxY)
-				targetY = maxY;
-		}
-		
-		
-		Log.e(TAG, "minX = " + minX + " maxX = " + maxX + " mScrollX = " + mScrollX);
-		
-		if (targetX != mScrollX || targetY != mScrollY) {
-			if (Math.abs(targetX-mScrollX) <= 3 && Math.abs(targetY-mScrollY) <= 3) {
-				scrollTo(targetX, targetY, false);
-				postInvalidate();
-			} else {
-				smoothScrollTo(targetX, targetY);
-			}
-		}
-		
-		
-		
-		
-	}
 	
 	
-	private Runnable mCheckEdgesRunnable = new Runnable() {
-		
-		@Override
-		public void run() {
-			checkEdges();
-		}
-	};
+	
+	
 	
 	
 	
 	
 	@Override
 	public void onShowPress(MotionEvent e) {}
-
 	@Override
-	public boolean onDown(MotionEvent e) {
-		if (!mScroller.isFinished())
-			mScroller.abortAnimation();
-		return true;
-	}
+	public boolean onSingleTapConfirmed(MotionEvent e) {return true;}
 	@Override
-	public void onLongPress(MotionEvent e) {
-	}
+	public void onLongPress(MotionEvent e) {}
 	@Override
-	public boolean onDoubleTapEvent(MotionEvent e) {
-		return true;
-	}
+	public boolean onDoubleTapEvent(MotionEvent e) {return true;}
 	@Override
-	public boolean onSingleTapUp(MotionEvent e) {
-		return true;
-	}
-
+	public boolean onSingleTapUp(MotionEvent e) {return true;}
+	@Override
+	public boolean onScaleBegin(ScaleGestureDetector detector) {return true;}
+	@Override
+	public void onScaleEnd(ScaleGestureDetector detector) {}
 
 }
