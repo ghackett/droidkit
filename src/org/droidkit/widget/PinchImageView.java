@@ -232,7 +232,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			scrollTo((int) -((getWidth()-scaledWidth)/2), mScrollY, false);
 			mScroller.fling(mScrollX, mScrollY, 0, (int)velocityY, mScrollX, mScrollX, 0, getMaxScrollY());
 			postInvalidate();
-		} if (scaledHeight <= getHeight()) {
+		} else if (scaledHeight <= getHeight()) {
 			//else if bitmap height is shorter than viewport height, only fling the x axis
 			scrollTo(mScrollX, (int)-((getHeight()-scaledHeight)/2), false);
 			mScroller.fling(mScrollX, mScrollY, (int)velocityX, 0, 0, getMaxScrollX(), mScrollY, mScrollY);
@@ -310,7 +310,13 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	public void checkEdges() {
 		
 		if (mCurrentScale < mMinScale) {
-			smoothScaleTo(mMinScale);
+			if (Math.abs(mCurrentScale - mMinScale) <= 0.003f) {
+				scaleTo(mMinScale, false);
+				postInvalidate();
+				postCheckEdges();
+			} else {
+				smoothScaleTo(mMinScale);
+			}
 			return;
 		}
 		
@@ -326,8 +332,10 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		int minY = 0;
 		int maxY = getMaxScrollY();
 		
+		
 		if (scaledWidth <= getWidth()) {
 			targetX = (int) -((getWidth()-scaledWidth)/2);
+			
 		} else {
 			if (mScrollX < minX)
 				targetX = minX;
@@ -343,7 +351,6 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			if (mScrollY > maxY)
 				targetY = maxY;
 		}
-		
 		
 		if (targetX != mScrollX || targetY != mScrollY) {
 			if (Math.abs(targetX-mScrollX) <= 3 && Math.abs(targetY-mScrollY) <= 3) {
