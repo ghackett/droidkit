@@ -182,6 +182,23 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		if (!mScroller.isFinished())
 			mScroller.abortAnimation();
 		
+//		getHandler().removeCallbacks(mCheckEdgesRunnable);
+//		float scaledWidth = mBitmapWidth*mCurrentScale;
+//		float scaledHeight = mBitmapHeight*mCurrentScale;
+//		int minX = 0; //(int) (getWidth() - scaledWidth);
+//		int maxX = getMaxScrollX();
+//		int minY = 0;
+//		int maxY = getMaxScrollY();
+//		
+//		if (mScrollX <= minX || mScrollX >= maxX) {
+//			velocityY = 0;
+//		}
+//		if (mScrollY <= minY || mScrollY >= maxY) {
+//			velocityY = 0;
+//		}
+		
+//		Log.e(TAG, "scrollX = " + mScrollX + ", mScrollY = " + mScrollY);
+		
 //		mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, -mFlingBumper, getMaxScrollX()+mFlingBumper, -mFlingBumper, getMaxScrollY()+mFlingBumper);
 		mScroller.fling(mScrollX, mScrollY, (int)velocityX, (int)velocityY, 0, getMaxScrollX(), 0, getMaxScrollY());
 		postInvalidate();
@@ -191,11 +208,24 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	public boolean onDoubleTap(MotionEvent e) {
 		if (mScaleGestureDetector.isInProgress())
 			return false;
-
+		getHandler().removeCallbacks(mCheckEdgesRunnable);
+		final int tapX = (int) e.getX();
+		final int tapY = (int) e.getY();
+		
 		if (mCurrentScale != 2.0f)
-			smoothScaleTo(2.0f);
+			mTargetScale = 2.0f;
 		else
-			smoothScaleTo(mMinScale);
+			mTargetScale = mMinScale;
+		
+		getHandler().post(new Runnable() {
+			
+			@Override
+			public void run() {
+				smoothScrollBy(tapX-(getWidth()/2), tapY-(getHeight()/2));
+			}
+		});
+		
+		
 		return true;
 	}
 
@@ -279,30 +309,40 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	
 	
 	private float mTargetScale = 0.0f;
-	
+	private boolean mIsScaling = false;
+	private boolean mIsScrolling = false;
 	@Override
 	public void computeScroll() {
 		if (mScaler.computeScrollOffset()) {
-			float curScale = ((float)mScaler.getCurrX()/1000f);
+			mIsScaling = true;
+			int newScale = mScaler.getCurrX();
+//			int curScale = (int) (mCurrentScale*1000f);
 			
-			scaleTo(curScale, false);
+			scaleTo(((float)newScale/1000f), false);
 			postInvalidate();
-		} else if (mScroller.computeScrollOffset()) {
+		} else if (mIsScaling) {
+			mIsScaling = false;
+//			mScaler.abortAnimation();
+			postCheckEdges();
+			
+		}
+		if (mScroller.computeScrollOffset()) {
+			mIsScrolling = true;
 			int x = mScroller.getCurrX();
 			int y = mScroller.getCurrY();
 			
-			if (x != mScrollX || y != mScrollY) {
-				scrollTo(x, y, false);
-				postInvalidate();
-			} else {
-				mScroller.abortAnimation();
-				if (mTargetScale == 0.0f)
-					postCheckEdges();
-				else {
-					mTargetScale = 0.0f;
-				}
+			scrollTo(x, y, false);
+			postInvalidate();
+		} else if (mIsScrolling) {
+			mIsScrolling = false;
+//			mScroller.abortAnimation();
+			if (mTargetScale == 0.0f)
+				postCheckEdges();
+			else {
+				smoothScaleTo(mTargetScale);
+				mTargetScale = 0.0f;
 			}
-		} 
+		}
 		super.computeScroll();
 	}
 	
@@ -348,7 +388,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		int end = (int)(scale*1000f);
 		int diff = end-start;
 		mScaler.startScroll(start, 0, diff, 0);
-		postInvalidate();
+		invalidate();
 	}
 	public void scaleTo(float scale, boolean invalidate) {
 		mPreviousScale = mCurrentScale;
@@ -378,6 +418,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	}
 	
 	public void checkEdges() {
+		Log.e(TAG, "check edges");
 		
 		if (mCurrentScale < mMinScale) {
 			scaleTo(mMinScale, true);
@@ -420,7 +461,12 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		Log.e(TAG, "minX = " + minX + " maxX = " + maxX + " mScrollX = " + mScrollX);
 		
 		if (targetX != mScrollX || targetY != mScrollY) {
-			smoothScrollTo(targetX, targetY);
+			if (Math.abs(targetX-mScrollX) <= 3 && Math.abs(targetY-mScrollY) <= 3) {
+				scrollTo(targetX, targetY, false);
+				postInvalidate();
+			} else {
+				smoothScrollTo(targetX, targetY);
+			}
 		}
 		
 		
