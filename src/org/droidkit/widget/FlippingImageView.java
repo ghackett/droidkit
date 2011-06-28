@@ -49,24 +49,27 @@ public class FlippingImageView extends ImageView {
 
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
         
         if (visibility == INVISIBLE || visibility == GONE) {
             stop();
         } else {
             start();
         }
+        
+        super.onVisibilityChanged(changedView, visibility);
     }
 
     @Override
     public void setVisibility(int visibility) {
-        super.setVisibility(visibility);
+        
         
         if (visibility == INVISIBLE || visibility == GONE) {
             stop();
         } else {
             start();
         }
+        
+        super.setVisibility(visibility);
     }
 
     @Override
@@ -98,8 +101,10 @@ public class FlippingImageView extends ImageView {
     private void stop() {
         if (mIsAnimating) {
             mIsAnimating = false;
-            mFlipAnimation.cancel();
-            mFlipAnimation.reset();
+            setAnimation(null);
+            mFlipAnimation = null;
+//            mFlipAnimation.cancel();
+//            mFlipAnimation.reset();
         }
     }
 
