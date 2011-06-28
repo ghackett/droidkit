@@ -43,4 +43,12 @@ public class SoftBitmapCache implements SoftCacheInterface {
             return new CacheResult<Bitmap>(obj, true);
         }
     }
+    
+    public int size() {
+        return mCache.size();
+    }
+    
+    public boolean isEmpty() {
+        return mCache.isEmpty();
+    }
 }

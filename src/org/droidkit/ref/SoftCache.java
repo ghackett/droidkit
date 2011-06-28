@@ -47,4 +47,12 @@ public class SoftCache<T> implements SoftCacheInterface {
             return new CacheResult<T>(obj, true);
         }
     }
+    
+    public int size() {
+        return mCache.size();
+    }
+    
+    public boolean isEmpty() {
+        return mCache.isEmpty();
+    }
 }
