@@ -518,11 +518,14 @@ public class EzHttpRequest implements ProgressListener {
 			
 			ezResponse.setResponseCode(response.getStatusLine().getStatusCode());
 			ezResponse.mResponseReasonPhrase = response.getStatusLine().getReasonPhrase();
-			ezResponse.mResponseContentLength = entity.getContentLength();
-			if (entity.getContentEncoding() != null)
-				ezResponse.mResponseContentEncoding = entity.getContentEncoding().getValue();
-			if (entity.getContentType() != null)
-				ezResponse.mResponseContentType = entity.getContentType().getValue();
+			
+			if (entity != null) {
+    			ezResponse.mResponseContentLength = entity.getContentLength();
+    			if (entity.getContentEncoding() != null)
+    				ezResponse.mResponseContentEncoding = entity.getContentEncoding().getValue();
+    			if (entity.getContentType() != null)
+    				ezResponse.mResponseContentType = entity.getContentType().getValue();
+			}
 			
 			Header lastMod = response.getFirstHeader(VAL_LAST_MOD_HEADER);
 			if (lastMod != null) {
@@ -533,8 +536,8 @@ public class EzHttpRequest implements ProgressListener {
 				}
 			}
 
-
-			handleResponseInputStream(ezResponse, entity.getContent());
+			if (entity != null)
+			    handleResponseInputStream(ezResponse, entity.getContent());
 			
 			
 		} catch (Throwable e) {
