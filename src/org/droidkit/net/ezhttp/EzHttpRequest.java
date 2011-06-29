@@ -755,7 +755,7 @@ public class EzHttpRequest implements ProgressListener {
 		}
 		private void setResponseCode(int responseCode) {
 			mResponseCode = responseCode;
-			mSuccess = (mResponseCode == 200 || mResponseCode == 206);
+			mSuccess = (mResponseCode >= 200 && mResponseCode < 300);
 		}
 		public int getResponseCode() {
 			return mResponseCode;
