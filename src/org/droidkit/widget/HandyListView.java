@@ -1,7 +1,10 @@
 package org.droidkit.widget;
 
+import org.droidkit.util.tricks.Log;
+
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -16,6 +19,7 @@ public class HandyListView extends ListView {
 //	private View mLoadingListView = null;
 	private OnSizeChangedListener mSizeListener = null;
 	private int mFadingEdgeColor = -1;
+	private boolean mIsBeingTouched = false;
 //	private int mListViewHiddenValue = View.GONE;
 
 	public HandyListView(Context context, AttributeSet attrs, int defStyle) {
@@ -37,7 +41,27 @@ public class HandyListView extends ListView {
 		
 	}
 	
-	/**
+	
+	
+	@Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        switch(ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_MOVE:
+                mIsBeingTouched = true;
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mIsBeingTouched = false;
+                break;
+        }
+        return super.onTouchEvent(ev);
+    }
+
+	public boolean isBeingTouched() {
+	    return mIsBeingTouched;
+	}
+    /**
 	 * accepts View.INVISIBLE or View.GONE, default is View.GONE
 	 * might not work with empty view
 	 * @param hiddenValue
