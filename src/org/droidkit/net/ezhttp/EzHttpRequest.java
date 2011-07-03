@@ -21,8 +21,11 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
@@ -30,6 +33,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.droidkit.DroidKit;
+import org.droidkit.net.HttpClientFactory;
 import org.droidkit.util.tricks.Base64;
 import org.droidkit.util.tricks.ExceptionTricks;
 import org.droidkit.util.tricks.IOTricks;
@@ -56,6 +60,28 @@ public class EzHttpRequest implements ProgressListener {
 	
 	private static final String VAL_AUTHORIZATION_HEADER = "Authorization";
 	private static final String VAL_BASIC = "Basic ";
+	
+	public static final int DEFAULT_TIMEOUT_SECONDS = 60;
+	
+//	private static HttpClient sClient = null;
+	
+
+//	public synchronized static HttpClient getDefaultHttpClient() {
+//	    if (sClient == null) {
+//            sClient = getNewThreadsafeHttpClient(DEFAULT_TIMEOUT_SECONDS);
+//        }
+//        return sClient;
+//	}
+//	
+//	public static HttpClient getNewThreadsafeHttpClient(int timeoutInSecs) {
+//        DefaultHttpClient client = new DefaultHttpClient();
+//        HttpParams connParams = client.getParams();
+//        ClientConnectionManager mgr = client.getConnectionManager();
+//        
+//        HttpConnectionParams.setConnectionTimeout(connParams, timeoutInSecs*1000);
+//        HttpConnectionParams.setSoTimeout(connParams, timeoutInSecs*1000);
+//        return new DefaultHttpClient(new ThreadSafeClientConnManager(connParams, mgr.getSchemeRegistry()), connParams);
+//	}
 	
 	
 	public interface EzHttpRequestListener {
@@ -147,13 +173,12 @@ public class EzHttpRequest implements ProgressListener {
 		}
 	}
 	
-	public static final int DEFAULT_TIMEOUT_SECS = 60;
 	
 	private static final String TMP_FILE_PREFIX = "ez_http_response";
 	
 	private String mUrl;
 	private int mReqType;
-	private int mTimeoutSecs;
+//	private int mTimeoutSecs;
 	private boolean mIsRaw;
 	private int mNumberOfRetrysToAttempt;
 	
@@ -183,7 +208,7 @@ public class EzHttpRequest implements ProgressListener {
 		mUrl = url;
 		mReqType = reqType;
 		mIsRaw = isRaw;
-		mTimeoutSecs = DEFAULT_TIMEOUT_SECS;
+//		mTimeoutSecs = DEFAULT_TIMEOUT_SECS;
 		
 		mStringEntity = null;
 		mStringEntityType = null;
@@ -215,9 +240,9 @@ public class EzHttpRequest implements ProgressListener {
 	public void setRequestType(int requestType) {
 		mReqType = requestType;
 	}
-	public void setTimeoutSecs(int timeoutSecs) {
-		mTimeoutSecs = timeoutSecs;
-	}
+//	public void setTimeoutSecs(int timeoutSecs) {
+//		mTimeoutSecs = timeoutSecs;
+//	}
 	public void setIsRaw(boolean isRaw) {
 		mIsRaw = isRaw;
 	}
@@ -231,15 +256,21 @@ public class EzHttpRequest implements ProgressListener {
 	public int getRequestType() {
 		return mReqType;
 	}
-	public int getTimeoutSecs() {
-		return mTimeoutSecs;
-	}
+//	public int getTimeoutSecs() {
+//		return mTimeoutSecs;
+//	}
 	public boolean isRaw() {
 		return mIsRaw;
 	}
 	public int getNumberOfRetrysToAttempt() {
 	    return mNumberOfRetrysToAttempt;
 	}
+	
+//	public HttpClient getHttpClient() {
+//	    if (mTimeoutSecs == DEFAULT_TIMEOUT_SECONDS)
+//	        return getDefaultHttpClient();
+//	    return getNewThreadsafeHttpClient(mTimeoutSecs);
+//	}
 	
 	
 	public void setStringEntity(String entity, String type, String encoding) {
@@ -449,9 +480,6 @@ public class EzHttpRequest implements ProgressListener {
 		
 		EzHttpResponse ezResponse = new EzHttpResponse(this);
 		
-		HttpParams connParams = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(connParams, mTimeoutSecs*1000);
-		HttpConnectionParams.setSoTimeout(connParams, mTimeoutSecs*1000);
 		HttpUriRequest message = null;
 		
 		String url = mUrl;
@@ -466,7 +494,6 @@ public class EzHttpRequest implements ProgressListener {
 				url += param.getName() + "=" + param.getValue();
 			}
 		}
-		
 		
 		try {
 			switch(mReqType) {
@@ -512,8 +539,7 @@ public class EzHttpRequest implements ProgressListener {
 			
 			processMessage(message);
 			
-			HttpClient client = new DefaultHttpClient(connParams);
-			HttpResponse response = client.execute(message);
+			HttpResponse response = HttpClientFactory.getInstance().getSharedClient().execute(message);
 			HttpEntity entity = response.getEntity();
 			
 			ezResponse.setResponseCode(response.getStatusLine().getStatusCode());
@@ -587,7 +613,8 @@ public class EzHttpRequest implements ProgressListener {
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
 			conn.setUseCaches(false);
-			conn.setConnectTimeout(mTimeoutSecs*1000);
+//			conn.setConnectTimeout(mTimeoutSecs*1000);
+			conn.setConnectTimeout(DEFAULT_TIMEOUT_SECONDS*1000);
 			conn.setRequestMethod(VAL_HTTP_POST);
 			
 			if (mHeaders != null) {

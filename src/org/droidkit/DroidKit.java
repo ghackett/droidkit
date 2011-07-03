@@ -242,6 +242,12 @@ public class DroidKit {
         return sApplicationContext.getSystemService(name);
     }
     
+    public static boolean isFroyo() {
+        // Can use static final constants like FROYO, declared in later versions
+        // of the OS since they are inlined at compile time. This is guaranteed behavior.
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
+    }
+    
     public static boolean isHoneycomb() {
         // Can use static final constants like HONEYCOMB, declared in later versions
         // of the OS since they are inlined at compile time. This is guaranteed behavior.

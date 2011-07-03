@@ -23,6 +23,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -33,6 +34,8 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
+import org.droidkit.net.ezhttp.EzHttpRequest;
+import org.droidkit.net.ezhttp.EzHttpRequest.EzHttpResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,19 +55,15 @@ public class HttpUtils {
     public static final int METHOD_POST = 0x2;
     public static final int METHOD_PUT = 0x3;
     public static final int METHOD_DELETE = 0x4;
-    
-    public static final int DEFAULT_TIMEOUT_SECONDS = 60;
 
     public static String executeRequest(String url, int method, String body, Bundle params, Bundle headers) throws HttpConnectionException, HttpResponseException {
-        return executeRequest(url, method, body, params, headers, DEFAULT_TIMEOUT_SECONDS);
+        return executeRequest(url, method, body, params, headers, HttpClientFactory.getInstance().getSharedClient());
     }
     
-    public static String executeRequest(String url, int method, String body, Bundle params, Bundle headers, int timeoutSeconds) throws HttpConnectionException, HttpResponseException {
+    
+    public static String executeRequest(String url, int method, String body, Bundle params, Bundle headers, HttpClient client) throws HttpConnectionException, HttpResponseException {
         //GH - added timeout param and set to default of 60
-        HttpParams connParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(connParams, timeoutSeconds*1000);
-        HttpConnectionParams.setSoTimeout(connParams, timeoutSeconds*1000);
-        DefaultHttpClient client = new DefaultHttpClient(connParams);
+
         
         HttpResponse httpResponse;
         String response = null;
