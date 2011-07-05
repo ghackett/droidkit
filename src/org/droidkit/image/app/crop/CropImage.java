@@ -151,8 +151,9 @@ public class CropImage extends MonitoredActivity {
                 ContentResolver cr = getContentResolver();
                 is = cr.openInputStream(originalBitmapUri);
                 mBitmap = BitmapFactory.decodeStream(is);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (Throwable e) {
+                e.printStackTrace();
+//                throw new RuntimeException(e);
             } finally {
                 if (is != null) {
                     try {
