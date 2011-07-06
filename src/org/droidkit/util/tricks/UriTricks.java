@@ -9,6 +9,11 @@ public class UriTricks {
         int index = uriStr.indexOf("?");
         if (index >= 0)
             uriStr = uriStr.substring(0, index);
+        else {
+            index = uriStr.indexOf("#");
+            if (index >= 0)
+                uriStr = uriStr.substring(0, index);
+        }
         return uriStr;
     }
 
