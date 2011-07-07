@@ -1,5 +1,6 @@
 package org.droidkit.widget;
 
+import org.droidkit.DroidKit;
 import org.droidkit.animation.Flip3DAnimation;
 
 import android.content.Context;
@@ -56,7 +57,9 @@ public class FlippingImageView extends ImageView {
             start();
         }
         
-        super.onVisibilityChanged(changedView, visibility);
+        if (DroidKit.isFroyo()) {
+            super.onVisibilityChanged(changedView, visibility);
+        }
     }
 
     @Override
