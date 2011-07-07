@@ -7,6 +7,9 @@ import org.droidkit.ref.SoftCacheManager;
 import org.droidkit.util.LazyLoader;
 import org.droidkit.util.tricks.StorageTricks;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.OnAccountsUpdateListener;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,7 +33,8 @@ import android.view.LayoutInflater;
 public class DroidKit {
     
     private static final String SDCARD_PATH_FORMAT = "Android/data/%s";
-    private static final String ANDROID_MARKET_PACKAGE_NAME = "com.android.vending";
+//    private static final String ANDROID_MARKET_PACKAGE_NAME = "com.android.vending";
+    private static final String GOOGLE_ACCOUNT_TYPE = "com.google";
     
     private static Context sApplicationContext = null;
     private static ContentResolver sContentResolver = null;
@@ -42,6 +46,8 @@ public class DroidKit {
     private static LayoutInflater sLayoutInflater = null;
     private static Boolean sCanAcceptPush = null;
     private static PackageInfo sPackageInfo = null;
+    private static AccountManager sAccountManager = null;
+    private static OnAccountsUpdateListener sAccountListener = null;
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
@@ -50,6 +56,13 @@ public class DroidKit {
     }
     
     public static void onApplicationTerminate() {
+        if (sAccountManager != null) {
+            if (sAccountListener != null) {
+                sAccountManager.removeOnAccountsUpdatedListener(sAccountListener);
+                sAccountListener = null;
+            }
+            sAccountManager = null;
+        }
         sApplicationContext = null;
         sContentResolver = null;
         sPackageName = null;
@@ -134,6 +147,12 @@ public class DroidKit {
         return sPackageInfo;
     }
     
+    public static AccountManager getAccountManager() {
+        if (sAccountManager == null)
+            sAccountManager = AccountManager.get(getContext());
+        return sAccountManager;
+    }
+    
     public static String getVersionName() {
         return getPackageInfo().versionName;
     }
@@ -214,12 +233,22 @@ public class DroidKit {
         return isInstalled;
     }
     
-    public static boolean canDeviceAcceptPushNotifications() {
+    public static boolean isDevicePushCapable() {
         if (sCanAcceptPush == null) {
-            if (Build.VERSION.SDK_INT < 8) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {
                 sCanAcceptPush = false;
             } else {
-                sCanAcceptPush = isApplicationInstalled(ANDROID_MARKET_PACKAGE_NAME);
+                sCanAcceptPush = getAccountManager().getAccountsByType(GOOGLE_ACCOUNT_TYPE).length > 0;
+                if (sAccountListener == null) {
+                    sAccountListener = new OnAccountsUpdateListener() {
+                        
+                        @Override
+                        public void onAccountsUpdated(Account[] accounts) {
+                            sCanAcceptPush = null;
+                        }
+                    };
+                    getAccountManager().addOnAccountsUpdatedListener(sAccountListener, null, true);
+                }
             }
         }
         return sCanAcceptPush;
