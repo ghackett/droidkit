@@ -42,10 +42,16 @@ public class HttpClientFactory {
     }
     
     protected HttpClient getNewThreadsafeHttpClient() {
-        HttpParams params = new BasicHttpParams();
+//        HttpParams params = new BasicHttpParams();
 
+        DefaultHttpClient badClient = new DefaultHttpClient();
+        
+        HttpParams params = badClient.getParams();
+        SchemeRegistry schemeRegistry = badClient.getConnectionManager().getSchemeRegistry();
+        
         // Turn off stale checking.  Our connections break all the time anyway,
         // and it's not worth it to pay the penalty of checking every time.
+
         HttpConnectionParams.setStaleCheckingEnabled(params, false);
 
         HttpConnectionParams.setConnectionTimeout(params, SOCKET_OPERATION_TIMEOUT);
@@ -57,11 +63,11 @@ public class HttpClientFactory {
         HttpProtocolParams.setUserAgent(params, DEFAULT_USER_AGENT);
 
         // Set the specified user agent and register standard protocols.
-        SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register(new Scheme("http",
-                PlainSocketFactory.getSocketFactory(), 80));
-        schemeRegistry.register(new Scheme("https", 
-                (SocketFactory) SSLCertificateSocketFactory.getDefault(SOCKET_OPERATION_TIMEOUT), 443));
+//        SchemeRegistry schemeRegistry = new SchemeRegistry();
+//        schemeRegistry.register(new Scheme("http",
+//                PlainSocketFactory.getSocketFactory(), 80));
+//        schemeRegistry.register(new Scheme("https", 
+//                (SocketFactory) SSLCertificateSocketFactory.getDefault(SOCKET_OPERATION_TIMEOUT), 443));
 
         ClientConnectionManager manager =
                 new ThreadSafeClientConnManager(params, schemeRegistry);
