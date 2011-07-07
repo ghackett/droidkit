@@ -180,7 +180,8 @@ public class PlatformDatabaseUtils {
                 }
             }
 
-            return statement.executeUpdateDelete();
+            statement.execute();
+            return -1;
         } catch (SQLiteDatabaseCorruptException e) {
             throw e;
         } catch (SQLException e) {
