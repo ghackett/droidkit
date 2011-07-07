@@ -240,6 +240,9 @@ public class DroidKit {
             } else {
                 sCanAcceptPush = getAccountManager().getAccountsByType(GOOGLE_ACCOUNT_TYPE).length > 0;
                 if (sAccountListener == null) {
+                    //register an OnAccountsUpdateListener that nulls out the cached sCanAcceptPush value
+                    //in case a google account is added or removed while the app is open. This listener is 
+                    //removed in DroidKit's onApplicationTerminate
                     sAccountListener = new OnAccountsUpdateListener() {
                         
                         @Override
