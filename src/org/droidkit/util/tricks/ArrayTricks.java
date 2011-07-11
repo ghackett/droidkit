@@ -37,5 +37,19 @@ public class ArrayTricks {
 		}
 		return rtr;
 	}
+	
+	public static String join(String[] array, String delimiter) {
+		if (array == null)
+			return null;
+		if (delimiter == null)
+			delimiter = "";
+		StringBuilder b = new StringBuilder();
+		for (int i = 0; i< array.length; i++) {
+			if (i!=0)
+				b.append(delimiter);
+			b.append(array[i]);
+		}
+		return b.toString();
+	}
 
 }
