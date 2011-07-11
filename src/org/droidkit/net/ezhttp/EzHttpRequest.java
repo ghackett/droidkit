@@ -39,6 +39,7 @@ import org.droidkit.util.tricks.ExceptionTricks;
 import org.droidkit.util.tricks.IOTricks;
 import org.droidkit.util.tricks.IOTricks.ProgressListener;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
@@ -807,6 +808,9 @@ public class EzHttpRequest implements ProgressListener {
 		}
 		public String getResponseText() {
 			return mResponseText;
+		}
+		public JSONObject getResponseTextAsJson() throws JSONException {
+		    return new JSONObject(mResponseText);
 		}
 		public long getRequestTime() {
 			return mRequestTime;
