@@ -37,11 +37,11 @@ public class HttpClientFactory {
     
     public synchronized HttpClient getSharedClient() {
         if (sClientInstance == null)
-            sClientInstance = getNewThreadsafeHttpClient();
+            sClientInstance = getNewThreadsafeHttpClient(SOCKET_OPERATION_TIMEOUT);
         return sClientInstance;
     }
     
-    protected HttpClient getNewThreadsafeHttpClient() {
+    public HttpClient getNewThreadsafeHttpClient(int timeout) {
 //        HttpParams params = new BasicHttpParams();
 
         DefaultHttpClient badClient = new DefaultHttpClient();
@@ -54,8 +54,8 @@ public class HttpClientFactory {
 
         HttpConnectionParams.setStaleCheckingEnabled(params, false);
 
-        HttpConnectionParams.setConnectionTimeout(params, SOCKET_OPERATION_TIMEOUT);
-        HttpConnectionParams.setSoTimeout(params, SOCKET_OPERATION_TIMEOUT);
+        HttpConnectionParams.setConnectionTimeout(params, timeout);
+        HttpConnectionParams.setSoTimeout(params, timeout);
         HttpConnectionParams.setSocketBufferSize(params, 8192);
 
         HttpClientParams.setRedirecting(params, true);
