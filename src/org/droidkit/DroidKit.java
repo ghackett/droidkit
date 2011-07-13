@@ -29,6 +29,7 @@ import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.inputmethod.InputMethodManager;
 
 public class DroidKit {
     
@@ -272,6 +273,10 @@ public class DroidKit {
     
     public static Object getSystemService(String name) {
         return sApplicationContext.getSystemService(name);
+    }
+    
+    public static InputMethodManager getInputManager() {
+        return (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
     }
     
     public static boolean isFroyo() {
