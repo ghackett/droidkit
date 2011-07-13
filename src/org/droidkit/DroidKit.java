@@ -299,47 +299,57 @@ public class DroidKit {
                 == Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
     
-    
-    
     public static boolean getBoolPreference(String key, boolean defValue) {
         return getSharedPreferences().getBoolean(key, defValue);
     }
+    
     public static int getIntPreference(String key, int defValue) {
         return getSharedPreferences().getInt(key, defValue);
     }
+    
     public static float getFloatPreference(String key, float defValue) {
         return getSharedPreferences().getFloat(key, defValue);
     }
+    
     public static long getLongPreference(String key, long defValue) {
         return getSharedPreferences().getLong(key, defValue);
     }
+    
     public static String getStringPreference(String key, String defValue) {
         return getSharedPreferences().getString(key, defValue);
     }
+    
     public static void setPreference(String key, boolean value) {
         SharedPreferences.Editor edit = getSharedPreferences().edit();
         edit.putBoolean(key, value);
         edit.commit();
     }
+    
     public static void setPreference(String key, int value) {
         SharedPreferences.Editor edit = getSharedPreferences().edit();
         edit.putInt(key, value);
         edit.commit();
     }
+    
     public static void setPreference(String key, float value) {
         SharedPreferences.Editor edit = getSharedPreferences().edit();
         edit.putFloat(key, value);
         edit.commit();
     }
+    
     public static void setPreference(String key, long value) {
         SharedPreferences.Editor edit = getSharedPreferences().edit();
         edit.putLong(key, value);
         edit.commit();
     }
+    
     public static void setPreference(String key, String value) {
         SharedPreferences.Editor edit = getSharedPreferences().edit();
         edit.putString(key, value);
         edit.commit();
     }
-    
+
+    public static void clearPreferences() {
+        getSharedPreferences().edit().clear().commit();
+    }
 }
