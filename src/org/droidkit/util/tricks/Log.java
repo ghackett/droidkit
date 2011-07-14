@@ -29,6 +29,8 @@ import android.os.Bundle;
  * @author mrn
  */
 public class Log {
+    
+    private static String DEFAULT_TAG = "DroidKit";
 
     /**
      * Prints a debug message to the Android console log. The message will only
@@ -141,6 +143,25 @@ public class Log {
         if (android.util.Log.isLoggable(tag, android.util.Log.VERBOSE)) {
             android.util.Log.v(tag, message, t);
         }
+    }
+    
+    public static void d(String msg) {
+        d(DEFAULT_TAG, msg);
+    }
+    public static void i(String msg) {
+        i(DEFAULT_TAG, msg);
+    }
+    public static void w(String msg) {
+        w(DEFAULT_TAG, msg);
+    }
+    public static void e(String msg) {
+        e(DEFAULT_TAG, msg);
+    }
+    public static void e(String msg, Throwable t) {
+        e(DEFAULT_TAG, msg, t);
+    }
+    public static void e(String msg, Intent i) {
+        e(DEFAULT_TAG, msg, i);
     }
     
     private static String describeIntent(Intent i) {

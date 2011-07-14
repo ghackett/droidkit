@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import org.droidkit.ref.SoftCacheManager;
 import org.droidkit.util.LazyLoader;
+import org.droidkit.util.tricks.Log;
 import org.droidkit.util.tricks.StorageTricks;
 
 import android.accounts.Account;
@@ -255,7 +256,7 @@ public class DroidKit {
                 }
             }
         }
-        return sCanAcceptPush;
+        return sCanAcceptPush.booleanValue();
     }
     
     public static void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
