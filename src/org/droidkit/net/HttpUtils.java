@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -140,6 +141,9 @@ public class HttpUtils {
         } catch (ClientProtocolException e) {
             throw new HttpConnectionException(e);
         } catch (IOException e) {
+            if (e instanceof SocketTimeoutException)
+                return null;
+
             throw new HttpConnectionException(e);
         }
 
