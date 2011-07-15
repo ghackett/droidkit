@@ -734,7 +734,18 @@ public class EzHttpRequest implements ProgressListener {
 			break;
 		}
 		case REQ_POST_STRING_ENT: {
-			b.append("POST-STRING-ENTITY");
+			b.append("POST-STRING-ENTITY\n");
+			b.append("String Entity: \n");
+			b.append("\tType: ");
+			b.append(mStringEntityType);
+			b.append("\n\tEncoding: ");
+			b.append(mStringEntityEncoding);
+			b.append("\n\tContent: \n");
+			try {
+			    b.append(new JSONObject(mStringEntity).toString(4));
+			} catch (JSONException e) {
+			    b.append(mStringEntity);
+			}
 			break;
 		}
 		}
