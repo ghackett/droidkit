@@ -16,5 +16,11 @@ public class UriTricks {
         }
         return uriStr;
     }
+    
+    public static boolean doStrippedUrisMatch(Uri a, Uri b) {
+    	if (a == null || b == null)
+    		return false;
+    	return stripQueryAndFragments(a).equals(stripQueryAndFragments(b));
+    }
 
 }
