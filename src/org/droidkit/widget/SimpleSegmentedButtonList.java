@@ -10,6 +10,7 @@ import org.droidkit.R;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -24,7 +25,7 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 		public void onSegmentedButtonClick(View view, int index);
 	}
 	
-	
+	private Handler mHandler = new Handler();
 	private ArrayList<SegmentedButtonView> mViewArray;
 	private int mTwoDp;
 	private CharSequence mTitle;
@@ -45,6 +46,10 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 		mTwoDp = DroidKit.getPixels(2);
 		mTitle = null;
 		setOrientation(VERTICAL);
+	}
+	
+	public Handler getHandler() {
+		return mHandler;
 	}
 	
 	public void addButton(View v, SimpleSegmentedButtonOnOnClickListener listener) {
