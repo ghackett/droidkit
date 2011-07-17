@@ -68,7 +68,11 @@ public class LazyLoader {
     }
     
     
-    
+    public void clearQueue() {
+    	synchronized (mTaskQueue) {
+    		mTaskQueue.clear();
+    	}
+    }
     
     public void shutdown() {
         if (mThreadHandler != null) {
