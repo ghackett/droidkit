@@ -99,7 +99,7 @@ public class HttpUtils {
                 if (body == null) {
                     post.setEntity(new UrlEncodedFormEntity(bundleToList(params), HTTP.UTF_8));
                 } else {
-                    post.setEntity(new StringEntity(body));
+                    post.setEntity(new StringEntity(body, HTTP.UTF_8));
                 }
     
                 httpResponse = client.execute(post);
