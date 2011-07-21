@@ -249,10 +249,6 @@ public class DroidKit {
                         
                         @Override
                         public void onAccountsUpdated(Account[] accounts) {
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {
-                                sCanAcceptPush = false;
-                            }
-
                             sCanAcceptPush = getAccountManager().getAccountsByType(GOOGLE_ACCOUNT_TYPE).length > 0;
                         }
                     };
