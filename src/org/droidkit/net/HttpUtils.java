@@ -178,7 +178,7 @@ public class HttpUtils {
             }
 
             try {
-                sb.append(URLEncoder.encode(key, "utf-8")).append("=").append(URLEncoder.encode(params.getString(key), "utf-8"));
+                sb.append(URLEncoder.encode(key, HTTP.UTF_8)).append("=").append(URLEncoder.encode(params.getString(key), HTTP.UTF_8));
             } catch (UnsupportedEncodingException e) {
                 return null;
             }
