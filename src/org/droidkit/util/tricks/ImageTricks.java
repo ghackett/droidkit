@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.provider.ContactsContract.Contacts;
 import android.widget.ImageView;
 
 
@@ -201,9 +202,36 @@ public class ImageTricks {
     	}
     }
     
+    public static Bitmap scaleDownContactPhoto(Uri contactUri, int maxDimension) {
+    	try {
+    		InputStream mediaStream = Contacts.openContactPhotoInputStream(DroidKit.getContentResolver(), contactUri);
+    		if (mediaStream == null)
+    			return null;
+    		BitmapFactory.Options opts = new BitmapFactory.Options();
+    		opts.inJustDecodeBounds = true;
+        	BitmapFactory.decodeStream(mediaStream, null, opts);
+        	mediaStream.close();
+            int outWidth = opts.outWidth;
+        	
+            mediaStream = Contacts.openContactPhotoInputStream(DroidKit.getContentResolver(), contactUri);
+
+        	opts = new BitmapFactory.Options();
+        	opts.inSampleSize = outWidth / maxDimension;
+        	
+            Bitmap bitmap = BitmapFactory.decodeStream(mediaStream, null, opts);
+            mediaStream.close();
+            return bitmap;
+    	} catch (Throwable t) {
+    		t.printStackTrace();
+    	}
+        	
+    	return null;
+    }
+    
     public static Bitmap scaleDownImageUriToBitmap(Uri imageUri, int maxDimension, boolean deleteOriginal) {
     	try {
     		InputStream mediaStream = DroidKit.getContentResolver().openInputStream(imageUri);
+    		
     		BitmapFactory.Options opts = new BitmapFactory.Options();
     		opts.inJustDecodeBounds = true;
         	BitmapFactory.decodeStream(mediaStream, null, opts);
@@ -219,7 +247,6 @@ public class ImageTricks {
         	
         	mediaStream.close();
 
-//        	bitmap = scaleDownBitmap(bitmap, maxDimension, true);
         	
         	if (deleteOriginal)
         		DroidKit.getContentResolver().delete(imageUri, null, null);
