@@ -10,6 +10,7 @@ import org.droidkit.R;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -25,6 +26,62 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 	public interface SimpleSegmentedButtonOnOnClickListener {
 		public void onSegmentedButtonClick(View view, int index);
 	}
+	
+	public interface SimpleSegmentedButtonBackground {
+		public Drawable getTopDrawable();
+		public Drawable getMiddleDrawable();
+		public Drawable getBottomDrawable();
+		public Drawable getWholeDrawable();
+	}
+	
+	public static abstract class SimpleSegmentedButtonResourceBackground implements SimpleSegmentedButtonBackground {
+		abstract public int getTopDrawableResId();
+		abstract public int getMiddleDrawableResId();
+		abstract public int getBottomDrawableResId();
+		abstract public int getWholeDrawableResId();
+		
+		@Override
+		public Drawable getTopDrawable() {
+			return DroidKit.getDrawable(getTopDrawableResId());
+		}
+		@Override
+		public Drawable getMiddleDrawable() {
+			return DroidKit.getDrawable(getMiddleDrawableResId());
+		}
+		@Override
+		public Drawable getBottomDrawable() {
+			return DroidKit.getDrawable(getBottomDrawableResId());
+		}
+		@Override
+		public Drawable getWholeDrawable() {
+			return DroidKit.getDrawable(getWholeDrawableResId());
+		}
+		
+		
+	}
+	
+	public static final SimpleSegmentedButtonResourceBackground DEFAULT_BACKGROUND =  new SimpleSegmentedButtonResourceBackground() {
+		
+		@Override
+		public int getWholeDrawableResId() {
+			return R.drawable.simp_seg_bg_single;
+		}
+		
+		@Override
+		public int getTopDrawableResId() {
+			return R.drawable.simp_seg_bg_top;
+		}
+		
+		@Override
+		public int getMiddleDrawableResId() {
+			return R.drawable.simp_seg_bg_middle;
+		}
+		
+		@Override
+		public int getBottomDrawableResId() {
+			return R.drawable.simp_seg_bg_bottom;
+		}
+	};
 	
 	private Handler mHandler = new Handler();
 	private ArrayList<SegmentedButtonView> mViewArray;
@@ -54,8 +111,13 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 		return mHandler;
 	}
 	
+	public void addButton(View v, SimpleSegmentedButtonOnOnClickListener listener, SimpleSegmentedButtonBackground background) {
+		mViewArray.add(new SegmentedButtonView(v, listener, background));
+		postLayoutUpdate();
+	}
+	
 	public void addButton(View v, SimpleSegmentedButtonOnOnClickListener listener) {
-		mViewArray.add(new SegmentedButtonView(v, listener));
+		mViewArray.add(new SegmentedButtonView(v, listener, null));
 		postLayoutUpdate();
 	}
 	
@@ -126,21 +188,27 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 					newView.setFocusable(true);
 				}
 				
+				SimpleSegmentedButtonBackground background = sbv.mBackground == null ? DEFAULT_BACKGROUND : sbv.mBackground;
+				
 				if (i == 0) {
 					if (mViewArray.size() == 1) {
 						//single
-						newView.setBackgroundResource(R.drawable.simp_seg_bg_single);
+						newView.setBackgroundDrawable(background.getWholeDrawable());
+//						newView.setBackgroundResource(R.drawable.simp_seg_bg_single);
 					} else {
 						//top
-						newView.setBackgroundResource(R.drawable.simp_seg_bg_top);
+						newView.setBackgroundDrawable(background.getTopDrawable());
+//						newView.setBackgroundResource(R.drawable.simp_seg_bg_top);
 					}
 				} else if (i == mViewArray.size()-1) {
 					//bottom
-					newView.setBackgroundResource(R.drawable.simp_seg_bg_bottom);
+					newView.setBackgroundDrawable(background.getBottomDrawable());
+//					newView.setBackgroundResource(R.drawable.simp_seg_bg_bottom);
 					parentParams.topMargin = -mTwoDp;
 				} else {
 					//middle
-					newView.setBackgroundResource(R.drawable.simp_seg_bg_middle);
+					newView.setBackgroundDrawable(background.getMiddleDrawable());
+//					newView.setBackgroundResource(R.drawable.simp_seg_bg_middle);
 					parentParams.topMargin = -mTwoDp;
 				}
 				
@@ -173,10 +241,12 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 	public class SegmentedButtonView {
 		private View mView;
 		private SimpleSegmentedButtonOnOnClickListener mOnClickListener;
+		private SimpleSegmentedButtonBackground mBackground;
 		
-		public SegmentedButtonView(View view, SimpleSegmentedButtonOnOnClickListener onClickListener) {
+		public SegmentedButtonView(View view, SimpleSegmentedButtonOnOnClickListener onClickListener, SimpleSegmentedButtonBackground background) {
 			mView = view;
 			mOnClickListener = onClickListener;
+			mBackground = background;
 		}
 	}
 
