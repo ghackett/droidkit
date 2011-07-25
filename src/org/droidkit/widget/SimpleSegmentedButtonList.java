@@ -16,6 +16,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -29,6 +30,7 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 	private ArrayList<SegmentedButtonView> mViewArray;
 	private int mTwoDp;
 	private CharSequence mTitle;
+	private TextView mTitleView = null;
 	
 
 	public SimpleSegmentedButtonList(Context context, AttributeSet attrs) {
@@ -64,12 +66,18 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 	
 	public void setTitle(CharSequence title) {
 		mTitle = title;
-		postLayoutUpdate();
+		if (mTitleView == null)
+			postLayoutUpdate();
+		else 
+			mTitleView.setText(mTitle);
 	}
 	
 	public void setTitle(int titleResId) {
 		mTitle = getContext().getString(titleResId);
-		postLayoutUpdate();
+		if (mTitleView == null)
+			postLayoutUpdate();
+		else 
+			mTitleView.setText(mTitle);
 	}
 	
 	public void postLayoutUpdate() {
@@ -84,22 +92,29 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 		if (mViewArray.size() > 0) {
 			
 			if (mTitle != null) {
-				TextView tv = new TextView(getContext());
-				tv.setText(mTitle);
-				tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-				tv.setTextColor(Color.DKGRAY);
-				tv.setTypeface(Typeface.DEFAULT_BOLD);
+				if (mTitleView != null) {
+					if (mTitleView.getParent() != null)
+						((ViewGroup)mTitleView.getParent()).removeView(mTitleView);
+				} else {
+					mTitleView = new TextView(getContext());
+				}
+				mTitleView.setText(mTitle);
+				mTitleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+				mTitleView.setTextColor(Color.DKGRAY);
+				mTitleView.setTypeface(Typeface.DEFAULT_BOLD);
 				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 				lp.bottomMargin = DroidKit.getPixels(4);
 				lp.leftMargin = DroidKit.getPixels(4);
-				tv.setLayoutParams(lp);
-				addView(tv);
+				mTitleView.setLayoutParams(lp);
+				addView(mTitleView);
 			}
 			
 			for (int i = 0; i<mViewArray.size(); i++) {
 				SegmentedButtonView sbv = mViewArray.get(i);
 				
 				LinearLayout newView = new LinearLayout(getContext());
+				if (sbv.mView.getParent() != null)
+					((ViewGroup)sbv.mView.getParent()).removeView(sbv.mView);
 				newView.addView(sbv.mView, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 				
 				LinearLayout.LayoutParams parentParams = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
