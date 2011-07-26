@@ -7,6 +7,7 @@ import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -469,8 +470,9 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			super.onDraw(canvas);
 			return;
 		}
-		
+
 		canvas.drawBitmap(mBitmap, null, getImageRect(), null);
+		
 		super.onDraw(canvas);
 		
 	}

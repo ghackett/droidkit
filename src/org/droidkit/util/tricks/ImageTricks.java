@@ -17,9 +17,8 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Path.Direction;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -27,8 +26,8 @@ import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.provider.ContactsContract.Contacts;
+import android.provider.MediaStore;
 import android.widget.ImageView;
 
 
@@ -530,5 +529,28 @@ public class ImageTricks {
         }
         
         return output;
+    }
+    
+    public static Bitmap rotateBitmapRight(Bitmap src, boolean recycleOriginal) {
+        if (src == null || src.isRecycled())
+            return null;
+        
+        
+        System.gc();
+        Matrix m = new Matrix();
+        
+        
+        int srcWidth = src.getWidth();
+        int srcHeight = src.getHeight();
+        
+        m.setRotate(90, srcWidth/2, srcHeight/2);
+        Bitmap result = Bitmap.createBitmap(src, 0, 0, srcWidth, srcHeight, m, false);
+
+        
+        if (recycleOriginal) {
+            src.recycle();
+            System.gc();
+        }
+        return result;
     }
 }
