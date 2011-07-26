@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -51,6 +52,7 @@ public class DroidKit {
     private static AccountManager sAccountManager = null;
     private static OnAccountsUpdateListener sAccountListener = null;
     private static HttpConnectionMonitor sConnectionMonitor = null;
+    private static TelephonyManager sTelephonyManager = null;
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
@@ -76,6 +78,7 @@ public class DroidKit {
         sLayoutInflater = null;
         sCanAcceptPush = null;
         sPackageInfo = null;
+        sTelephonyManager = null;
         LazyLoader.shutdownInstance();
         SoftCacheManager.clearAllCaches();
         sConnectionMonitor = null;
@@ -138,6 +141,12 @@ public class DroidKit {
             sLayoutInflater = LayoutInflater.from(sApplicationContext);
         }
         return sLayoutInflater;
+    }
+    
+    public static TelephonyManager getTelephonyManager() {
+        if (sTelephonyManager == null)
+            sTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        return sTelephonyManager;
     }
     
     public static PackageInfo getPackageInfo() {
