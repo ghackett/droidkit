@@ -28,12 +28,14 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
+import org.droidkit.DroidKit;
 import org.droidkit.net.ezhttp.EzHttpRequest;
 import org.droidkit.net.ezhttp.EzHttpRequest.EzHttpResponse;
 
@@ -68,20 +70,20 @@ public class HttpUtils {
         
         HttpResponse httpResponse;
         String response = null;
+        HttpRequestBase msg = null;
 
         try {
             switch (method) {
             case METHOD_GET:
                 url = url + "?" + encodeParams(params);
                 HttpGet get = new HttpGet(url);
-
                 if (headers != null) {
                     for (String key : headers.keySet()) {
                         get.addHeader(key, headers.getString(key));
                     }
                 }
-
-                httpResponse = client.execute(get);
+                msg = get;
+//                httpResponse = client.execute(get);
                 break;
             case METHOD_POST:
                 if (body != null) {
@@ -102,7 +104,8 @@ public class HttpUtils {
                     post.setEntity(new StringEntity(body, HTTP.UTF_8));
                 }
     
-                httpResponse = client.execute(post);
+                msg = post;
+//                httpResponse = client.execute(post);
                 break;
             case METHOD_PUT:
                 url = url + "?" + encodeParams(params);
@@ -114,7 +117,8 @@ public class HttpUtils {
                     }
                 }
 
-                httpResponse = client.execute(put);
+                msg = put;
+//                httpResponse = client.execute(put);
                 break;
             case METHOD_DELETE:
                 url = url + "?" + encodeParams(params);
@@ -125,22 +129,29 @@ public class HttpUtils {
                         delete.addHeader(key, headers.getString(key));
                     }
                 }
-
-                httpResponse = client.execute(delete);
+                
+                msg = delete;
+//                httpResponse = client.execute(delete);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown http method: " + method);
             }
+            
+            DroidKit.getHttpConnectionMonitor().onRequestStart(msg);
 
+            httpResponse = client.execute(msg);
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             response = read(httpResponse.getEntity().getContent());
 
+            DroidKit.getHttpConnectionMonitor().onRequestFinished(msg);
             if (statusCode > HttpStatus.SC_MULTIPLE_CHOICES) {
                 throw new HttpResponseException(statusCode, response);
             }
         } catch (ClientProtocolException e) {
+        	DroidKit.getHttpConnectionMonitor().onRequestFinished(msg, e);
             throw new HttpConnectionException(e);
         } catch (IOException e) {
+        	DroidKit.getHttpConnectionMonitor().onRequestFinished(msg, e);
             if (e instanceof SocketTimeoutException)
                 return null;
 

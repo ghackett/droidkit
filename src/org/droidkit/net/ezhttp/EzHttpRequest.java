@@ -20,6 +20,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -42,6 +43,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.media.AudioRecord.OnRecordPositionUpdateListener;
 import android.os.AsyncTask;
 import android.os.Handler;
 
@@ -481,7 +483,7 @@ public class EzHttpRequest implements ProgressListener {
 		
 		EzHttpResponse ezResponse = new EzHttpResponse(this);
 		
-		HttpUriRequest message = null;
+		HttpRequestBase message = null;
 		
 		String url = mUrl;
 		
@@ -540,6 +542,7 @@ public class EzHttpRequest implements ProgressListener {
 			
 			processMessage(message);
 			
+			DroidKit.getHttpConnectionMonitor().onRequestStart(message);
 			HttpResponse response = HttpClientFactory.getInstance().getSharedClient().execute(message);
 			HttpEntity entity = response.getEntity();
 			
@@ -566,9 +569,14 @@ public class EzHttpRequest implements ProgressListener {
 			if (entity != null)
 			    handleResponseInputStream(ezResponse, entity.getContent());
 			
+			DroidKit.getHttpConnectionMonitor().onRequestFinished(message);
+			
 			
 		} catch (Throwable e) {
 			e.printStackTrace();
+			if (message != null) {
+				DroidKit.getHttpConnectionMonitor().onRequestFinished(message, e);
+			}
 			ezResponse.mSuccess = false;
 			ezResponse.mResponseCode = -1;
 			ezResponse.mResponseReasonPhrase = e.getMessage();
@@ -608,9 +616,11 @@ public class EzHttpRequest implements ProgressListener {
 		EzHttpResponse ezResponse = new EzHttpResponse(this);
 		mUploadingFiles = true;
 		
+		HttpURLConnection conn = null;
 		try {
 			//setup connection
-			HttpURLConnection conn = (HttpURLConnection)(new URL(mUrl).openConnection());
+			conn = (HttpURLConnection)(new URL(mUrl).openConnection());
+			DroidKit.getHttpConnectionMonitor().onRequestStart(conn);
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
 			conn.setUseCaches(false);
@@ -676,9 +686,12 @@ public class EzHttpRequest implements ProgressListener {
 			
 			handleResponseInputStream(ezResponse, conn.getInputStream());
 			
+			DroidKit.getHttpConnectionMonitor().onRequestFinished(conn);
 			
 		} catch (Throwable e) {
 			e.printStackTrace();
+			if (conn != null)
+				DroidKit.getHttpConnectionMonitor().onRequestFinished(conn, e);
 			ezResponse.mSuccess = false;
 			ezResponse.mResponseCode = -1;
 			ezResponse.mResponseReasonPhrase = e.getMessage();

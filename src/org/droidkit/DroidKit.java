@@ -3,9 +3,9 @@ package org.droidkit;
 import java.io.File;
 import java.util.Locale;
 
+import org.droidkit.net.HttpConnectionMonitor;
 import org.droidkit.ref.SoftCacheManager;
 import org.droidkit.util.LazyLoader;
-import org.droidkit.util.tricks.Log;
 import org.droidkit.util.tricks.StorageTricks;
 
 import android.accounts.Account;
@@ -50,6 +50,7 @@ public class DroidKit {
     private static PackageInfo sPackageInfo = null;
     private static AccountManager sAccountManager = null;
     private static OnAccountsUpdateListener sAccountListener = null;
+    private static HttpConnectionMonitor sConnectionMonitor = null;
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
@@ -77,6 +78,7 @@ public class DroidKit {
         sPackageInfo = null;
         LazyLoader.shutdownInstance();
         SoftCacheManager.clearAllCaches();
+        sConnectionMonitor = null;
     }
     
     public static Context getContext() {
@@ -153,6 +155,12 @@ public class DroidKit {
         if (sAccountManager == null)
             sAccountManager = AccountManager.get(getContext());
         return sAccountManager;
+    }
+    
+    public static HttpConnectionMonitor getHttpConnectionMonitor() {
+    	if (sConnectionMonitor == null)
+    		sConnectionMonitor = new HttpConnectionMonitor();
+    	return sConnectionMonitor;
     }
     
     public static String getVersionName() {
