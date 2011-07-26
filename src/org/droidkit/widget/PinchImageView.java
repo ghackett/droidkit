@@ -1,13 +1,11 @@
 package org.droidkit.widget;
 
 
-import org.droidkit.util.tricks.Log;
 import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -40,6 +38,8 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	private Bitmap mBitmap = null;
 	private int mBitmapWidth = 0;
 	private int mBitmapHeight = 0;
+	
+	private int mRotation = 0;
 
 	public PinchImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -84,10 +84,24 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		resetMinScale();
 	}
 	
+	public int getBitmapWidth() {
+	    if (mRotation == 90 || mRotation == 270)
+	        return mBitmapHeight;
+	    else
+	        return mBitmapWidth;
+	}
+	
+	public int getBitmapHeight() {
+	       if (mRotation == 90 || mRotation == 270)
+	            return mBitmapWidth;
+	        else
+	            return mBitmapHeight;
+	}
+	
 	public void resetMinScale() {
-		if (mBitmapWidth > 0 && getWidth() > 0) {
-			float wScale = (float)getWidth()/(float)mBitmapWidth;
-			float hScale = (float)getHeight()/(float)mBitmapHeight;
+		if (getBitmapWidth() > 0 && getWidth() > 0) {
+			float wScale = (float)getWidth()/(float)getBitmapWidth();
+			float hScale = (float)getHeight()/(float)getBitmapHeight();
 			mMinScale = Math.min(wScale, hScale);
 			postCheckEdges();
 		}
@@ -232,8 +246,8 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		if (!mScroller.isFinished())
 			mScroller.abortAnimation();
 		
-		float scaledWidth = mBitmapWidth*mCurrentScale;
-		float scaledHeight = mBitmapHeight*mCurrentScale;
+		float scaledWidth = getBitmapWidth()*mCurrentScale;
+		float scaledHeight = getBitmapHeight()*mCurrentScale;
 		
 		
 
@@ -321,11 +335,11 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	}
 	
 	public int getMaxScrollX() {
-		return (int)((mBitmapWidth*mCurrentScale) - getWidth());
+		return (int)((getBitmapWidth()*mCurrentScale) - getWidth());
 	}
 	
 	public int getMaxScrollY() {
-		return (int)((mBitmapHeight*mCurrentScale) - getHeight());
+		return (int)((getBitmapHeight()*mCurrentScale) - getHeight());
 	}
 	
 	public void checkEdges() {
@@ -365,8 +379,8 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			targetX = startX;
 			targetY = startY;
 			
-			float scaledWidth = mBitmapWidth*mCurrentScale;
-			float scaledHeight = mBitmapHeight*mCurrentScale;
+			float scaledWidth = getBitmapWidth()*mCurrentScale;
+			float scaledHeight = getBitmapHeight()*mCurrentScale;
 			int minX = 0; 
 			int maxX = getMaxScrollX();
 			int minY = 0;
@@ -471,6 +485,9 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 			return;
 		}
 
+
+		if (mRotation != 0)
+		    canvas.rotate(mRotation, mBitmapWidth/2, mBitmapHeight/2);
 		canvas.drawBitmap(mBitmap, null, getImageRect(), null);
 		
 		super.onDraw(canvas);
@@ -506,8 +523,8 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	}
 	
 	public RectF getPreviousScaleImageRect() {
-		float scaledWidth = mBitmapWidth*mPreviousScale;
-		float scaledHeight = mBitmapHeight*mPreviousScale;
+		float scaledWidth = getBitmapWidth()*mPreviousScale;
+		float scaledHeight = getBitmapHeight()*mPreviousScale;
 		
 		RectF r = new RectF();
 		r.left = -mScrollX;
