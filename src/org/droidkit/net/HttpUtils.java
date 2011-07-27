@@ -182,6 +182,9 @@ public class HttpUtils {
         boolean first = true;
 
         for (String key : params.keySet()) {
+            if (key == null || params.getString(key) == null)
+                continue;
+            
             if (first) {
                 first = false;
             } else {
