@@ -16,18 +16,19 @@ public class BitmapSoftReference extends SoftReference<Bitmap> {
 	public void clear() {
 		
 		Bitmap b = get();
-		if (b != null) {
+		if (b != null && !b.isRecycled()) {
 			b.recycle();
 		}
 		super.clear();
 	}
 
-//	@Override
-//	protected void finalize() throws Throwable {
-////		clear();
-//		super.finalize();
-//	}  
-//	
+    @Override
+    protected void finalize() throws Throwable {
+        Bitmap b = get();
+        if (b != null && !b.isRecycled())
+            b.recycle();
+        super.finalize();
+    }
 	
 
 }

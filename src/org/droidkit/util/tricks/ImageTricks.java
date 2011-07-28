@@ -233,8 +233,11 @@ public class ImageTricks {
     		
     		BitmapFactory.Options opts = new BitmapFactory.Options();
     		opts.inJustDecodeBounds = true;
-        	BitmapFactory.decodeStream(mediaStream, null, opts);
+        	Bitmap b = BitmapFactory.decodeStream(mediaStream, null, opts);
+        	if (b != null)
+        	    b.recycle();
         	mediaStream.close();
+        	mediaStream = null;
             int outWidth = opts.outWidth;
         	
         	mediaStream = DroidKit.getContentResolver().openInputStream(imageUri);
@@ -245,7 +248,7 @@ public class ImageTricks {
             Bitmap bitmap = BitmapFactory.decodeStream(mediaStream, null, opts);
         	
         	mediaStream.close();
-
+        	mediaStream = null;
         	
         	if (deleteOriginal)
         		DroidKit.getContentResolver().delete(imageUri, null, null);

@@ -16,6 +16,8 @@ public class WeakBitmapCache implements CacheInterface {
     
     @Override
     public void clearCache() {
+        for (BitmapWeakReference ref : mCache.values())
+            ref.clear();
         mCache.clear();
     }
     
