@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Locale;
 
 import org.droidkit.net.HttpConnectionMonitor;
-import org.droidkit.ref.SoftCacheManager;
+import org.droidkit.ref.CacheManager;
 import org.droidkit.util.LazyLoader;
 import org.droidkit.util.tricks.StorageTricks;
 
@@ -80,7 +80,7 @@ public class DroidKit {
         sPackageInfo = null;
         sTelephonyManager = null;
         LazyLoader.shutdownInstance();
-        SoftCacheManager.clearAllCaches();
+        CacheManager.clearAllCaches();
         sConnectionMonitor = null;
     }
     

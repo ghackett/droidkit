@@ -1,20 +1,21 @@
 package org.droidkit.ref;
 
-import java.lang.ref.SoftReference;
+
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 import org.droidkit.ref.CacheManager.CacheInterface;
 
 /**
- * A helper class used to cache objects inside SoftReferences
+ * A helper class used to cache objects inside WeakReferences
  * @author ghackett
  *
  */
-public class SoftCache<T> implements CacheInterface {
-    protected HashMap<String, SoftReference<T>> mCache;
+public class WeakCache<T> implements CacheInterface {
+    protected HashMap<String, WeakReference<T>> mCache;
     
-    public SoftCache() {
-        mCache = new HashMap<String, SoftReference<T>>();
+    public WeakCache() {
+        mCache = new HashMap<String, WeakReference<T>>();
         CacheManager.registerCache(this);
     }
     
@@ -27,7 +28,7 @@ public class SoftCache<T> implements CacheInterface {
         if (obj == null)
             mCache.put(key, null);
         else
-            mCache.put(key, new SoftReference<T>(obj));
+            mCache.put(key, new WeakReference<T>(obj));
     }
     
     public CacheResult<T> get(String key) {
@@ -35,7 +36,7 @@ public class SoftCache<T> implements CacheInterface {
             return new CacheResult<T>(null, false);
         }
         
-        SoftReference<T> ref = mCache.get(key);
+        WeakReference<T> ref = mCache.get(key);
         if (ref == null) {
             return new CacheResult<T>(null, true);
         }

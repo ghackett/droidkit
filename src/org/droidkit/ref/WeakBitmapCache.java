@@ -6,11 +6,11 @@ import org.droidkit.ref.CacheManager.CacheInterface;
 
 import android.graphics.Bitmap;
 
-public class SoftBitmapCache implements CacheInterface {
-    protected HashMap<String, BitmapSoftReference> mCache;
+public class WeakBitmapCache implements CacheInterface {
+    protected HashMap<String, BitmapWeakReference> mCache;
     
-    public SoftBitmapCache() {
-        mCache = new HashMap<String, BitmapSoftReference>();
+    public WeakBitmapCache() {
+        mCache = new HashMap<String, BitmapWeakReference>();
         CacheManager.registerCache(this);
     }
     
@@ -23,7 +23,7 @@ public class SoftBitmapCache implements CacheInterface {
         if (obj == null)
             mCache.put(key, null);
         else
-            mCache.put(key, new BitmapSoftReference(obj));
+            mCache.put(key, new BitmapWeakReference(obj));
     }
     
     public CacheResult<Bitmap> get(String key) {
@@ -31,7 +31,7 @@ public class SoftBitmapCache implements CacheInterface {
             return new CacheResult<Bitmap>(null, false);
         }
         
-        BitmapSoftReference ref = mCache.get(key);
+        BitmapWeakReference ref = mCache.get(key);
         if (ref == null) {
             return new CacheResult<Bitmap>(null, true);
         }
