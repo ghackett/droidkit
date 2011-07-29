@@ -26,6 +26,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -274,6 +275,14 @@ public class DroidKit {
             }
         }
         return sCanAcceptPush.booleanValue();
+    }
+    
+    public static void registerReceiver(BroadcastReceiver receiver, IntentFilter filter, String broadcastPermission) {
+        sApplicationContext.registerReceiver(receiver, filter, broadcastPermission, null);
+    }
+    
+    public static void registerReceiver(BroadcastReceiver receiver, IntentFilter filter, String broadcastPermission, Handler handler) {
+        sApplicationContext.registerReceiver(receiver, filter, broadcastPermission, handler);
     }
     
     public static void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
