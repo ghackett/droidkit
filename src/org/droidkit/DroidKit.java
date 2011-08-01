@@ -142,13 +142,15 @@ public class DroidKit {
         
         if (sBestStorageDirectory == null)
             return null;
-        
-        if (!sBestStorageDirectory.canWrite())
-            return null;
-        
+                
         if (!sBestStorageDirectory.exists()) {
             sBestStorageDirectory.mkdirs();
         }
+        
+        if (!sBestStorageDirectory.canWrite())
+            return null;
+
+        
         return sBestStorageDirectory;
     }
     
