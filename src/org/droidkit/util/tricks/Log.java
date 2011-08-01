@@ -16,6 +16,7 @@
 package org.droidkit.util.tricks;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 
 /**
@@ -136,6 +137,22 @@ public class Log {
     public static void e(String tag, String message, Intent i) {
         if (android.util.Log.isLoggable(tag, android.util.Log.ERROR)) {
             android.util.Log.e(tag, message + "\n" + describeIntent(i));
+        }
+    }
+    
+    public static void e(String tag, String message, Cursor c) {
+        if (android.util.Log.isLoggable(tag, android.util.Log.ERROR)) {
+            android.util.Log.e(tag, message);
+            if (c != null && !c.isClosed() && !c.isAfterLast() && !c.isBeforeFirst()) {
+                int colCount = c.getColumnCount();
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i<colCount; i++) {
+                    if (i!=0)
+                        builder.append(", ");
+                    builder.append(c.getColumnName(i) + " = " + c.getString(i));
+                }
+                Log.e(tag, builder.toString());
+            }
         }
     }
 
