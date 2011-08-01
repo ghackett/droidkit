@@ -54,10 +54,14 @@ public class DroidKit {
     private static OnAccountsUpdateListener sAccountListener = null;
     private static HttpConnectionMonitor sConnectionMonitor = null;
     private static TelephonyManager sTelephonyManager = null;
+    private static Handler sHandler = null;
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
             sApplicationContext = context.getApplicationContext();
+        }
+        if (sHandler == null) {
+            sHandler = new Handler();
         }
     }
     
@@ -83,6 +87,7 @@ public class DroidKit {
         LazyLoader.shutdownInstance();
         CacheManager.clearAllCaches();
         sConnectionMonitor = null;
+        sHandler = null;
     }
     
     public static Context getContext() {
@@ -171,6 +176,10 @@ public class DroidKit {
     	if (sConnectionMonitor == null)
     		sConnectionMonitor = new HttpConnectionMonitor();
     	return sConnectionMonitor;
+    }
+    
+    public static Handler getHandler() {
+        return sHandler;
     }
     
     public static String getVersionName() {
