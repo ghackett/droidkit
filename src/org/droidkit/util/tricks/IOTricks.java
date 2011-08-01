@@ -206,6 +206,8 @@ public class IOTricks {
      */
     
     public static void recursiveDelete(File file) {
+        if (file == null)
+            return;
         if (!file.exists())
             return;
         if (file.isDirectory()) {
