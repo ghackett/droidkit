@@ -79,7 +79,9 @@ public class StorageTricks {
 			}
 		}
 
-		return new File(rtr);
+		if (rtr != null)
+		    return new File(rtr);
+		return null;
 		
 	}
 	
