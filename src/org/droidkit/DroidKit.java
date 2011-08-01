@@ -134,8 +134,18 @@ public class DroidKit {
     
     public static File getBestStorageDirectory(boolean includeAppDirectory) {
         if (sBestStorageDirectory == null) {
-            sBestStorageDirectory = new File(StorageTricks.findWritableDirectoryWithMostFreeSpace(getContext(), includeAppDirectory), String.format(Locale.US, SDCARD_PATH_FORMAT, getPackageName()));
+            File bestWritable = StorageTricks.findWritableDirectoryWithMostFreeSpace(getContext(), includeAppDirectory);
+            if (bestWritable == null)
+                return null;
+            sBestStorageDirectory = new File(bestWritable, String.format(Locale.US, SDCARD_PATH_FORMAT, getPackageName()));
         }
+        
+        if (sBestStorageDirectory == null)
+            return null;
+        
+        if (!sBestStorageDirectory.canWrite())
+            return null;
+        
         if (!sBestStorageDirectory.exists()) {
             sBestStorageDirectory.mkdirs();
         }
