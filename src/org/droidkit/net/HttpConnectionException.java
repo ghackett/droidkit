@@ -19,9 +19,11 @@ package org.droidkit.net;
  * @author mrn
  */
 public class HttpConnectionException extends Exception {
-    
+
+    private static final long serialVersionUID = 8270187061110118554L;
+
     public HttpConnectionException(Exception e) {
-        super(e.toString());
+        super(e);
     }
 }
 
