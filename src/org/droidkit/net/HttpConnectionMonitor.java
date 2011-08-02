@@ -69,33 +69,33 @@ public class HttpConnectionMonitor {
 		return mUrlConnections.size() + mHttpRequests.size();
 	}
 	
-	public void stopAllConnectionsAsync() {
-		new AsyncTask<Void, Void, Void>() {
-
-			@Override
-			protected Void doInBackground(Void... params) {
-				stopAllConnections();
-				return null;
-			}
-			
-		}.execute((Void)null);
-	}
-	
-	public void stopAllConnections() {
-		for (HttpURLConnection conn : mUrlConnections) {
-			try {
-				conn.disconnect();
-			} catch (Throwable t) {
-				t.printStackTrace();
-			}
-		}
-		
-		for (HttpRequestBase req : mHttpRequests) {
-			try {
-				req.abort();
-			} catch (Throwable t) {
-				t.printStackTrace();
-			}
-		}
-	}
+//	public void stopAllConnectionsAsync() {
+//		new AsyncTask<Void, Void, Void>() {
+//
+//			@Override
+//			protected Void doInBackground(Void... params) {
+//				stopAllConnections();
+//				return null;
+//			}
+//			
+//		}.execute((Void)null);
+//	}
+//	
+//	public void stopAllConnections() {
+//		for (HttpURLConnection conn : mUrlConnections) {
+//			try {
+//				conn.disconnect();
+//			} catch (Throwable t) {
+//				t.printStackTrace();
+//			}
+//		}
+//		
+//		for (HttpRequestBase req : mHttpRequests) {
+//			try {
+//				req.abort();
+//			} catch (Throwable t) {
+//				t.printStackTrace();
+//			}
+//		}
+//	}
 }
