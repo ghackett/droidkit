@@ -17,7 +17,7 @@ public class SoftBitmapCache implements CacheInterface {
     @Override
     public void clearCache() {
         for (BitmapSoftReference ref : mCache.values())
-            ref.clear();
+            if (ref != null) ref.clear();
         mCache.clear();
     }
     
