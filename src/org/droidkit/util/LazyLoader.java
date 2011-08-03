@@ -10,21 +10,27 @@ public class LazyLoader {
     
     private static LazyLoader sInstance = null;
     
+    private static final Object sLock = new Object();
+    
     public static LazyLoader get() {
-        if (sInstance == null) {
-            sInstance = new LazyLoader();
+        synchronized (sLock) {
+            if (sInstance == null) {
+                sInstance = new LazyLoader();
+            }
         }
         return sInstance;
     }
     
-    public static boolean hasInstance() {
-        return sInstance != null;
-    }
+//    public static boolean hasInstance() {
+//        return sInstance != null;
+//    }
     
     public static void shutdownInstance() {
-        if (hasInstance()) {
-            get().shutdown();
-            sInstance = null;
+        synchronized (sLock) {
+            if (sInstance != null) {
+                get().shutdown();
+                sInstance = null;
+            }
         }
     }
     

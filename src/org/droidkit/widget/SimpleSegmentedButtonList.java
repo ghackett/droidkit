@@ -182,7 +182,7 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 				LinearLayout.LayoutParams parentParams = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 				
 				if (sbv.mOnClickListener != null) {
-					newView.setTag(new Integer(i));
+					newView.setTag(Integer.valueOf(i));
 					newView.setOnClickListener(this);
 					newView.setClickable(true);
 					newView.setFocusable(true);

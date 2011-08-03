@@ -25,13 +25,18 @@ public class HttpClientFactory {
     private static HttpClientFactory sFactoryInstance = null;
     private static HttpClient sClientInstance = null;
     
+    private static final Object sLock = new Object();
+    
     public static HttpClientFactory getInstance() {
-        if (sFactoryInstance == null) {
-            if (DroidKit.isFroyo())
-                sFactoryInstance = new FroyoHttpClientFactory();
-            else
-                sFactoryInstance = new HttpClientFactory();
+        synchronized (sLock) {
+            if (sFactoryInstance == null) {
+                if (DroidKit.isFroyo())
+                    sFactoryInstance = new FroyoHttpClientFactory();
+                else
+                    sFactoryInstance = new HttpClientFactory();
+            }            
         }
+
         return sFactoryInstance;
     }
     
