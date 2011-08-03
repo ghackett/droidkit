@@ -434,20 +434,27 @@ public class CropImage extends MonitoredActivity {
                 //calc scale to reduce by. scale must be power of 2 (1,2,4,8,16...)
                 load_scale = calculateLoadScale(input);
 
+                if (input != null) input.close();
+
+                input = cr.openInputStream(originalBitmapUri);
+
 	        	//Now load image with precalculated scale
 	        	BitmapFactory.Options option_to_load = new BitmapFactory.Options();
 	        	option_to_load.inSampleSize = load_scale;
-	        	((FileInputStream)input).getChannel().position(0); // reset input stream to read again
+	        	//((FileInputStream)input).getChannel().position(0); // reset input stream to read again
 	        	mBitmap = BitmapFactory.decodeStream(input, null, option_to_load);
-
+ 
 		    	Log.d(TAG, "bitmap HxW: " + mBitmap.getHeight() + "x"+mBitmap.getWidth());
 
             } catch (IOException e) {
             	//TODO: check to see that the returning activity handles and error message
-            	
+            	e.printStackTrace();
+
             	setResult(ACTIVITY_RESULT_CROP_ERROR);
             	finish();
             	try{if(input!=null){input.close();}}catch(Exception ignore){}
+
+                return;
             } 
             
           
