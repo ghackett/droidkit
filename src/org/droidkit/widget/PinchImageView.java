@@ -480,13 +480,15 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
-	    RectF imgRect = getImageRect();
+	    
 	    
 		if (mBitmap == null || mBitmap.isRecycled() || getWidth() == 0) {
 			super.onDraw(canvas);
 			return;
 		}
-		canvas.drawBitmap(mBitmap, null, imgRect, null);
+		RectF imgRect = getImageRect();
+		if (mBitmap != null && !mBitmap.isRecycled())
+		    canvas.drawBitmap(mBitmap, null, imgRect, null);
 
 
 //		if (mRotation != 0)
