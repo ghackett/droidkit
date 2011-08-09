@@ -1,6 +1,9 @@
 package org.droidkit.widget;
 
+import java.lang.ref.WeakReference;
+
 import org.droidkit.util.tricks.Log;
+import org.droidkit.widget.HandyFrameLayout.OnSizeChangedListener;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -17,7 +20,7 @@ public class HandyListView extends ListView {
 	
 //	private View mEmptyListView = null;
 //	private View mLoadingListView = null;
-	private OnSizeChangedListener mSizeListener = null;
+	private WeakReference<OnSizeChangedListener> mSizeListener = null;
 	private int mFadingEdgeColor = -1;
 	private boolean mIsBeingTouched = false;
 //	private int mListViewHiddenValue = View.GONE;
@@ -104,14 +107,17 @@ public class HandyListView extends ListView {
 //	}
 	
 	public void setOnSizeChangedListener(OnSizeChangedListener listener) {
-		mSizeListener = listener;
+		mSizeListener = new WeakReference<HandyListView.OnSizeChangedListener>(listener);
 	}
 	
 	@Override
 	public void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-		if (mSizeListener != null)
-			mSizeListener.onSizeChanged(this, w, h, oldw, oldh);
+        if (mSizeListener != null) {
+            OnSizeChangedListener listener = mSizeListener.get();
+            if (listener != null)
+                listener.onSizeChanged(this, w, h, oldw, oldh);
+        }
 	}
 	
 	public ListAdapter getBaseAdapter() {
