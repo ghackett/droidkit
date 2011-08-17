@@ -37,8 +37,9 @@ public class LazyLoader {
     private Handler mThreadHandler = null;
     private final Handler mUiHandler = new Handler();
     private Stack<LazyLoaderTask> mTaskQueue;
+    private boolean mPaused = false;
     
-    private LazyLoader() {
+    public LazyLoader() {
         mTaskQueue = new Stack<LazyLoaderTask>();
         
         LazyLoaderThread t = new LazyLoaderThread();
@@ -78,6 +79,20 @@ public class LazyLoader {
     	synchronized (mTaskQueue) {
     		mTaskQueue.clear();
     	}
+    }
+    
+    public void setPaused(boolean paused) {
+        if (paused != mPaused) {
+            mPaused = paused;
+            if (mThreadHandler != null) {
+                mThreadHandler.removeMessages(0);
+                if (!mPaused) {
+                    mThreadHandler.sendEmptyMessage(0);
+                }
+            } else if (!mPaused) {
+                mUiHandler.postDelayed(mRetrySendMessageTask, 500);
+            }
+        }
     }
     
     public void shutdown() {
@@ -122,6 +137,9 @@ public class LazyLoader {
                 
                 @Override
                 public void handleMessage(Message msg) {
+                    if (mPaused)
+                        return;
+                    
                     LazyLoaderTask task = null;
                     synchronized (mTaskQueue) {
                         if (mTaskQueue.size() > 0) {
