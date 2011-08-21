@@ -351,7 +351,10 @@ public class ImageTricks {
             } 
             catch (FileNotFoundException e) {
                 e.printStackTrace();
-            }   
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+            
         } else {
             Log.e("ImageTricks", "imageFile did not exists or was not a file: " + imageFile.getAbsolutePath());
         }
