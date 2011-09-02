@@ -181,7 +181,7 @@ public class Log {
         e(DEFAULT_TAG, msg, i);
     }
     
-    private static String describeIntent(Intent i) {
+    public static String describeIntent(Intent i) {
         if (i == null)
             return "Intent is null";
         
