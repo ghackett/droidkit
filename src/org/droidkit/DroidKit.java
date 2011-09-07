@@ -347,6 +347,15 @@ public class DroidKit {
                 == Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
     
+    public static boolean isGoogleMapsSupported() {
+        try {
+            Class.forName("com.google.android.maps.MapActivity");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+    
     public static boolean getBoolPreference(String key, boolean defValue) {
         return getSharedPreferences().getBoolean(key, defValue);
     }
