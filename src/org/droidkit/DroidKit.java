@@ -55,6 +55,7 @@ public class DroidKit {
     private static HttpConnectionMonitor sConnectionMonitor = null;
     private static TelephonyManager sTelephonyManager = null;
     private static Handler sHandler = null;
+    private static Boolean mGoogleMapsSupported = null;
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
@@ -348,12 +349,15 @@ public class DroidKit {
     }
     
     public static boolean isGoogleMapsSupported() {
-        try {
-            Class.forName("com.google.android.maps.MapActivity");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
+        if (mGoogleMapsSupported == null) {
+            try {
+                Class.forName("com.google.android.maps.MapActivity");
+                mGoogleMapsSupported = true;
+            } catch (ClassNotFoundException e) {
+                mGoogleMapsSupported = false;
+            }
         }
+        return mGoogleMapsSupported.booleanValue();
     }
     
     public static boolean getBoolPreference(String key, boolean defValue) {
