@@ -27,6 +27,8 @@ public class HttpClientFactory {
     
     private static final Object sLock = new Object();
     
+    private boolean mTrustAllCerts = false;
+    
     public static HttpClientFactory getInstance() {
         synchronized (sLock) {
             if (sFactoryInstance == null) {
@@ -40,19 +42,28 @@ public class HttpClientFactory {
         return sFactoryInstance;
     }
     
+    public synchronized void setTrustAllSSLCerts(boolean trustAllCerts) {
+        mTrustAllCerts = trustAllCerts;
+        sClientInstance = null;
+    }
+    
     public synchronized HttpClient getSharedClient() {
         if (sClientInstance == null)
-            sClientInstance = getNewThreadsafeHttpClient(SOCKET_OPERATION_TIMEOUT);
+            sClientInstance = getNewThreadsafeHttpClient(SOCKET_OPERATION_TIMEOUT, mTrustAllCerts);
         return sClientInstance;
     }
     
-    public HttpClient getNewThreadsafeHttpClient(int timeout) {
+    public HttpClient getNewThreadsafeHttpClient(int timeout, boolean trustAllCerts) {
 //        HttpParams params = new BasicHttpParams();
 
         DefaultHttpClient badClient = new DefaultHttpClient();
         
         HttpParams params = badClient.getParams();
         SchemeRegistry schemeRegistry = badClient.getConnectionManager().getSchemeRegistry();
+        if (trustAllCerts) {
+            schemeRegistry.unregister("https");
+            schemeRegistry.register(new Scheme("https", new FakeSocketFactory(), 443));
+        }
         
         // Turn off stale checking.  Our connections break all the time anyway,
         // and it's not worth it to pay the penalty of checking every time.
