@@ -53,6 +53,12 @@ public class HttpClientFactory {
         return sClientInstance;
     }
     
+    public void closeClient(HttpClient client) {
+        //not sure how to really close a DefaultHttpClient
+        //this is really here for the froyo version
+//        ((DefaultHttpClient)client).c
+    }
+    
     public HttpClient getNewThreadsafeHttpClient(int timeout, boolean trustAllCerts) {
 //        HttpParams params = new BasicHttpParams();
 

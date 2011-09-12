@@ -10,6 +10,13 @@ import android.net.http.AndroidHttpClient;
 
 public class FroyoHttpClientFactory extends HttpClientFactory {
     
+    
+    
+    @Override
+    public void closeClient(HttpClient client) {
+        ((AndroidHttpClient)client).close();
+    }
+
     @Override
     public HttpClient getNewThreadsafeHttpClient(int timeout, boolean trustAllCerts) {
         AndroidHttpClient client = AndroidHttpClient.newInstance(DEFAULT_USER_AGENT, DroidKit.getContext());
