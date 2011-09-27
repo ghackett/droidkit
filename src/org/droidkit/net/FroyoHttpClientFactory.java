@@ -14,7 +14,11 @@ public class FroyoHttpClientFactory extends HttpClientFactory {
     
     @Override
     public void closeClient(HttpClient client) {
-        ((AndroidHttpClient)client).close();
+        try {
+            ((AndroidHttpClient)client).close();
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
     @Override
