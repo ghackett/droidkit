@@ -11,6 +11,7 @@ import org.droidkit.util.tricks.StorageTricks;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.OnAccountsUpdateListener;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -33,6 +34,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 public class DroidKit {
     
@@ -412,5 +414,13 @@ public class DroidKit {
 
     public static void clearPreferences() {
         getSharedPreferences().edit().clear().commit();
+    }
+    
+    public static void showSoftKeyboard(EditText editText, boolean force) {
+        getInputManager().showSoftInput(editText, force ? InputMethodManager.SHOW_FORCED : 0);
+    }
+    
+    public static void hideSoftKeyboard(Activity a) {
+        getInputManager().hideSoftInputFromWindow(a.getWindow().getDecorView().getApplicationWindowToken(), 0);
     }
 }
