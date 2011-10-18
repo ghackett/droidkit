@@ -417,6 +417,7 @@ public class DroidKit {
     }
     
     public static void showSoftKeyboard(EditText editText, boolean force) {
+        editText.requestFocus();
         getInputManager().showSoftInput(editText, force ? InputMethodManager.SHOW_FORCED : 0);
     }
     
