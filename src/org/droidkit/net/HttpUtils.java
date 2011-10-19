@@ -141,7 +141,12 @@ public class HttpUtils {
 
             httpResponse = client.execute(msg);
             int statusCode = httpResponse.getStatusLine().getStatusCode();
-            response = read(httpResponse.getEntity().getContent());
+            
+            try {
+                response = read(httpResponse.getEntity().getContent());
+            } catch (NullPointerException npe) {
+                response = null;
+            }
 
             DroidKit.getHttpConnectionMonitor().onRequestFinished(msg);
             if (statusCode > HttpStatus.SC_MULTIPLE_CHOICES) {
