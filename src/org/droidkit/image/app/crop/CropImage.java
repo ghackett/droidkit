@@ -20,7 +20,6 @@ package org.droidkit.image.app.crop;
 // data to caller. Removed saving to file, MediaManager, unneeded options, etc.
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

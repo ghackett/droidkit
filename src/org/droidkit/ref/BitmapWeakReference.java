@@ -2,8 +2,6 @@ package org.droidkit.ref;
 
 import java.lang.ref.WeakReference;
 
-import org.droidkit.util.tricks.Log;
-
 import android.graphics.Bitmap;
 
 public class BitmapWeakReference extends WeakReference<Bitmap> {

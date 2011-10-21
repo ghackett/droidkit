@@ -16,7 +16,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 
 public class PinchImageView extends View implements OnScaleGestureListener, OnGestureListener, OnDoubleTapListener, OnTouchListener  {
-	private static final String TAG = "PinchImageView";
+//	private static final String TAG = "PinchImageView";
 	
 	
 	private ScaleGestureDetector mScaleGestureDetector;

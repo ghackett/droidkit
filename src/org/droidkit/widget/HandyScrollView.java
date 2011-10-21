@@ -4,8 +4,6 @@ package org.droidkit.widget;
 
 import java.lang.ref.WeakReference;
 
-import org.droidkit.widget.HandyFrameLayout.OnSizeChangedListener;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;

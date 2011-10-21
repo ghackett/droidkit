@@ -5,8 +5,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.http.client.methods.HttpRequestBase;
 
-import android.os.AsyncTask;
-
 /**
  * A static singleton monitoring object (managed by the DroidKit lifecycle)
  * that keeps track of all connections being used using the DroidKit libraries

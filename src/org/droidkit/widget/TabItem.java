@@ -15,22 +15,20 @@
  */
 package org.droidkit.widget;
 
+import org.droidkit.R;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import org.droidkit.R;
 
 public class TabItem extends RelativeLayout {
     public static final int TYPE_INTENT = 0x1;

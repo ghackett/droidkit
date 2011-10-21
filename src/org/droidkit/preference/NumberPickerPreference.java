@@ -15,16 +15,15 @@
  */
 package org.droidkit.preference;
 
+import org.droidkit.R;
+import org.droidkit.widget.NumberPicker;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-
-import org.droidkit.R;
-import org.droidkit.widget.NumberPicker;
 
 public class NumberPickerPreference extends DialogPreference {
     private NumberPicker mPicker;

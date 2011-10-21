@@ -15,14 +15,13 @@
  */
 package org.droidkit.widget;
 
+import java.util.Vector;
+
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
-
-import java.util.Vector;
 
 class TabBar extends LinearLayout {
     private Vector<TabItem> mTabItems;
