@@ -122,12 +122,23 @@ public class HandyCarouselView extends FrameLayout {
 	    mSpacing = DroidKit.getPixels(spacingDp);
 	    mSideShowable = DroidKit.getPixels(sideShowable);
 	    mScrollPadding = mSideShowable*2;
+	    
+	    if (mAdapter != null && getWidth() > 0) {
+    	    mHandler.post(new Runnable() {
+    
+    	        @Override
+    	        public void run() {
+    	            updatePageLayout();
+    	        }
+    	    });
+	    }
+	    
 	}
 	
 	
 	private void updatePageLayout() {
-		removeAllViews();
 		if (mAdapter != null && getWidth() > 0) {
+		    removeAllViews();
 			int pageWidth = getWidth();
 			int pageHeight = getHeight();
 			mInnerView.setLayoutParams(new FrameLayout.LayoutParams(pageWidth*5, pageHeight));
