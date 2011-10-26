@@ -159,17 +159,17 @@ public class HandyCarouselView extends FrameLayout {
 			
 			startPosition = mCurrentPage - 2;
 			
-			if (startPosition == -1) {
-				startPosition = mAdapter.getCount()-1;
-			} else if (startPosition == -2) {
-			    startPosition = mAdapter.getCount()-2;
-			}
+//			if (startPosition == -1) {
+//				startPosition = mAdapter.getCount()-1;
+//			} else if (startPosition == -2) {
+//			    startPosition = mAdapter.getCount()-2;
+//			}
 			    
 			int position = startPosition;
 			for (int i = startIndex; i<5; i++) {
 				
-				if (position >= mAdapter.getCount())
-					position = 0;
+//				if (position >= mAdapter.getCount())
+//					position = 0;
 				
 				AdapterViewInfo info = getAdapterView(position);
 				
