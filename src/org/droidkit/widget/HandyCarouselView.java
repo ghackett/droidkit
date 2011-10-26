@@ -93,7 +93,7 @@ public class HandyCarouselView extends FrameLayout {
 		mVelocityTracker = null;
 		mAutoScroll = false;
 		mAutoScrollInterval = 400;
-		mInfiniteLoop = false;
+		mInfiniteLoop = true;
 		mStopAutoScrollingOnTouch = false;
 		mPageChangedListener = null;
 		
