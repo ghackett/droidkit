@@ -118,9 +118,14 @@ public class HandyCarouselView extends FrameLayout {
 		
 	}
 	
-	public void setSpacing(int spacingDp, int sideShowable) {
+	/**
+	 * 
+	 * @param spacingDp The spacing inbetween views
+	 * @param sideShowableDp The amount of each view on either side to show
+	 */
+	public void setSpacing(int spacingDp, int sideShowableDp) {
 	    mSpacing = DroidKit.getPixels(spacingDp);
-	    mSideShowable = DroidKit.getPixels(sideShowable);
+	    mSideShowable = DroidKit.getPixels(sideShowableDp);
 	    mScrollPadding = mSideShowable*2;
 	    
 	    if (mAdapter != null && getWidth() > 0) {
