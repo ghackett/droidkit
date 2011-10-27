@@ -144,7 +144,7 @@ public class HandyCarouselView extends FrameLayout {
 	}
 	
 	private void updateSideShowable() {
-	    if (DroidKit.isDeviceInLandscapeMode())
+	    if (getWidth() > getHeight())
 	        mSideShowable = mSideShowableLand;
 	    else
 	        mSideShowable = mSideShowablePort;
@@ -478,8 +478,9 @@ public class HandyCarouselView extends FrameLayout {
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right,
 			int bottom) {
-	    updateSideShowable();
+	    
 		super.onLayout(changed, left, top, right, bottom);
+		updateSideShowable();
 		if (changed) {
 			getHandler().post(new Runnable() {
 				@Override
