@@ -41,7 +41,7 @@ public class ScaleableFrameLayout extends FrameLayout {
 
         super.onDraw(canvas);
         if (mScale != 1.0f)
-            canvas.scale(mScale, mScale, 0, getHeight()/2);
+            canvas.scale(mScale, mScale, getWidth()/2, getHeight()/2);
     }
     
     

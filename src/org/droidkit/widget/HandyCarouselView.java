@@ -60,8 +60,10 @@ public class HandyCarouselView extends FrameLayout {
 	private OnPageChangedListener mPageChangedListener;
 	private LinearLayout mPageIndicatorView;
 	private int mScrollPadding;
-	private int mSpacing;
+//	private int mSpacing;
 	private int mSideShowable;
+	private int mSideShowablePort;
+	private int mSideShowableLand;
 	private float mSideScale;
 	
 
@@ -79,7 +81,7 @@ public class HandyCarouselView extends FrameLayout {
 		setWillNotCacheDrawing(true);
 		setWillNotDraw(false);
 		
-		setSpacing(30, 60);
+		setSpacing(60, 100);
 		mSideScale = 0.75f;
 		mPageIndicatorView = null;
 		mPreventInvalidate = false;
@@ -124,10 +126,10 @@ public class HandyCarouselView extends FrameLayout {
 	 * @param spacingDp The spacing inbetween views
 	 * @param sideShowableDp The amount of each view on either side to show
 	 */
-	public void setSpacing(int spacingDp, int sideShowableDp) {
-	    mSpacing = DroidKit.getPixels(spacingDp);
-	    mSideShowable = DroidKit.getPixels(sideShowableDp);
-	    mScrollPadding = mSideShowable*2;
+	public void setSpacing(int sideShowablePortDp, int sideShowableLandDp) {
+	    mSideShowablePort = DroidKit.getPixels(sideShowablePortDp);
+	    mSideShowableLand = DroidKit.getPixels(sideShowableLandDp);
+	    updateSideShowable();
 	    
 	    if (mAdapter != null && getWidth() > 0) {
     	    mHandler.post(new Runnable() {
@@ -141,17 +143,25 @@ public class HandyCarouselView extends FrameLayout {
 	    
 	}
 	
+	private void updateSideShowable() {
+	    if (DroidKit.isDeviceInLandscapeMode())
+	        mSideShowable = mSideShowableLand;
+	    else
+	        mSideShowable = mSideShowablePort;
+	    mScrollPadding = mSideShowable*2;
+	}
+	
 	
 	private void updatePageLayout() {
 		if (mAdapter != null && getWidth() > 0) {
 		    removeAllViews();
 			int pageWidth = getWidth();
 			int pageHeight = getHeight();
-			mInnerView.setLayoutParams(new ScaleableFrameLayout.LayoutParams(pageWidth*5, pageHeight));
+			mInnerView.setLayoutParams(new FrameLayout.LayoutParams(pageWidth*5, pageHeight));
 			for (int i = 0; i<5; i++) {
-			    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(pageWidth-(mSpacing+(mSideShowable*2)), pageHeight);
-			    lp.leftMargin = mSpacing/2;
-			    lp.rightMargin = mSpacing/2;
+			    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(pageWidth-((mSideShowable*2)), pageHeight);
+//			    lp.leftMargin = mSpacing/2;
+//			    lp.rightMargin = mSpacing/2;
 				mContainerViews.get(i).setLayoutParams(lp);
 			}
 			
@@ -175,7 +185,7 @@ public class HandyCarouselView extends FrameLayout {
 				AdapterViewInfo info = getAdapterView(position);
 				
 				if (info != null) {
-					info.view.setLayoutParams(new ScaleableFrameLayout.LayoutParams(pageWidth, pageHeight));
+					info.view.setLayoutParams(new ScaleableFrameLayout.LayoutParams(pageWidth-((mSideShowable*2)), pageHeight));
 					mContainerViews.get(i).addView(info.view);
 					mVisibleViews[i] = info;
 				}
@@ -468,6 +478,7 @@ public class HandyCarouselView extends FrameLayout {
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right,
 			int bottom) {
+	    updateSideShowable();
 		super.onLayout(changed, left, top, right, bottom);
 		if (changed) {
 			getHandler().post(new Runnable() {
