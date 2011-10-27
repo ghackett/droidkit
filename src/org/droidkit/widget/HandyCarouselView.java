@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import org.droidkit.DroidKit;
 import org.droidkit.R;
-import org.droidkit.util.tricks.CLog;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -39,7 +38,7 @@ public class HandyCarouselView extends FrameLayout {
 	
 	private StoppableScrollView mParentScrollview;
 	private LinearLayout mInnerView;
-	private ArrayList<FrameLayout> mContainerViews;
+	private ArrayList<ScaleableFrameLayout> mContainerViews;
 	private ArrayList<ArrayList<View>> mRecycledViews;
 	private AdapterViewInfo[] mVisibleViews;
 	private ListAdapter mAdapter;
@@ -63,6 +62,7 @@ public class HandyCarouselView extends FrameLayout {
 	private int mScrollPadding;
 	private int mSpacing;
 	private int mSideShowable;
+	private float mSideScale;
 	
 
 	public HandyCarouselView(Context context, AttributeSet attrs) {
@@ -79,11 +79,12 @@ public class HandyCarouselView extends FrameLayout {
 		setWillNotCacheDrawing(true);
 		setWillNotDraw(false);
 		
-		setSpacing(30, 40);
+		setSpacing(30, 60);
+		mSideScale = 0.75f;
 		mPageIndicatorView = null;
 		mPreventInvalidate = false;
 		mParentScrollview = null;
-		mContainerViews = new ArrayList<FrameLayout>(5);
+		mContainerViews = new ArrayList<ScaleableFrameLayout>(5);
 		mVisibleViews = new AdapterViewInfo[5];
 		mRecycledViews = null;
 		mAdapter = null;
@@ -103,7 +104,7 @@ public class HandyCarouselView extends FrameLayout {
 		
 		for (int i =0; i<5; i++) {
 
-			mContainerViews.add(new FrameLayout(getContext()));
+			mContainerViews.add(new ScaleableFrameLayout(getContext()));
 			mInnerView.addView(mContainerViews.get(i));
 		}
 		
@@ -146,7 +147,7 @@ public class HandyCarouselView extends FrameLayout {
 		    removeAllViews();
 			int pageWidth = getWidth();
 			int pageHeight = getHeight();
-			mInnerView.setLayoutParams(new FrameLayout.LayoutParams(pageWidth*5, pageHeight));
+			mInnerView.setLayoutParams(new ScaleableFrameLayout.LayoutParams(pageWidth*5, pageHeight));
 			for (int i = 0; i<5; i++) {
 			    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(pageWidth-(mSpacing+(mSideShowable*2)), pageHeight);
 			    lp.leftMargin = mSpacing/2;
@@ -174,7 +175,7 @@ public class HandyCarouselView extends FrameLayout {
 				AdapterViewInfo info = getAdapterView(position);
 				
 				if (info != null) {
-					info.view.setLayoutParams(new FrameLayout.LayoutParams(pageWidth, pageHeight));
+					info.view.setLayoutParams(new ScaleableFrameLayout.LayoutParams(pageWidth, pageHeight));
 					mContainerViews.get(i).addView(info.view);
 					mVisibleViews[i] = info;
 				}
@@ -182,9 +183,15 @@ public class HandyCarouselView extends FrameLayout {
 				position++;
 			}
 			scrollTo(pageWidth*2, true);
-			
+			resetScales();
 			updatePageIndicator();
 		}
+	}
+	
+	private void resetScales() {
+	    for (int i = 0; i<mContainerViews.size(); i++) {
+	        setChildScale(i, i == 2 ? 1.0f : mSideScale);
+	    }
 	}
 	
 	private void postPageChanged() {
@@ -251,6 +258,7 @@ public class HandyCarouselView extends FrameLayout {
 		if (mPageChangedListener != null) {
 			mPageChangedListener.OnPageChanged(this, lastPage, mCurrentPage, mAdapter.getCount());
 		}
+		resetScales();
 		updatePageIndicator();
 	}
 	
@@ -415,7 +423,7 @@ public class HandyCarouselView extends FrameLayout {
 		if (!mScroller.isFinished()) {
 			mScroller.abortAnimation();
 		}
-		CLog.e("Smooth scrolling to " + x);
+		
 		mScroller.startScroll(getScrollX(), 0, x - getScrollX(), 0);
 		invalidate();
 	}
@@ -592,7 +600,7 @@ public class HandyCarouselView extends FrameLayout {
 		if (!mIsBeingDragged) {
 			mIsBeingScrolled = false;
 			
-			CLog.e("FINISH SCROLL - getScrollX = " + getScrollX() + ", getWidth*1.5 = " + getWidth()*1.5);
+			
 			
 			if (getScrollX() == getLeftScrollTarget() || getScrollX() == getCenterScrollTarget() || getScrollX() == getRightScrollTarget()) {
 				postPageChanged();
@@ -613,6 +621,7 @@ public class HandyCarouselView extends FrameLayout {
 	
 	@Override
 	public void computeScroll() {
+	    updateScales();
 		if (mScroller.computeScrollOffset()) {
 			mIsBeingScrolled = true;
 			boolean finishScroll = false;
@@ -638,11 +647,38 @@ public class HandyCarouselView extends FrameLayout {
 		}
 	}
 	
+	private void updateScales() {
+	    int scrollX = getScrollX();
+        int spaceDiff = getCenterScrollTarget() - getLeftScrollTarget();
+        float scaleDiff = 1.0f - mSideScale;
+        
+        if (scrollX < getCenterScrollTarget()) {
+            int leftDiff = scrollX - getLeftScrollTarget();
+            int rightDiff = spaceDiff - leftDiff;
+            float leftPercent = (float)rightDiff / (float)spaceDiff;
+            float rightPercent = 1f - leftPercent;
+            setChildScale(1, mSideScale + (scaleDiff * leftPercent));
+            setChildScale(2, mSideScale + (scaleDiff * rightPercent));
+        } else if (scrollX > getCenterScrollTarget()) {
+            int leftDiff = scrollX - getCenterScrollTarget();
+            int rightDiff = spaceDiff - leftDiff;
+            float leftPercent = (float)rightDiff / (float)spaceDiff;
+            float rightPercent = 1f - leftPercent;
+            setChildScale(2, mSideScale + (scaleDiff * leftPercent));
+            setChildScale(3, mSideScale + (scaleDiff * rightPercent));
+        } else {
+            resetScales();
+        }
+	}
+	
+	private void setChildScale(int index, float scale) {
+	    mContainerViews.get(index).setScale(scale);
+	}
 	
 	@Override
 	public void removeAllViews() {
 		for (int i = 0; i<5; i++) {
-			FrameLayout container = mContainerViews.get(i);
+			ScaleableFrameLayout container = mContainerViews.get(i);
 			AdapterViewInfo info = mVisibleViews[i];
 			if (mAdapter == null) {
 				container.removeAllViews();
