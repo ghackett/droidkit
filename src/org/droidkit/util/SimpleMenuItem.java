@@ -18,6 +18,7 @@ package org.droidkit.util;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.view.ActionProvider;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -209,6 +210,48 @@ public class SimpleMenuItem implements MenuItem {
     public MenuItem setActionView(int i) {
         // Noop
         return this;
+    }
+
+    @Override
+    public boolean collapseActionView() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean expandActionView() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public ActionProvider getActionProvider() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isActionViewExpanded() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public MenuItem setActionProvider(ActionProvider actionProvider) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MenuItem setOnActionExpandListener(OnActionExpandListener listener) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MenuItem setShowAsActionFlags(int actionEnum) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
