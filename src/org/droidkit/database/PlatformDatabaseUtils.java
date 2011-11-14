@@ -32,6 +32,14 @@ public class PlatformDatabaseUtils {
         mDatabase = db;
     }
 
+    public synchronized SQLiteDatabase getReadableDatabase() {
+        return mDatabase.getReadableDatabase();
+    }
+    
+    public synchronized SQLiteDatabase getWritableDatabase() {
+        return mDatabase.getWritableDatabase();
+    }
+    
     public int update(String table, ContentValues values, String where, String[] whereArgs) {
         SQLiteDatabase db = mDatabase.getWritableDatabase();
         return db.update(table, values, where, whereArgs);
