@@ -65,6 +65,7 @@ public class HandyCarouselView extends FrameLayout {
 	private int mSideShowablePort;
 	private int mSideShowableLand;
 	private float mSideScale;
+	private boolean mStrictScrolling = false;
 	
 
 	public HandyCarouselView(Context context, AttributeSet attrs) {
@@ -396,8 +397,9 @@ public class HandyCarouselView extends FrameLayout {
 		mInfiniteLoop = infLoop;
 	}
 	
-	public void setParentScrollView(StoppableScrollView parentScrollView) {
+	public void setParentScrollView(StoppableScrollView parentScrollView, boolean strictScrolling) {
 		mParentScrollview = parentScrollView;
+		mStrictScrolling = strictScrolling;
 	}
 	
 	public void scrollTo(int scrollX, boolean invalidate) {
@@ -519,9 +521,10 @@ public class HandyCarouselView extends FrameLayout {
 		switch(action & MotionEvent.ACTION_MASK) {
 		
 		case MotionEvent.ACTION_MOVE: {
+		    if (mStrictScrolling) setParentScrollingAllowed(false);
 			final float x = ev.getX();
 			final int dx = (int)Math.abs(x - mLastMotionX);
-			if (dx > mTouchSlop) {
+			if (dx >= mTouchSlop) {
 				mIsBeingDragged = true;
 				mLastMotionX = x;
 				setParentScrollingAllowed(false);
@@ -530,6 +533,7 @@ public class HandyCarouselView extends FrameLayout {
 		}
 		
 		case MotionEvent.ACTION_DOWN: {
+		    if (mStrictScrolling) setParentScrollingAllowed(false);
 			final float x = ev.getX();
 			mLastMotionX = x;
 			mIsBeingDragged = !mScroller.isFinished();
