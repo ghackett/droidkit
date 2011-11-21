@@ -66,6 +66,9 @@ public class HandyCarouselView extends FrameLayout {
 	private int mSideShowableLand;
 	private float mSideScale;
 	private boolean mStrictScrolling = false;
+	private int mMargin;
+	private int mMarginLandscape;
+	private int mMarginPortrait;
 	
 
 	public HandyCarouselView(Context context, AttributeSet attrs) {
@@ -84,6 +87,7 @@ public class HandyCarouselView extends FrameLayout {
 		
 		setSpacing(60, 100);
 		mSideScale = 0.75f;
+		mMargin = 0;
 		mPageIndicatorView = null;
 		mPreventInvalidate = false;
 		mParentScrollview = null;
@@ -122,6 +126,23 @@ public class HandyCarouselView extends FrameLayout {
 		
 	}
 	
+	public void setMargin(int marginPortDip, int marginLandscapeDp) {
+	    mMarginPortrait = DroidKit.getPixels(marginPortDip);
+	    mMarginLandscape = DroidKit.getPixels(marginLandscapeDp);
+	    
+	    updateSideShowable();
+        
+        if (mAdapter != null && getWidth() > 0) {
+            mHandler.post(new Runnable() {
+    
+                @Override
+                public void run() {
+                    updatePageLayout();
+                }
+            });
+        }
+	}
+	
 	/**
 	 * 
 	 * @param spacingDp The spacing inbetween views
@@ -145,10 +166,13 @@ public class HandyCarouselView extends FrameLayout {
 	}
 	
 	private void updateSideShowable() {
-	    if (DroidKit.isDeviceInLandscapeMode())
+	    if (DroidKit.isDeviceInLandscapeMode()) {
 	        mSideShowable = mSideShowableLand;
-	    else
+	        mMargin = mMarginLandscape;
+	    } else {
 	        mSideShowable = mSideShowablePort;
+	        mMargin = mMarginPortrait;
+	    }
 	    mScrollPadding = mSideShowable*2;
 	}
 	
@@ -170,6 +194,8 @@ public class HandyCarouselView extends FrameLayout {
 			mInnerView.setLayoutParams(new FrameLayout.LayoutParams(pageWidth*5, pageHeight));
 			for (int i = 0; i<5; i++) {
 			    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(pageWidth-((mSideShowable*2)), pageHeight);
+			    lp.leftMargin = mMargin;
+			    lp.rightMargin = mMargin;
 //			    lp.leftMargin = mSpacing/2;
 //			    lp.rightMargin = mSpacing/2;
 				mContainerViews.get(i).setLayoutParams(lp);
@@ -196,6 +222,7 @@ public class HandyCarouselView extends FrameLayout {
 				
 				if (info != null) {
 					info.view.setLayoutParams(new ScaleableFrameLayout.LayoutParams(pageWidth-((mSideShowable*2)), pageHeight));
+					info.view.setLayoutParams(new ScaleableFrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 					mContainerViews.get(i).addView(info.view);
 					mVisibleViews[i] = info;
 				}
@@ -811,11 +838,11 @@ public class HandyCarouselView extends FrameLayout {
 	}
 	
 	public int getLeftScrollTarget() {
-	    return getWidth()+mScrollPadding;
+	    return getWidth()+mScrollPadding-(2*mMargin);
 	}
 	
 	public int getRightScrollTarget() {
-	    return getWidth()*3-mScrollPadding;
+	    return getWidth()*3-mScrollPadding+(2*mMargin);
 	}
 	
 	public int getCenterScrollTarget() {
