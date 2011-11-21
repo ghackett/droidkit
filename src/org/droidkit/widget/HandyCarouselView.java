@@ -152,6 +152,15 @@ public class HandyCarouselView extends FrameLayout {
 	    mScrollPadding = mSideShowable*2;
 	}
 	
+	public int getCurrentPage() {
+	    return mCurrentPage;
+	}
+	
+	public void setCurrentPage(int currentPage) {
+	    mCurrentPage = currentPage;
+	    updatePageLayout();
+	}
+	
 	
 	private void updatePageLayout() {
 		if (mAdapter != null && getWidth() > 0) {
