@@ -23,7 +23,7 @@ public class FroyoHttpClientFactory extends HttpClientFactory {
 
     @Override
     public HttpClient getNewThreadsafeHttpClient(int timeout, boolean trustAllCerts) {
-        AndroidHttpClient client = AndroidHttpClient.newInstance(DEFAULT_USER_AGENT, DroidKit.getContext());
+        AndroidHttpClient client = AndroidHttpClient.newInstance(sUserAgent, DroidKit.getContext());
         HttpClientParams.setRedirecting(client.getParams(), true);
         if (timeout != SOCKET_OPERATION_TIMEOUT) {
             HttpConnectionParams.setConnectionTimeout(client.getParams(), timeout);

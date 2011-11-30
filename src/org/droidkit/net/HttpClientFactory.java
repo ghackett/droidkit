@@ -24,6 +24,8 @@ public class HttpClientFactory {
     
     private boolean mTrustAllCerts = false;
     
+    protected static String sUserAgent = DEFAULT_USER_AGENT;
+    
     public static HttpClientFactory getInstance() {
         synchronized (sLock) {
             if (sFactoryInstance == null) {
@@ -35,6 +37,12 @@ public class HttpClientFactory {
         }
 
         return sFactoryInstance;
+    }
+    
+    public static void setUserAgent(String userAgent) {
+        synchronized (sLock) {
+            sUserAgent = userAgent;
+        }
     }
     
     public synchronized void setTrustAllSSLCerts(boolean trustAllCerts) {
@@ -77,7 +85,7 @@ public class HttpClientFactory {
 
         HttpClientParams.setRedirecting(params, true);
         
-        HttpProtocolParams.setUserAgent(params, DEFAULT_USER_AGENT);
+        HttpProtocolParams.setUserAgent(params, sUserAgent);
 
         // Set the specified user agent and register standard protocols.
 //        SchemeRegistry schemeRegistry = new SchemeRegistry();
