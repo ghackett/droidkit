@@ -27,6 +27,8 @@
 
 package org.droidkit.widget;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -44,6 +46,32 @@ import android.widget.ListAdapter;
 import android.widget.Scroller;
 
 public class HorizontalListView extends AdapterView<ListAdapter> {
+    
+    private static class StoppableScrollViewInfo {
+        WeakReference<StoppableScrollView> scrollView;
+        boolean strict;
+        
+        public StoppableScrollViewInfo(StoppableScrollView scrollView, boolean strict) {
+            this.scrollView = new WeakReference<StoppableScrollView>(scrollView);
+            this.strict = strict;
+        }
+        
+        public void stop() {
+            if (this.scrollView != null) {
+                StoppableScrollView sv = this.scrollView.get();
+                if (sv != null)
+                    sv.stopScrolling();
+            }
+        }
+        
+        public void release() {
+            if (this.scrollView != null) {
+                StoppableScrollView sv = this.scrollView.get();
+                if (sv != null)
+                    sv.allowScrolling();
+            }
+        }
+    }
 
     public boolean mAlwaysOverrideTouch = true;
     protected ListAdapter mAdapter;
@@ -61,7 +89,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     private OnItemLongClickListener mOnItemLongClicked;
     private boolean mDataChanged = false;
     private boolean mMeasureHeightForVisibleOnly = true;
-    private StoppableScrollView mStoppableScrollView = null;
+    private ArrayList<StoppableScrollViewInfo> mStoppableScrollViews = null;
     
 
     public HorizontalListView(Context context, AttributeSet attrs) {
@@ -80,8 +108,27 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         mGesture = new GestureDetector(getContext(), mOnGesture);
     }
     
-    public void setStoppableScrollView(StoppableScrollView scrollView) {
-        mStoppableScrollView = scrollView;
+    public void addStoppableScrollView(StoppableScrollView scrollView, boolean strict) {
+        if (mStoppableScrollViews == null)
+            mStoppableScrollViews = new ArrayList<HorizontalListView.StoppableScrollViewInfo>();
+        mStoppableScrollViews.add(new StoppableScrollViewInfo(scrollView, strict));
+    }
+    
+    private void holdStoppables(boolean strictOnly) {
+        if (mStoppableScrollViews != null) {
+            for (StoppableScrollViewInfo info : mStoppableScrollViews) {
+                if (info.strict || !strictOnly)
+                    info.stop();
+            }
+        }
+    }
+    
+    private void releaseStoppables() {
+        if (mStoppableScrollViews != null) {
+            for (StoppableScrollViewInfo info : mStoppableScrollViews) {
+                info.release();
+            }
+        }
     }
     
     @Override
@@ -359,11 +406,13 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        final int action = ev.getAction();
         boolean handled = super.dispatchTouchEvent(ev);
         handled |= mGesture.onTouchEvent(ev);
-        if (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_CANCEL) {
-            if (mStoppableScrollView != null)
-                mStoppableScrollView.allowScrolling();
+        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
+            holdStoppables(true);
+        } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            releaseStoppables();
         }
             
         return handled;
@@ -403,8 +452,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         public boolean onScroll(MotionEvent e1, MotionEvent e2,
                 float distanceX, float distanceY) {
             
-            if (mStoppableScrollView != null)
-                mStoppableScrollView.stopScrolling();
+            holdStoppables(false);
             
             synchronized(HorizontalListView.this){
                 mNextX += (int)distanceX;

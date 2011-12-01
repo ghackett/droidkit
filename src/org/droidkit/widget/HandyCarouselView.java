@@ -2,6 +2,7 @@ package org.droidkit.widget;
 
 //com.episode6.android.common.ui.widget.HandyCarouselView
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import org.droidkit.DroidKit;
@@ -36,7 +37,7 @@ public class HandyCarouselView extends FrameLayout {
 	
 	private final Handler mHandler = new Handler();
 	
-	private StoppableScrollView mParentScrollview;
+	private WeakReference<StoppableScrollView> mParentScrollview;
 	private LinearLayout mInnerView;
 	private ArrayList<ScaleableFrameLayout> mContainerViews;
 	private ArrayList<ArrayList<View>> mRecycledViews;
@@ -434,7 +435,7 @@ public class HandyCarouselView extends FrameLayout {
 	}
 	
 	public void setParentScrollView(StoppableScrollView parentScrollView, boolean strictScrolling) {
-		mParentScrollview = parentScrollView;
+		mParentScrollview = new WeakReference<StoppableScrollView>(parentScrollView);
 		mStrictScrolling = strictScrolling;
 	}
 	
@@ -539,10 +540,13 @@ public class HandyCarouselView extends FrameLayout {
 	
 	private void setParentScrollingAllowed(boolean allowed) {
 		if (mParentScrollview != null) {
-			if (allowed)
-				mParentScrollview.allowScrolling();
-			else 
-				mParentScrollview.stopScrolling();
+		    StoppableScrollView ss = mParentScrollview.get();
+		    if (ss != null) {
+    			if (allowed)
+    				ss.allowScrolling();
+    			else 
+    				ss.stopScrolling();
+		    }
 		}
 	}
 	
