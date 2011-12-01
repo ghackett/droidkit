@@ -9,7 +9,7 @@ import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public class HandyListView extends ListView {
+public class HandyListView extends ListView implements StoppableScrollView {
 	
 	public interface OnSizeChangedListener {
 		public void onSizeChanged(HandyListView listView, int w, int h, int oldw, int oldh);
@@ -20,6 +20,7 @@ public class HandyListView extends ListView {
 	private WeakReference<OnSizeChangedListener> mSizeListener = null;
 	private int mFadingEdgeColor = -1;
 	private boolean mIsBeingTouched = false;
+	private boolean mScrollingAllowed = true;
 //	private int mListViewHiddenValue = View.GONE;
 
 	public HandyListView(Context context, AttributeSet attrs, int defStyle) {
@@ -42,9 +43,17 @@ public class HandyListView extends ListView {
 	}
 	
 	
-	
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (mScrollingAllowed)
+            return super.onInterceptTouchEvent(ev);
+        return false;
+    }
+    
 	@Override
     public boolean onTouchEvent(MotionEvent ev) {
+	    if (!mScrollingAllowed)
+	        return false;
         switch(ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
@@ -134,5 +143,24 @@ public class HandyListView extends ListView {
 			return super.getSolidColor();
 		return mFadingEdgeColor;
 	}
+
+    @Override
+    public void stopScrolling() {
+       mScrollingAllowed = false;
+    }
+
+    @Override
+    public void allowScrolling() {
+        mScrollingAllowed = true;
+    }
+
+    @Override
+    public boolean isScrollingAllowed() {
+        return mScrollingAllowed;
+    }
+
+
+    
+    
 	
 }
