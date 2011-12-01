@@ -206,6 +206,17 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         removeAllViewsInLayout();
         requestLayout();
     }
+    
+    public synchronized void reset(boolean maintainPosition) {
+        if (maintainPosition) {
+            mDataChanged = true;
+            invalidate();
+            requestLayout();
+        } else {
+            reset();
+        }
+        
+    }
 
     @Override
     public void setSelection(int position) {
@@ -278,7 +289,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
             return;
         }
         
-        if(mDataChanged){
+        if(mDataChanged || changed){
             int oldCurrentX = mCurrentX;
             initView();
             removeAllViewsInLayout();
@@ -308,7 +319,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         
         mCurrentX = mNextX;
         
-        if(!mScroller.isFinished()){
+        if(!mScroller.isFinished() || (changed && mCurrentX > mMaxX)){
             post(new Runnable(){
                 @Override
                 public void run() {
