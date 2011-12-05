@@ -1,5 +1,7 @@
 package org.droidkit.util.tricks;
 
+import android.net.Uri;
+
 public class ArrayTricks {
 	
     public static int findValueInArray(int[] array, int value) {
@@ -50,6 +52,20 @@ public class ArrayTricks {
 			b.append(array[i]);
 		}
 		return b.toString();
+	}
+	
+	public static String joinAndEncodeEachEntry(String[] array, String delimiter) {
+        if (array == null)
+            return null;
+        if (delimiter == null)
+            delimiter = "";
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i< array.length; i++) {
+            if (i!=0)
+                b.append(delimiter);
+            b.append(Uri.encode(array[i]));
+        }
+        return b.toString();
 	}
 
 }
