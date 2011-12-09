@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -299,6 +300,10 @@ public class DroidKit {
             }
         }
         return sCanAcceptPush.booleanValue();
+    }
+    
+    public static boolean doesDeviceHaveACamera() {
+        return sApplicationContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
     
     public static void registerReceiver(BroadcastReceiver receiver, IntentFilter filter, String broadcastPermission) {
