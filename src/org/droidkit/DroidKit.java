@@ -306,6 +306,10 @@ public class DroidKit {
         return sApplicationContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
     
+    public static boolean doesDeviceSupportLocation() {
+        return sApplicationContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION);
+    }
+    
     public static void registerReceiver(BroadcastReceiver receiver, IntentFilter filter, String broadcastPermission) {
         sApplicationContext.registerReceiver(receiver, filter, broadcastPermission, null);
     }
