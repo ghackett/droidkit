@@ -38,15 +38,25 @@ public class LazyLoader {
     private final Handler mUiHandler = new Handler();
     private Stack<LazyLoaderTask> mTaskQueue;
     private boolean mPaused = false;
+    private int mDelay = 500;
     
-    public LazyLoader() {
+    public LazyLoader(int delay) {
+        mDelay = delay;
         mTaskQueue = new Stack<LazyLoaderTask>();
         
         LazyLoaderThread t = new LazyLoaderThread();
         t.setPriority(Math.max(Thread.MIN_PRIORITY, Thread.NORM_PRIORITY-3));
         t.start();
     }
+    
+    public LazyLoader() {
+        this(500);
+    }
 
+    public void setDelay(int delay) {
+        mDelay = delay;
+    }
+    
     public void addTask(LazyLoaderTask task) {
         if (task == null)
             return;
@@ -67,7 +77,7 @@ public class LazyLoader {
             
             
             if (mThreadHandler == null) {
-                mUiHandler.postDelayed(mRetrySendMessageTask, 500);
+                mUiHandler.postDelayed(mRetrySendMessageTask, mDelay);
             } else { 
                 resetLoadTimer();
             }
@@ -90,7 +100,7 @@ public class LazyLoader {
                     mThreadHandler.sendEmptyMessage(0);
                 }
             } else if (!mPaused) {
-                mUiHandler.postDelayed(mRetrySendMessageTask, 500);
+                mUiHandler.postDelayed(mRetrySendMessageTask, mDelay);
             }
         }
     }
@@ -103,7 +113,7 @@ public class LazyLoader {
     }
     
     private void resetLoadTimer() {
-        resetLoadTimer(500);
+        resetLoadTimer(mDelay);
     }
     
     private void resetLoadTimer(long timer) {
@@ -123,7 +133,7 @@ public class LazyLoader {
             if (mThreadHandler != null) {
                 resetLoadTimer();
             } else {
-                mUiHandler.postDelayed(mRetrySendMessageTask, 500);
+                mUiHandler.postDelayed(mRetrySendMessageTask, mDelay);
             }
         }
     };
