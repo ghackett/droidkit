@@ -36,6 +36,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class DroidKit {
     
@@ -438,5 +439,43 @@ public class DroidKit {
     
     public static void hideSoftKeyboard(Activity a) {
         getInputManager().hideSoftInputFromWindow(a.getWindow().getDecorView().getApplicationWindowToken(), 0);
+    }
+    
+    public static void toastScreenBucket() {
+        if ((getResources().getConfiguration().screenLayout &      Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE) {     
+            Toast.makeText(sApplicationContext, "Large screen",Toast.LENGTH_LONG).show();
+        } else if ((getResources().getConfiguration().screenLayout &      Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_NORMAL) {     
+            Toast.makeText(sApplicationContext, "Normal sized screen" , Toast.LENGTH_LONG).show();
+        } else if ((getResources().getConfiguration().screenLayout &      Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_SMALL) {     
+            Toast.makeText(sApplicationContext, "Small sized screen" , Toast.LENGTH_LONG).show();
+        } else if ((getResources().getConfiguration().screenLayout &      Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_XLARGE) {     
+            Toast.makeText(sApplicationContext, "X-Large sized screen" , Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(sApplicationContext, "Screen size is neither x-large, large, normal or small" , Toast.LENGTH_LONG).show();
+        }
+        
+        if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_LONG_MASK) == Configuration.SCREENLAYOUT_LONG_YES) {     
+            Toast.makeText(sApplicationContext, "Long Screen",Toast.LENGTH_LONG).show();
+        } else if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_LONG_MASK) == Configuration.SCREENLAYOUT_LONG_NO) {     
+            Toast.makeText(sApplicationContext, "NOT Long Screen",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(sApplicationContext, "Long is undefined",Toast.LENGTH_LONG).show();
+        }
+        
+        DisplayMetrics metrics = getDisplayMetrics();
+        int density = metrics.densityDpi;
+        if (density==DisplayMetrics.DENSITY_HIGH) {
+            Toast.makeText(sApplicationContext, "DENSITY_HIGH... Density is " + String.valueOf(density),  Toast.LENGTH_LONG).show();
+        } else if (density==DisplayMetrics.DENSITY_MEDIUM) {
+            Toast.makeText(sApplicationContext, "DENSITY_MEDIUM... Density is " + String.valueOf(density),  Toast.LENGTH_LONG).show();
+        } else if (density==DisplayMetrics.DENSITY_LOW) {
+            Toast.makeText(sApplicationContext, "DENSITY_LOW... Density is " + String.valueOf(density),  Toast.LENGTH_LONG).show();
+        } else if (density==DisplayMetrics.DENSITY_XHIGH) {
+            Toast.makeText(sApplicationContext, "DENSITY_XHIGH... Density is " + String.valueOf(density),  Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(sApplicationContext, "Density is neither XHIGH, HIGH, MEDIUM OR LOW.  Density is " + String.valueOf(density),  Toast.LENGTH_LONG).show();
+        }
+        
+        Toast.makeText(sApplicationContext, "screen res = " + metrics.heightPixels + "x" + metrics.widthPixels,  Toast.LENGTH_LONG).show();
     }
 }
