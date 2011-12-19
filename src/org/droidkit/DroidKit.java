@@ -478,4 +478,14 @@ public class DroidKit {
         
         Toast.makeText(sApplicationContext, "screen res = " + metrics.heightPixels + "x" + metrics.widthPixels,  Toast.LENGTH_LONG).show();
     }
+    
+    public static float getDimension(int dimenId) {
+        return getResources().getDimension(dimenId);
+    }
+    
+    public static int getDimensionPixelSize(int dimenId) {
+        return getResources().getDimensionPixelSize(dimenId);
+    }
+    
+    
 }

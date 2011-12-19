@@ -127,11 +127,11 @@ public class HandyCarouselView extends FrameLayout {
 		
 	}
 	
-	public void setMargin(int marginPortDip, int marginLandscapeDp) {
-	    mMarginPortrait = DroidKit.getPixels(marginPortDip);
-	    mMarginLandscape = DroidKit.getPixels(marginLandscapeDp);
-	    
-	    updateSideShowable();
+	public void setMarginPx(int marginPort, int marginLand) {
+        mMarginPortrait = marginPort;
+        mMarginLandscape = marginLand;
+        
+        updateSideShowable();
         
         if (mAdapter != null && getWidth() > 0) {
             mHandler.post(new Runnable() {
@@ -142,6 +142,10 @@ public class HandyCarouselView extends FrameLayout {
                 }
             });
         }
+	}
+	
+	public void setMarginDp(int marginPortDip, int marginLandscapeDp) {
+	    setMarginPx(DroidKit.getPixels(marginPortDip), DroidKit.getPixels(marginLandscapeDp));
 	}
 	
 	/**
