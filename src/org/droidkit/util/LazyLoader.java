@@ -117,8 +117,12 @@ public class LazyLoader {
     }
     
     private void resetLoadTimer(long timer) {
-        mThreadHandler.removeMessages(0);
-        mThreadHandler.sendEmptyMessageDelayed(0, timer);
+    	if (mThreadHandler == null) {
+    		mUiHandler.postDelayed(mRetrySendMessageTask, mDelay);
+    	} else {
+	        mThreadHandler.removeMessages(0);
+	        mThreadHandler.sendEmptyMessageDelayed(0, timer);
+    	}
     }
     
     
