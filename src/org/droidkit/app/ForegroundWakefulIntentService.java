@@ -5,6 +5,8 @@ import android.content.Intent;
 
 public abstract class ForegroundWakefulIntentService extends
         WakefulIntentService {
+    
+    protected Notification mNotification = null;
 
     public ForegroundWakefulIntentService(String name) {
         super(name);
@@ -16,7 +18,8 @@ public abstract class ForegroundWakefulIntentService extends
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        startForeground(getNotificationId(), getNotification());
+        mNotification = getNotification();
+        startForeground(getNotificationId(), mNotification);
         onHandleNewIntent(intent);
         stopForeground(true);
     }
