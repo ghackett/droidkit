@@ -1,7 +1,6 @@
 package org.droidkit.app;
 
 import android.app.Notification;
-import android.content.Intent;
 
 public abstract class ForegroundWakefulIntentService extends
         WakefulIntentService {
@@ -13,15 +12,19 @@ public abstract class ForegroundWakefulIntentService extends
     }
     
     protected abstract int getNotificationId();
-    protected abstract Notification getNotification();
-    protected abstract void onHandleNewIntent(Intent intent);
-
+    protected abstract Notification getNotification();    
+    
     @Override
-    protected void onHandleIntent(Intent intent) {
+    public void onCreate() {
+        super.onCreate();
         mNotification = getNotification();
         startForeground(getNotificationId(), mNotification);
-        onHandleNewIntent(intent);
+    }
+
+    @Override
+    public void onDestroy() {
         stopForeground(true);
+        super.onDestroy();
     }
 
 }

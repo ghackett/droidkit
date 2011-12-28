@@ -26,7 +26,6 @@ public abstract class AnimatedForegroundWakefulIntentService extends
     @Override
     public void onDestroy() {
         DroidKit.getHandler().removeCallbacks(mAnimateTask);
-        ((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancel(getNotificationId());
         super.onDestroy();
     }
     
