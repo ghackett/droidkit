@@ -1,6 +1,8 @@
 package org.droidkit.app;
 
 import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
 
 public abstract class ForegroundWakefulIntentService extends
         WakefulIntentService {
@@ -24,6 +26,7 @@ public abstract class ForegroundWakefulIntentService extends
     @Override
     public void onDestroy() {
         stopForeground(true);
+        ((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancel(getNotificationId());
         super.onDestroy();
     }
 
