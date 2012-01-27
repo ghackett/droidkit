@@ -12,6 +12,14 @@ public class ArrayTricks {
         return -1;
     }
     
+    public static int findValueInArray(String[] array, String value) {
+        for (int i = 0; i<array.length; i++) {
+            if (array[i].equals(value))
+                return i;
+        }
+        return -1;
+    }
+    
 	public static int findValueInArray(Object[] array, Object value) {
 		for (int i = 0; i<array.length; i++) {
 			if (array[i].equals(value))
@@ -27,6 +35,10 @@ public class ArrayTricks {
 	public static boolean arrayContainsValue(Object[] array, Object value) {
 		return findValueInArray(array, value) != -1;
 	}
+	
+    public static boolean arrayContainsValue(String[] array, String value) {
+        return findValueInArray(array, value) != -1;
+    }	
 	
 	public static String[] copyOf(String[] original, int newLength) {
 		if (original == null) {
