@@ -853,28 +853,35 @@ public class EzHttpRequest implements ProgressListener {
 		
 		@Override
 		public String toString() {
-			StringBuilder b = new StringBuilder(mRequest.toString());
-			b.append("\n\nEzHttpResponse: " + (mSuccess ? "Success: " : "Failure: ") + mResponseCode + "\n");
-			b.append("ReasonPhrase: " + cnull(mResponseReasonPhrase) + "\n");
-			b.append("ContentType: " + cnull(mResponseContentType) + "\n");
-			b.append("ContentEncoding: " + cnull(mResponseContentEncoding) + "\n");
-			b.append("LastModTime: " + mResponseLastModTime + "\n");
-			b.append("Response: \n");
-			if (!mSuccess || !isRaw()) {
-				try {
-					b.append(new JSONObject(mResponseText).toString(4));
-				} catch (Throwable e) {
-					try {
-						b.append(new JSONArray(mResponseText).toString(4));
-					} catch (Throwable e2) {
-						b.append(cnull(mResponseText));
-					}
-				}
-			} else {
-				b.append("BINARY FILE");
-			}
-			return b.toString();
+			return toString(true);
 		}
+		
+		public String toString(boolean includeRequest) {
+		    StringBuilder b = new StringBuilder();
+		    if (includeRequest)
+		        b.append(mRequest.toString());
+		    b.append("\n\nEzHttpResponse: " + (mSuccess ? "Success: " : "Failure: ") + mResponseCode + "\n");
+	        b.append("ReasonPhrase: " + cnull(mResponseReasonPhrase) + "\n");
+	        b.append("ContentType: " + cnull(mResponseContentType) + "\n");
+	        b.append("ContentEncoding: " + cnull(mResponseContentEncoding) + "\n");
+	        b.append("LastModTime: " + mResponseLastModTime + "\n");
+	        b.append("Response: \n");
+	        if (!mSuccess || !isRaw()) {
+	            try {
+	                b.append(new JSONObject(mResponseText).toString(4));
+	            } catch (Throwable e) {
+	                try {
+	                    b.append(new JSONArray(mResponseText).toString(4));
+	                } catch (Throwable e2) {
+	                    b.append(cnull(mResponseText));
+	                }
+	            }
+	        } else {
+	            b.append("BINARY FILE");
+	        }
+	        return b.toString();
+		}
+		
 		private String cnull(String str) {
 			if (str == null)
 				return "";
