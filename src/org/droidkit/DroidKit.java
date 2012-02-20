@@ -1,11 +1,13 @@
 package org.droidkit;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.Locale;
 
 import org.droidkit.net.HttpConnectionMonitor;
 import org.droidkit.ref.CacheManager;
 import org.droidkit.util.LazyLoader;
+import org.droidkit.util.tricks.CLog;
 import org.droidkit.util.tricks.StorageTricks;
 
 import android.accounts.Account;
@@ -27,6 +29,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -366,10 +369,14 @@ public class DroidKit {
                 == Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
     
+    
+    @SuppressWarnings("unchecked")
     public static boolean isGoogleMapsSupported() {
         if (mGoogleMapsSupported == null) {
             try {
-                Class.forName("com.google.android.maps.MapActivity");
+                @SuppressWarnings("rawtypes")
+                Class mc = Class.forName("com.google.android.maps.MapActivity");
+                mc.getMethod("getIntent");
                 mGoogleMapsSupported = true;
             } catch (Throwable e) {
                 mGoogleMapsSupported = false;
