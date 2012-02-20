@@ -371,7 +371,7 @@ public class DroidKit {
             try {
                 Class.forName("com.google.android.maps.MapActivity");
                 mGoogleMapsSupported = true;
-            } catch (ClassNotFoundException e) {
+            } catch (Throwable e) {
                 mGoogleMapsSupported = false;
             }
         }
