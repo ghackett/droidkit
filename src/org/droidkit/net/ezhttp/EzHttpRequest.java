@@ -4,8 +4,10 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -485,7 +487,12 @@ public class EzHttpRequest implements ProgressListener {
 				} else {
 					url += "?";
 				}
-				url += param.getName() + "=" + param.getValue();
+				try {
+				    url += param.getName() + "=" + URLEncoder.encode(param.getValue(), HTTP.UTF_8);
+				} catch (UnsupportedEncodingException e) {
+				    e.printStackTrace();
+				    url += param.getName() + "=" + param.getValue();
+				}
 			}
 		}
 		
