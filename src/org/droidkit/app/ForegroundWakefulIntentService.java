@@ -16,18 +16,22 @@ public abstract class ForegroundWakefulIntentService extends
     protected abstract int getNotificationId();
     protected abstract Notification getNotification();    
     
+
     @Override
-    public void onCreate() {
-        super.onCreate();
-        mNotification = getNotification();
-        startForeground(getNotificationId(), mNotification);
+    protected synchronized void lock() {
+        super.lock();
+        if (mNotification == null) {
+            mNotification = getNotification();
+            startForeground(getNotificationId(), mNotification);
+        }
     }
 
     @Override
-    public void onDestroy() {
+    protected synchronized void unlock() {
         stopForeground(true);
         ((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancel(getNotificationId());
-        super.onDestroy();
+        super.unlock();
     }
 
+    
 }

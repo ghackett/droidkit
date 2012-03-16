@@ -121,6 +121,7 @@ public abstract class WakefulIntentService extends Service {
         // method that would launch the service & hand off a wakelock.
 
         super.onCreate();
+        lock();
         mMessages = new ArrayList<Message>();
         
         HandlerThread thread = new HandlerThread("IntentService[" + mName + "]");
@@ -179,11 +180,11 @@ public abstract class WakefulIntentService extends Service {
             mMessages.remove(msg);
     }
     
-    private synchronized boolean isMessageQueueEmpty() {
+    protected synchronized boolean isMessageQueueEmpty() {
         return mMessages == null || mMessages.isEmpty();
     }
     
-    private synchronized void lock() {
+    protected synchronized void lock() {
         if (mLock == null) {
             PowerManager pm = (PowerManager) DroidKit.getSystemService(Context.POWER_SERVICE);
             mLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mName);
@@ -192,7 +193,7 @@ public abstract class WakefulIntentService extends Service {
             mLock.acquire();
     }
     
-    private synchronized void unlock() {
+    protected synchronized void unlock() {
         if (mLock != null && mLock.isHeld()) {
             mLock.release();
         }

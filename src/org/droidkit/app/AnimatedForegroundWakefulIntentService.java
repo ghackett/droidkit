@@ -17,17 +17,6 @@ public abstract class AnimatedForegroundWakefulIntentService extends
     protected abstract int getMaxIconLevel();
     protected abstract int getAnimationDelay();
     
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        DroidKit.getHandler().postDelayed(mAnimateTask, getAnimationDelay());
-    }
-
-    @Override
-    public void onDestroy() {
-        DroidKit.getHandler().removeCallbacks(mAnimateTask);
-        super.onDestroy();
-    }
     
     protected void animateIcon() {
         mCounter++;
@@ -47,5 +36,20 @@ public abstract class AnimatedForegroundWakefulIntentService extends
             DroidKit.getHandler().postDelayed(mAnimateTask, getAnimationDelay());
         }
     };
+
+    @Override
+    protected synchronized void lock() {
+        super.lock();
+        DroidKit.getHandler().removeCallbacks(mAnimateTask);
+        DroidKit.getHandler().postDelayed(mAnimateTask, getAnimationDelay());
+    }
+
+    @Override
+    protected synchronized void unlock() {
+        DroidKit.getHandler().removeCallbacks(mAnimateTask);
+        super.unlock();
+    }
+    
+    
 
 }
