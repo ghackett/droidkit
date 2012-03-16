@@ -10,8 +10,8 @@ public abstract class AnimatedForegroundWakefulIntentService extends
     
     private int mCounter = 0;
 
-    public AnimatedForegroundWakefulIntentService(String name) {
-        super(name);
+    public AnimatedForegroundWakefulIntentService(String name, boolean intentRedelivery) {
+        super(name, intentRedelivery);
     }
     
     protected abstract int getMaxIconLevel();

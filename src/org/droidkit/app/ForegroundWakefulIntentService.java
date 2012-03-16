@@ -9,8 +9,8 @@ public abstract class ForegroundWakefulIntentService extends
     
     protected Notification mNotification = null;
 
-    public ForegroundWakefulIntentService(String name) {
-        super(name);
+    public ForegroundWakefulIntentService(String name, boolean intentRedelivery) {
+        super(name, intentRedelivery);
     }
     
     protected abstract int getNotificationId();
