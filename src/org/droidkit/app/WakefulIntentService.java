@@ -19,6 +19,7 @@ package org.droidkit.app;
 import java.util.ArrayList;
 
 import org.droidkit.DroidKit;
+import org.droidkit.util.tricks.CLog;
 
 import android.app.Service;
 import android.content.Context;
@@ -157,6 +158,8 @@ public abstract class WakefulIntentService extends Service {
     public void onDestroy() {
         unlock();
         mServiceLooper.quit();
+        CLog.e("********SERVICE DESTROYED " + mName + "**********");
+        super.onDestroy();
     }
 
     /**
@@ -189,13 +192,16 @@ public abstract class WakefulIntentService extends Service {
             PowerManager pm = (PowerManager) DroidKit.getSystemService(Context.POWER_SERVICE);
             mLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mName);
         }
-        if (!mLock.isHeld())
+        if (!mLock.isHeld()) {
             mLock.acquire();
+            CLog.e("********WAKE LOCK ACQUIRED FOR " + mName + "**********");
+        }
     }
     
     protected synchronized void unlock() {
         if (mLock != null && mLock.isHeld()) {
             mLock.release();
+            CLog.e("********WAKE LOCK RELEASED FOR " + mName + "**********");
         }
         mLock = null;
     }
