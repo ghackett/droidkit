@@ -62,6 +62,7 @@ public abstract class WakefulIntentService extends Service {
     
     private static volatile WakeLock sLock = null;
     private static volatile ArrayList<String> sServiceLocks = null;
+    private static long sLockStartTime = 0;
     
     private volatile Looper mServiceLooper;
     private volatile ServiceHandler mServiceHandler;
@@ -199,6 +200,7 @@ public abstract class WakefulIntentService extends Service {
         }
         if (!sLock.isHeld()) {
             sLock.acquire();
+            sLockStartTime = System.currentTimeMillis();
         }
         
         if (!sServiceLocks.contains(name)) {
@@ -218,6 +220,8 @@ public abstract class WakefulIntentService extends Service {
         if (sServiceLocks.isEmpty()) {
             if (sLock != null && sLock.isHeld()) {
                 sLock.release();
+                long lockTimeSecs = (System.currentTimeMillis() - sLockStartTime)/1000;
+                if (DroidKit.DEBUG) CLog.e("WAKE LOCK HELD FOR " + lockTimeSecs + " seconds");
             }
             sLock = null;
         }
