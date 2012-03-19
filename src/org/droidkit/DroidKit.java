@@ -40,6 +40,9 @@ import android.widget.Toast;
 
 public class DroidKit {
     
+    //This variable is not final so that it can be set explicitly by different builds of the same app.
+    public static boolean DEBUG = false;
+    
     private static final String SDCARD_PATH_FORMAT = "Android/data/%s";
 //    private static final String ANDROID_MARKET_PACKAGE_NAME = "com.android.vending";
     private static final String GOOGLE_ACCOUNT_TYPE = "com.google";

@@ -158,7 +158,7 @@ public abstract class WakefulIntentService extends Service {
     public void onDestroy() {
         unlock();
         mServiceLooper.quit();
-        CLog.e("********SERVICE DESTROYED " + mName + "**********");
+        if (DroidKit.DEBUG) CLog.e("********SERVICE DESTROYED " + mName + "**********");
         super.onDestroy();
     }
 
@@ -194,14 +194,14 @@ public abstract class WakefulIntentService extends Service {
         }
         if (!mLock.isHeld()) {
             mLock.acquire();
-            CLog.e("********WAKE LOCK ACQUIRED FOR " + mName + "**********");
+            if (DroidKit.DEBUG) CLog.e("********WAKE LOCK ACQUIRED FOR " + mName + "**********");
         }
     }
     
     protected synchronized void unlock() {
         if (mLock != null && mLock.isHeld()) {
             mLock.release();
-            CLog.e("********WAKE LOCK RELEASED FOR " + mName + "**********");
+            if (DroidKit.DEBUG) CLog.e("********WAKE LOCK RELEASED FOR " + mName + "**********");
         }
         mLock = null;
     }
