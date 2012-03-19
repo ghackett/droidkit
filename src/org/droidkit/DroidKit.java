@@ -44,7 +44,7 @@ public class DroidKit {
     public static boolean DEBUG = false;
     
     private static final String SDCARD_PATH_FORMAT = "Android/data/%s";
-//    private static final String ANDROID_MARKET_PACKAGE_NAME = "com.android.vending";
+    private static final String ANDROID_MARKET_PACKAGE_NAME = "com.android.vending";
     private static final String GOOGLE_ACCOUNT_TYPE = "com.google";
     
     private static Context sApplicationContext = null;
@@ -287,19 +287,22 @@ public class DroidKit {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {
                 sCanAcceptPush = false;
             } else {
-                sCanAcceptPush = getAccountManager().getAccountsByType(GOOGLE_ACCOUNT_TYPE).length > 0;
-                if (sAccountListener == null) {
-                    //register an OnAccountsUpdateListener that nulls out the cached sCanAcceptPush value
-                    //in case a google account is added or removed while the app is open. This listener is 
-                    //removed in DroidKit's onApplicationTerminate
-                    sAccountListener = new OnAccountsUpdateListener() {
-                        
-                        @Override
-                        public void onAccountsUpdated(Account[] accounts) {
-                            sCanAcceptPush = getAccountManager().getAccountsByType(GOOGLE_ACCOUNT_TYPE).length > 0;
-                        }
-                    };
-                    getAccountManager().addOnAccountsUpdatedListener(sAccountListener, null, true);
+                sCanAcceptPush = isApplicationInstalled(ANDROID_MARKET_PACKAGE_NAME);
+                if (sCanAcceptPush) {
+                    sCanAcceptPush = getAccountManager().getAccountsByType(GOOGLE_ACCOUNT_TYPE).length > 0;
+                    if (sAccountListener == null) {
+                        //register an OnAccountsUpdateListener that nulls out the cached sCanAcceptPush value
+                        //in case a google account is added or removed while the app is open. This listener is 
+                        //removed in DroidKit's onApplicationTerminate
+                        sAccountListener = new OnAccountsUpdateListener() {
+                            
+                            @Override
+                            public void onAccountsUpdated(Account[] accounts) {
+                                sCanAcceptPush = getAccountManager().getAccountsByType(GOOGLE_ACCOUNT_TYPE).length > 0;
+                            }
+                        };
+                        getAccountManager().addOnAccountsUpdatedListener(sAccountListener, null, true);
+                    }
                 }
             }
         }
