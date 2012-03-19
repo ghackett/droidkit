@@ -59,13 +59,16 @@ import android.os.PowerManager.WakeLock;
  * @see android.os.AsyncTask
  */
 public abstract class WakefulIntentService extends Service {
+    
+    private static volatile WakeLock sLock = null;
+    private static volatile ArrayList<String> sServiceLocks = null;
+    
     private volatile Looper mServiceLooper;
     private volatile ServiceHandler mServiceHandler;
     private String mName;
     private boolean mRedelivery;
     
     private ArrayList<Message> mMessages = null;
-    private WakeLock mLock = null;
 
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
@@ -187,23 +190,45 @@ public abstract class WakefulIntentService extends Service {
         return mMessages == null || mMessages.isEmpty();
     }
     
-    protected synchronized void lock() {
-        if (mLock == null) {
+    protected static synchronized void lock(String name) {
+        if (sServiceLocks == null)
+            sServiceLocks = new ArrayList<String>();
+        if (sLock == null) {
             PowerManager pm = (PowerManager) DroidKit.getSystemService(Context.POWER_SERVICE);
-            mLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mName);
+            sLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, name);
         }
-        if (!mLock.isHeld()) {
-            mLock.acquire();
-            if (DroidKit.DEBUG) CLog.e("********WAKE LOCK ACQUIRED FOR " + mName + "**********");
+        if (!sLock.isHeld()) {
+            sLock.acquire();
+        }
+        
+        if (!sServiceLocks.contains(name)) {
+            sServiceLocks.add(name);
+            if (DroidKit.DEBUG) CLog.e("********WAKE LOCK ACQUIRED FOR " + name + "**********");
         }
     }
     
-    protected synchronized void unlock() {
-        if (mLock != null && mLock.isHeld()) {
-            mLock.release();
-            if (DroidKit.DEBUG) CLog.e("********WAKE LOCK RELEASED FOR " + mName + "**********");
+    protected static synchronized void unlock(String name) {
+        if (sServiceLocks == null)
+            sServiceLocks = new ArrayList<String>();
+        
+        if (sServiceLocks.remove(name)) {
+            if (DroidKit.DEBUG) CLog.e("********WAKE LOCK RELEASED FOR " + name + "**********");
         }
-        mLock = null;
+        
+        if (sServiceLocks.isEmpty()) {
+            if (sLock != null && sLock.isHeld()) {
+                sLock.release();
+            }
+            sLock = null;
+        }
+    }
+    
+    protected synchronized void lock() {
+        lock(mName);
+    }
+    
+    protected synchronized void unlock() {
+        unlock(mName);
     }
 
     /**
