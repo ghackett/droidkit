@@ -564,8 +564,13 @@ public class EzHttpRequest implements ProgressListener {
 				}
 			}
 
-			if (entity != null)
-			    handleResponseInputStream(ezResponse, entity.getContent());
+			if (entity != null) {
+			    try {
+			        handleResponseInputStream(ezResponse, entity.getContent());
+			    } catch (Throwable t) {
+			        t.printStackTrace();
+			    }
+			}
 			
 			DroidKit.getHttpConnectionMonitor().onRequestFinished(message);
 			
@@ -682,7 +687,11 @@ public class EzHttpRequest implements ProgressListener {
 			ezResponse.mResponseContentType = conn.getContentType();
 			ezResponse.mResponseLastModTime = conn.getLastModified();
 			
-			handleResponseInputStream(ezResponse, conn.getInputStream());
+			try {
+			    handleResponseInputStream(ezResponse, conn.getInputStream());
+			} catch (Throwable t) {
+			    t.printStackTrace();
+			}
 			
 			DroidKit.getHttpConnectionMonitor().onRequestFinished(conn);
 			
