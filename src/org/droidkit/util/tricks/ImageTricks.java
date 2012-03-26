@@ -238,12 +238,12 @@ public class ImageTricks {
         	    b.recycle();
         	mediaStream.close();
         	mediaStream = null;
-            int outWidth = opts.outWidth;
+        	int maxSideSize = Math.max(opts.outWidth, opts.outHeight);
         	
         	mediaStream = DroidKit.getContentResolver().openInputStream(imageUri);
 
         	opts = new BitmapFactory.Options();
-        	opts.inSampleSize = outWidth / maxDimension;
+        	opts.inSampleSize = maxSideSize / maxDimension;
         	
             Bitmap bitmap = BitmapFactory.decodeStream(mediaStream, null, opts);
         	
