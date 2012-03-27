@@ -229,6 +229,9 @@ public class ImageTricks {
     
     public static Bitmap scaleDownImageUriToBitmap(Uri imageUri, int maxDimension, boolean deleteOriginal) {
     	try {
+    	    
+    	    if (DroidKit.DEBUG) CLog.e("SCALE DOWN IMAGE - max dimension = " + maxDimension);
+    	    
     		InputStream mediaStream = DroidKit.getContentResolver().openInputStream(imageUri);
     		
     		BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -240,18 +243,32 @@ public class ImageTricks {
         	mediaStream = null;
         	int maxSideSize = Math.max(opts.outWidth, opts.outHeight);
         	
+        	if (DroidKit.DEBUG) CLog.e("SCALE DOWN IMAGE - max original side = " + maxSideSize);
+        	
         	mediaStream = DroidKit.getContentResolver().openInputStream(imageUri);
 
         	opts = new BitmapFactory.Options();
         	opts.inSampleSize = maxSideSize / maxDimension;
         	
-            Bitmap bitmap = BitmapFactory.decodeStream(mediaStream, null, opts);
+        	if (DroidKit.DEBUG) CLog.e("SCALE DOWN IMAGE - new sample size = " + opts.inSampleSize);
+        	
+            Bitmap bitmap = null;
+            
+            if (opts.inSampleSize > 1)
+                bitmap = BitmapFactory.decodeStream(mediaStream, null, opts);
+            else
+                bitmap = BitmapFactory.decodeStream(mediaStream);
+            
+            
         	
         	mediaStream.close();
         	mediaStream = null;
         	
+        	if (DroidKit.DEBUG) CLog.e("SCALE DOWN IMAGE - new bitmap width = " + bitmap.getWidth() + ", height = " + bitmap.getHeight());
+        	
         	if (deleteOriginal)
         		DroidKit.getContentResolver().delete(imageUri, null, null);
+        	
         	return bitmap;
         	
     	} catch (Throwable e) {
@@ -487,7 +504,7 @@ public class ImageTricks {
         try {
             Bitmap image = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
             Bitmap border = null;
-            int borderWidth = 2; // DroidKit.getPixels(2);
+            int borderWidth = 1; // DroidKit.getPixels(2);
             Rect imageSrcRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 //            Rect imageDestRect = new Rect(borderWidth, borderWidth, bitmap.getWidth()-borderWidth, bitmap.getHeight()-borderWidth);
             
