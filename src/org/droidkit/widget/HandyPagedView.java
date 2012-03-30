@@ -1,6 +1,6 @@
 package org.droidkit.widget;
 
-//com.episode6.android.common.ui.widget.HandyPagedView
+//org.droidkit.widget.HandyPagedView
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
