@@ -9,6 +9,7 @@ package org.droidkit.widget;
 import java.lang.ref.WeakReference;
 
 import org.droidkit.DroidKit;
+import org.droidkit.util.tricks.CLog;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -155,8 +156,38 @@ public class DeckView extends RelativeLayout {
         mTopContainer.scrollTo(0, 0);
     }
     
+    private boolean isOkToScroll(MotionEvent ev)
+    {
+        if (mIsBeingDragged || mIsBeingScrolled)
+            return true;
+        
+        int action = ev.getAction() & MotionEvent.ACTION_MASK;
+        
+        if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP)
+            return true;
+        
+        float x = ev.getX();
+        int scrollX = mTopContainer.getScrollX();
+        
+        CLog.e("Event X: " + x + " Scroll X: " + scrollX);
+        
+        if (scrollX == 0)
+            return true;
+        else if (scrollX < 0)
+            return x > Math.abs(scrollX);
+        else
+            return x < getWidth()-scrollX;
+        
+//        CLog.e("Event X: " + x + " Scroll X: " + scrollX);
+//        return true;
+    }
+    
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        
+        if (!isOkToScroll(ev))
+            return false;
+        
         final int action = ev.getAction();
         if (action == MotionEvent.ACTION_MOVE && mIsBeingDragged) {
             return true;
@@ -175,7 +206,7 @@ public class DeckView extends RelativeLayout {
             break;
         }
         
-        case MotionEvent.ACTION_DOWN: {
+        case MotionEvent.ACTION_DOWN: { 
             final float x = ev.getX();
             mLastMotionX = x;
             mIsBeingDragged = !mScroller.isFinished();
@@ -195,6 +226,9 @@ public class DeckView extends RelativeLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!isOkToScroll(event))
+            return false;
+        
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
@@ -252,7 +286,8 @@ public class DeckView extends RelativeLayout {
     
     private void finishScroll()
     {
-        
+        mIsBeingDragged = false;
+        mIsBeingScrolled = false;
     }
     
     private void setParentScrollingAllowed(boolean allowed) {
@@ -275,6 +310,15 @@ public class DeckView extends RelativeLayout {
         if (!invalidate) {
             preventInvalidate();
         }
+        
+        if (scrollX < 0) {
+            mLeftView.setVisibility(VISIBLE);
+            mRightView.setVisibility(INVISIBLE);
+        } else if (scrollX > 0) {
+            mLeftView.setVisibility(INVISIBLE);
+            mRightView.setVisibility(VISIBLE);
+        }
+        
         mTopContainer.scrollTo(scrollX, 0);
         allowInvalidate();
     }
