@@ -186,21 +186,25 @@ public class DeckView extends RelativeLayout {
         addView(mTopContainer);
     }
     
-    public void showLeft() {
-        mRightView.setVisibility(View.INVISIBLE);
-        mLeftView.setVisibility(View.VISIBLE);
-        mTopContainer.scrollTo(getMinScrollX(), 0);
+    public void showLeft(boolean animated) {
+        if (animated)
+            smoothScrollTo(getMinScrollX());
+        else
+            scrollTo(getMinScrollX(), true);
     }
     
-    public void showRight() {
-        mRightView.setVisibility(View.VISIBLE);
-        mLeftView.setVisibility(View.INVISIBLE);
-        mTopContainer.scrollTo(getMaxScrollX(), 0);
-
+    public void showRight(boolean animated) {
+        if (animated)
+            smoothScrollTo(getMaxScrollX());
+        else
+            scrollTo(getMaxScrollX(), true);
     }
     
-    public void showTop() {
-        mTopContainer.scrollTo(0, 0);
+    public void showTop(boolean animated) {
+        if (animated)
+            smoothScrollTo(0);
+        else
+            scrollTo(0, true);
     }
     
     private boolean isOkToScroll(MotionEvent ev)
