@@ -28,7 +28,7 @@ import android.widget.RelativeLayout;
 /*
 * IMPORTANT: if you turn autoscrolling on, remember to turn it off in your activity's onPause
 */
-public class DeckView extends RelativeLayout {
+public class DeckView extends RelativeLayout implements StoppableScrollView {
     
     public static final int DEFAULT_VISIBLE_SIDE_MARGIN_DP = 80;
     
@@ -56,6 +56,8 @@ public class DeckView extends RelativeLayout {
     
     private FrameLayout mLeftShadow = null;
     private FrameLayout mRightShadow = null;
+    
+    private boolean mScrollingDisabled = false;
 
     public DeckView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -208,8 +210,10 @@ public class DeckView extends RelativeLayout {
             scrollTo(getCenterScrollX(), true);
     }
     
-    private boolean isOkToScroll(MotionEvent ev)
-    {
+    private boolean isOkToScroll(MotionEvent ev) {
+        if (mScrollingDisabled)
+            return false;
+        
         if (mIsBeingDragged || mIsBeingScrolled)
             return true;
         
@@ -355,6 +359,7 @@ public class DeckView extends RelativeLayout {
             mIsBeingDragged = false;
             mIsBeingScrolled = false;
             mScrollXOnDown = null;
+            setParentScrollingAllowed(true);
         } else {
             if (scrollX < (centerX + minX)/2)
                 smoothScrollTo(minX);
@@ -480,14 +485,8 @@ public class DeckView extends RelativeLayout {
             mIsBeingScrolled = true;
             boolean finishScroll = false;
             int curX = mScroller.getCurrX();
-            if (curX > getMaxScrollX()) {
-                curX = getMaxScrollX();
+            if (curX == mScroller.getFinalX())
                 finishScroll = true;
-            }
-            if (curX < getMinScrollX()) {
-                curX = getMinScrollX();
-                finishScroll = true;
-            }
             
             scrollTo(curX, false);
             postInvalidate();
@@ -531,6 +530,21 @@ public class DeckView extends RelativeLayout {
     
     public void allowInvalidate() {
         mPreventInvalidate = false;
+    }
+
+    @Override
+    public void stopScrolling() {
+        mScrollingDisabled = true;
+    }
+
+    @Override
+    public void allowScrolling() {
+        mScrollingDisabled = false;
+    }
+
+    @Override
+    public boolean isScrollingAllowed() {
+        return !mScrollingDisabled;
     }
     
     

@@ -1,10 +1,12 @@
 package org.droidkit.widget;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -22,6 +24,10 @@ public class HandyListView extends ListView implements StoppableScrollView {
 	private boolean mIsBeingTouched = false;
 	private boolean mScrollingAllowed = true;
 //	private int mListViewHiddenValue = View.GONE;
+	
+	private ArrayList<WeakReference<StoppableScrollView>> mStoppableScrollViews = new ArrayList<WeakReference<StoppableScrollView>>();
+	private int mTouchSlop;
+	private float mLastMotionY;
 
 	public HandyListView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -39,29 +45,81 @@ public class HandyListView extends ListView implements StoppableScrollView {
 	}
 	
 	private void initHandyListView() {
-		
+        final ViewConfiguration configuration = ViewConfiguration.get(getContext());
+        mTouchSlop = configuration.getScaledTouchSlop();
 	}
 	
+    public void addStoppableScrollView(StoppableScrollView stoppableScrollView) {
+        if (stoppableScrollView != null) {
+            mStoppableScrollViews.add(new WeakReference<StoppableScrollView>(stoppableScrollView));
+        }
+    }
+    
+    private void setStoppableScrollingAllowed(boolean allowed) {
+        for (WeakReference<StoppableScrollView> ref : mStoppableScrollViews) {
+            StoppableScrollView sv = ref.get();
+            if (sv != null) {
+                if (allowed)
+                    sv.allowScrolling();
+                else
+                    sv.stopScrolling();
+            }
+        }
+    }	
 	
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mScrollingAllowed)
-            return super.onInterceptTouchEvent(ev);
-        return false;
+        if (!mScrollingAllowed)
+            return false;
+        
+        int action = ev.getAction() & MotionEvent.ACTION_MASK;
+        
+        switch(action) {
+            case MotionEvent.ACTION_DOWN:
+                mLastMotionY = ev.getY();
+                break;    
+            case MotionEvent.ACTION_MOVE:
+                float y = ev.getY();
+                int dy = (int)Math.abs(y - mLastMotionY);
+                if (dy > mTouchSlop) {
+                    setStoppableScrollingAllowed(false);
+                    mLastMotionY = y;
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                setStoppableScrollingAllowed(true);
+                break;
+        }
+        
+        return super.onInterceptTouchEvent(ev);
     }
     
 	@Override
     public boolean onTouchEvent(MotionEvent ev) {
 	    if (!mScrollingAllowed)
 	        return false;
-        switch(ev.getAction()) {
+	    
+	    int action = ev.getAction() & MotionEvent.ACTION_MASK;
+	    
+        switch(action) {
             case MotionEvent.ACTION_DOWN:
+                mIsBeingTouched = true;
+                mLastMotionY = ev.getY();
+                break;
             case MotionEvent.ACTION_MOVE:
                 mIsBeingTouched = true;
+                float y = ev.getY();
+                int dy = (int)Math.abs(y - mLastMotionY);
+                if (dy > mTouchSlop) {
+                    setStoppableScrollingAllowed(false);
+                    mLastMotionY = y;
+                }
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 mIsBeingTouched = false;
+                setStoppableScrollingAllowed(true);
                 break;
         }
         return super.onTouchEvent(ev);
