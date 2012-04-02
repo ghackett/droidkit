@@ -9,6 +9,7 @@ package org.droidkit.widget;
 import java.lang.ref.WeakReference;
 
 import org.droidkit.DroidKit;
+import org.droidkit.R;
 import org.droidkit.util.tricks.CLog;
 
 import android.content.Context;
@@ -20,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -48,6 +50,9 @@ public class DeckView extends RelativeLayout {
     private float mLastMotionX;
     private VelocityTracker mVelocityTracker;
     private boolean mPreventInvalidate = false;
+    
+    private FrameLayout mLeftShadow = null;
+    private FrameLayout mRightShadow = null;
 
     public DeckView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -84,10 +89,35 @@ public class DeckView extends RelativeLayout {
         mTopContainer = new RelativeLayout(getContext());
     }
     
-    public void setViews(View leftView, View rightView, View topView) {
+    public void setViews(View leftView, View rightView, View topView, boolean useShadows) {
         mLeftView = leftView;
         mRightView = rightView;
         mTopView = topView;
+        
+        if (useShadows) {
+            if (mLeftShadow == null) {
+                mLeftShadow = new FrameLayout(getContext());
+                mLeftShadow.setBackgroundResource(R.drawable.bg_shadow_left);
+//                mLeftShadow.setBackgroundColor(Color.YELLOW);
+            }
+            if (mRightShadow == null) {
+                mRightShadow = new FrameLayout(getContext());
+                mRightShadow.setBackgroundResource(R.drawable.bg_shadow_right);
+//                mRightShadow.setBackgroundColor(Color.CYAN);
+            }
+        } else {
+            if (mLeftShadow != null) {
+                if (mLeftShadow.getParent() != null)
+                    ((ViewGroup)mLeftShadow.getParent()).removeView(mLeftShadow);
+                mLeftShadow = null;
+            }
+            if (mRightShadow != null) {
+                if (mRightShadow.getParent() != null)
+                    ((ViewGroup)mRightShadow.getParent()).removeView(mRightShadow);
+                mRightShadow = null;
+            }
+        }
+        
         updateLayout();
     }
     
@@ -110,10 +140,14 @@ public class DeckView extends RelativeLayout {
         }
     }
     
+    
+    
     private void updateLayout() {
         if (getWidth() <= 0 || mLeftView == null || mRightView == null || mTopView == null) {
             return;
         }
+        
+        mTopContainer.removeAllViews();
         removeAllViews();
         
         RelativeLayout.LayoutParams leftViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
@@ -135,9 +169,20 @@ public class DeckView extends RelativeLayout {
         topViewLayoutParams.leftMargin = getWidth() - mVisibleSideMarginPx;
         mTopView.setLayoutParams(topViewLayoutParams);
         
+        mTopContainer.addView(mTopView);
+        
+        if (mLeftShadow != null && mRightShadow != null) {
+            
+            RelativeLayout.LayoutParams leftParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
+            RelativeLayout.LayoutParams rightParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
+            rightParams.leftMargin = (getWidth()*2 - mVisibleSideMarginPx);
+            
+            mTopContainer.addView(mLeftShadow, leftParams);
+            mTopContainer.addView(mRightShadow, rightParams);
+        }
+        
         addView(mLeftView);
         addView(mRightView);
-        mTopContainer.addView(mTopView);
         addView(mTopContainer);
     }
     
