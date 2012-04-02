@@ -162,7 +162,7 @@ public class DeckView extends RelativeLayout {
         topContainerLayoutParams.leftMargin = -((topContainerWidth - getWidth())/2);
         mTopContainer.setLayoutParams(topContainerLayoutParams);
         mTopContainer.setBackgroundColor(Color.TRANSPARENT);
-        mTopContainer.scrollTo(0, 0);
+        mTopContainer.scrollTo(getCenterScrollX(), 0);
         
         RelativeLayout.LayoutParams topViewLayoutParams = new RelativeLayout.LayoutParams(getWidth(), getHeight());
 //        topViewLayoutParams.addRule(CENTER_HORIZONTAL);
@@ -202,9 +202,9 @@ public class DeckView extends RelativeLayout {
     
     public void showTop(boolean animated) {
         if (animated)
-            smoothScrollTo(0);
+            smoothScrollTo(getCenterScrollX());
         else
-            scrollTo(0, true);
+            scrollTo(getCenterScrollX(), true);
     }
     
     private boolean isOkToScroll(MotionEvent ev)
@@ -219,17 +219,23 @@ public class DeckView extends RelativeLayout {
         
         float x = ev.getX();
         int scrollX = mTopContainer.getScrollX();
+        int centerX = getCenterScrollX();
         
         CLog.e("Event X: " + x + " Scroll X: " + scrollX);
         
-        if (scrollX == 0)
+//        if (scrollX == centerX)
+//            return true;
+//        else if (scrollX < centerX)
+//            return 
+        
+        if (scrollX == centerX)
             return true;
-        else if (scrollX < 0)
+        else if (scrollX < centerX)
             return x > Math.abs(scrollX);
         else
             return x < getWidth()-scrollX;
-        
-//        CLog.e("Event X: " + x + " Scroll X: " + scrollX);
+//        
+//        CLog.e("Event X: " + x + " Scroll X: " + scrollX + ", centerx = " + centerX);
 //        return true;
     }
     
@@ -339,16 +345,17 @@ public class DeckView extends RelativeLayout {
         int scrollX = mTopContainer.getScrollX();
         int maxX = getMaxScrollX();
         int minX = getMinScrollX();
-        if (scrollX == 0 || scrollX == maxX || scrollX == minX) {
+        int centerX = getCenterScrollX();
+        if (scrollX == centerX || scrollX == maxX || scrollX == minX) {
             mIsBeingDragged = false;
             mIsBeingScrolled = false;
         } else {
-            if (scrollX < minX/2)
+            if (scrollX < (centerX + minX)/2)
                 smoothScrollTo(minX);
-            else if (scrollX > maxX/2)
+            else if (scrollX > (centerX + maxX)/2)
                 smoothScrollTo(maxX);
             else
-                smoothScrollTo(0);
+                smoothScrollTo(centerX);
         }
     }
     
@@ -375,16 +382,17 @@ public class DeckView extends RelativeLayout {
         
         int maxX = getMaxScrollX();
         int minX = getMinScrollX();
+        int centerX = getCenterScrollX();
         
         if (scrollX < minX)
             scrollX = minX;
         if (scrollX > maxX)
             scrollX = maxX;
         
-        if (scrollX < 0) {
+        if (scrollX < centerX) {
             mLeftView.setVisibility(VISIBLE);
             mRightView.setVisibility(INVISIBLE);
-        } else if (scrollX > 0) {
+        } else if (scrollX > centerX) {
             mLeftView.setVisibility(INVISIBLE);
             mRightView.setVisibility(VISIBLE);
         }
@@ -421,11 +429,12 @@ public class DeckView extends RelativeLayout {
         int scrollX = mTopContainer.getScrollX();
         int maxX = getMaxScrollX();
         int minX = getMinScrollX();
+        int centerX = getCenterScrollX();
         
-        if (scrollX > 0)
-            minX = 0;
-        if (scrollX < 0)
-            maxX = 0;
+        if (scrollX > centerX)
+            minX = centerX;
+        if (scrollX < centerX)
+            maxX = centerX;
         
         mScroller.fling(scrollX, 0, initVelocity, 0, minX, maxX, 0, 0);
         invalidate();
@@ -437,6 +446,10 @@ public class DeckView extends RelativeLayout {
     
     private int getMinScrollX() {
         return -(getWidth() - mVisibleSideMarginPx);
+    }
+    
+    private int getCenterScrollX() {
+        return 0;
     }
     
     @Override
