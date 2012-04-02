@@ -27,7 +27,9 @@ import android.widget.RelativeLayout;
 /*
 * IMPORTANT: if you turn autoscrolling on, remember to turn it off in your activity's onPause
 */
-public class DeckView extends RelativeLayout {    
+public class DeckView extends RelativeLayout {
+    
+    public static final int DEFAULT_VISIBLE_SIDE_MARGIN_DP = 80;
     
     private RelativeLayout mTopContainer;
     
@@ -66,7 +68,7 @@ public class DeckView extends RelativeLayout {
         setWillNotCacheDrawing(true);
         setWillNotDraw(false);
         
-        mVisibleSideMarginPx = DroidKit.getPixels(50);
+        mVisibleSideMarginPx = DroidKit.getPixels(DEFAULT_VISIBLE_SIDE_MARGIN_DP);
         mIsBeingDragged = false;
         mIsBeingScrolled = false;
         mVelocityTracker = null;
@@ -142,13 +144,13 @@ public class DeckView extends RelativeLayout {
     public void showLeft() {
         mRightView.setVisibility(View.INVISIBLE);
         mLeftView.setVisibility(View.VISIBLE);
-        mTopContainer.scrollTo(-(getWidth() - mVisibleSideMarginPx), 0);
+        mTopContainer.scrollTo(getMinScrollX(), 0);
     }
     
     public void showRight() {
         mRightView.setVisibility(View.VISIBLE);
         mLeftView.setVisibility(View.INVISIBLE);
-        mTopContainer.scrollTo((getWidth() - mVisibleSideMarginPx), 0);
+        mTopContainer.scrollTo(getMaxScrollX(), 0);
 
     }
     
@@ -284,10 +286,21 @@ public class DeckView extends RelativeLayout {
 
     }
     
-    private void finishScroll()
-    {
-        mIsBeingDragged = false;
-        mIsBeingScrolled = false;
+    private void finishScroll() {
+        int scrollX = mTopContainer.getScrollX();
+        int maxX = getMaxScrollX();
+        int minX = getMinScrollX();
+        if (scrollX == 0 || scrollX == maxX || scrollX == minX) {
+            mIsBeingDragged = false;
+            mIsBeingScrolled = false;
+        } else {
+            if (scrollX < minX/2)
+                smoothScrollTo(minX);
+            else if (scrollX > maxX/2)
+                smoothScrollTo(maxX);
+            else
+                smoothScrollTo(0);
+        }
     }
     
     private void setParentScrollingAllowed(boolean allowed) {
@@ -310,6 +323,14 @@ public class DeckView extends RelativeLayout {
         if (!invalidate) {
             preventInvalidate();
         }
+        
+        int maxX = getMaxScrollX();
+        int minX = getMinScrollX();
+        
+        if (scrollX < minX)
+            scrollX = minX;
+        if (scrollX > maxX)
+            scrollX = maxX;
         
         if (scrollX < 0) {
             mLeftView.setVisibility(VISIBLE);
@@ -347,8 +368,26 @@ public class DeckView extends RelativeLayout {
         if (!mScroller.isFinished()) {
             mScroller.abortAnimation();
         }
-        mScroller.fling(mTopContainer.getScrollX(), 0, initVelocity, 0, -(getWidth() - mVisibleSideMarginPx), (getWidth() - mVisibleSideMarginPx), 0, 0);
+        
+        int scrollX = mTopContainer.getScrollX();
+        int maxX = getMaxScrollX();
+        int minX = getMinScrollX();
+        
+        if (scrollX > 0)
+            minX = 0;
+        if (scrollX < 0)
+            maxX = 0;
+        
+        mScroller.fling(scrollX, 0, initVelocity, 0, minX, maxX, 0, 0);
         invalidate();
+    }
+    
+    private int getMaxScrollX() {
+        return (getWidth() - mVisibleSideMarginPx);
+    }
+    
+    private int getMinScrollX() {
+        return -(getWidth() - mVisibleSideMarginPx);
     }
     
     @Override
@@ -357,12 +396,12 @@ public class DeckView extends RelativeLayout {
             mIsBeingScrolled = true;
             boolean finishScroll = false;
             int curX = mScroller.getCurrX();
-            if (curX > (getWidth() - mVisibleSideMarginPx)) {
-                curX = (getWidth() - mVisibleSideMarginPx);
+            if (curX > getMaxScrollX()) {
+                curX = getMaxScrollX();
                 finishScroll = true;
             }
-            if (curX < -(getWidth() - mVisibleSideMarginPx)) {
-                curX = -(getWidth() - mVisibleSideMarginPx);
+            if (curX < getMinScrollX()) {
+                curX = getMinScrollX();
                 finishScroll = true;
             }
             
