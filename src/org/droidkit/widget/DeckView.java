@@ -98,12 +98,10 @@ public class DeckView extends RelativeLayout {
             if (mLeftShadow == null) {
                 mLeftShadow = new FrameLayout(getContext());
                 mLeftShadow.setBackgroundResource(R.drawable.bg_shadow_left);
-//                mLeftShadow.setBackgroundColor(Color.YELLOW);
             }
             if (mRightShadow == null) {
                 mRightShadow = new FrameLayout(getContext());
                 mRightShadow.setBackgroundResource(R.drawable.bg_shadow_right);
-//                mRightShadow.setBackgroundColor(Color.CYAN);
             }
         } else {
             if (mLeftShadow != null) {
@@ -159,13 +157,12 @@ public class DeckView extends RelativeLayout {
         
         int topContainerWidth = (getWidth() * 3) - (mVisibleSideMarginPx * 2);
         RelativeLayout.LayoutParams topContainerLayoutParams = new LayoutParams(topContainerWidth, getHeight());
-        topContainerLayoutParams.leftMargin = -((topContainerWidth - getWidth())/2);
+        topContainerLayoutParams.leftMargin = (-topContainerWidth) + getWidth();
         mTopContainer.setLayoutParams(topContainerLayoutParams);
         mTopContainer.setBackgroundColor(Color.TRANSPARENT);
         mTopContainer.scrollTo(getCenterScrollX(), 0);
         
         RelativeLayout.LayoutParams topViewLayoutParams = new RelativeLayout.LayoutParams(getWidth(), getHeight());
-//        topViewLayoutParams.addRule(CENTER_HORIZONTAL);
         topViewLayoutParams.leftMargin = getWidth() - mVisibleSideMarginPx;
         mTopView.setLayoutParams(topViewLayoutParams);
         
@@ -220,23 +217,14 @@ public class DeckView extends RelativeLayout {
         float x = ev.getX();
         int scrollX = mTopContainer.getScrollX();
         int centerX = getCenterScrollX();
-        
-        CLog.e("Event X: " + x + " Scroll X: " + scrollX);
-        
-//        if (scrollX == centerX)
-//            return true;
-//        else if (scrollX < centerX)
-//            return 
+        int trueX = scrollX + (int)x;
         
         if (scrollX == centerX)
             return true;
         else if (scrollX < centerX)
-            return x > Math.abs(scrollX);
+            return trueX > getCenterScrollX();
         else
-            return x < getWidth()-scrollX;
-//        
-//        CLog.e("Event X: " + x + " Scroll X: " + scrollX + ", centerx = " + centerX);
-//        return true;
+            return trueX < (getCenterScrollX() + getWidth());
     }
     
     @Override
@@ -441,15 +429,18 @@ public class DeckView extends RelativeLayout {
     }
     
     private int getMaxScrollX() {
-        return (getWidth() - mVisibleSideMarginPx);
+        return 0;
+//        return (getWidth() - mVisibleSideMarginPx);
     }
     
     private int getMinScrollX() {
-        return -(getWidth() - mVisibleSideMarginPx);
+        return -((getWidth() * 2) - (mVisibleSideMarginPx * 2));
+//        return -(getWidth() - mVisibleSideMarginPx);
     }
     
     private int getCenterScrollX() {
-        return 0;
+        return -(getWidth() - mVisibleSideMarginPx);
+//        return 0;
     }
     
     @Override
