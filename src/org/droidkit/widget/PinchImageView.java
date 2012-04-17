@@ -6,6 +6,7 @@ import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -38,6 +39,8 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	private Bitmap mBitmap = null;
 	private int mBitmapWidth = 0;
 	private int mBitmapHeight = 0;
+	
+	private Rect mBitmapRect = null;
 	
 	private int mRotation = 0;
 
@@ -76,9 +79,11 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		if (bm == null) {
 			mBitmapHeight = 0;
 			mBitmapWidth = 0;
+			mBitmapRect = null;
 		} else {
 			mBitmapWidth = bm.getWidth();
 			mBitmapHeight = bm.getHeight();
+			mBitmapRect = new Rect(0, 0, mBitmapWidth, mBitmapWidth);
 		}
 		mBitmap = bm;
 		resetMinScale();
@@ -482,16 +487,17 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	protected void onDraw(Canvas canvas) {
 	    
 	    
-		if (mBitmap == null || mBitmap.isRecycled() || getWidth() == 0) {
+		if (mBitmap == null || mBitmap.isRecycled() || getWidth() == 0) { 
 			super.onDraw(canvas);
 			return;
 		}
 		
+    		
 		if (mRotation != 0)
 		    canvas.rotate(mRotation, mBitmapWidth/2, mBitmapHeight/2);
 		
 		RectF imgRect = getImageRect();
-		canvas.drawBitmap(mBitmap, null, imgRect, null);
+		canvas.drawBitmap(mBitmap, mBitmapRect, imgRect, null);
 		
 		super.onDraw(canvas);
 		
