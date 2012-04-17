@@ -83,7 +83,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		} else {
 			mBitmapWidth = bm.getWidth();
 			mBitmapHeight = bm.getHeight();
-			mBitmapRect = new Rect(0, 0, mBitmapWidth, mBitmapWidth);
+			mBitmapRect = new Rect(0, 0, mBitmapWidth, mBitmapHeight);
 		}
 		mBitmap = bm;
 		resetMinScale();
