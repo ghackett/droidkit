@@ -227,7 +227,7 @@ public class ImageTricks {
     	return null;
     }
     
-    public static Bitmap scaleDownImageUriToBitmap(Uri imageUri, int maxDimension, boolean deleteOriginal) {
+    public static Bitmap scaleDownImageUriToBitmap(Uri imageUri, int maxDimension, boolean deleteOriginal, boolean preferSmaller) {
     	try {
     	    
     	    if (DroidKit.DEBUG) CLog.e("SCALE DOWN IMAGE - max dimension = " + maxDimension);
@@ -249,6 +249,12 @@ public class ImageTricks {
 
         	opts = new BitmapFactory.Options();
         	opts.inSampleSize = maxSideSize / maxDimension;
+        	
+        	if (preferSmaller) {
+            	float finalSize = (float)maxSideSize / (float) opts.inSampleSize;
+            	if (finalSize > maxDimension)
+            	    opts.inSampleSize++;
+        	}
         	
         	if (DroidKit.DEBUG) CLog.e("SCALE DOWN IMAGE - new sample size = " + opts.inSampleSize);
         	
@@ -277,11 +283,11 @@ public class ImageTricks {
     	return null;
     }
     
-    public static File scaleDownImageUriToFile(Uri imageUri, int maxDimension, CompressFormat format, int quality, boolean deleteOriginal) {
+    public static File scaleDownImageUriToFile(Uri imageUri, int maxDimension, CompressFormat format, int quality, boolean deleteOriginal, boolean preferSmaller) {
     	if (!ImageTricks.checkTempCameraDir())
     		return null;
 
-    	Bitmap b = scaleDownImageUriToBitmap(imageUri, maxDimension, deleteOriginal);
+    	Bitmap b = scaleDownImageUriToBitmap(imageUri, maxDimension, deleteOriginal, preferSmaller);
     	if (b == null) 
     		return null;
     	
@@ -304,9 +310,9 @@ public class ImageTricks {
     	
     }
     
-    public static Uri scaleDownImageUri(Uri imageUri, int maxDimension, CompressFormat format, int quality, boolean deleteOriginal) {
+    public static Uri scaleDownImageUri(Uri imageUri, int maxDimension, CompressFormat format, int quality, boolean deleteOriginal, boolean preferSmaller) {
     	try {
-	    	File tmpFile = scaleDownImageUriToFile(imageUri, maxDimension, format, quality, deleteOriginal);
+	    	File tmpFile = scaleDownImageUriToFile(imageUri, maxDimension, format, quality, deleteOriginal, preferSmaller);
 	    	
 	    	if (tmpFile == null)
 	    		return null;

@@ -1,6 +1,8 @@
 package org.droidkit.widget;
 
 
+import org.droidkit.DroidKit;
+import org.droidkit.util.tricks.CLog;
 import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 
 import android.content.Context;
@@ -19,6 +21,9 @@ import android.view.View.OnTouchListener;
 public class PinchImageView extends View implements OnScaleGestureListener, OnGestureListener, OnDoubleTapListener, OnTouchListener  {
 //	private static final String TAG = "PinchImageView";
 	
+    public interface OnMaxBitmapDimensionChangedListener {
+        public void onMaxBitmapDimensionChanged(int maxBitmapDimension);
+    }
 	
 	private ScaleGestureDetector mScaleGestureDetector;
 	private GestureDetector mNormalGestureDetector;
@@ -43,6 +48,9 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	private Rect mBitmapRect = null;
 	
 	private int mRotation = 0;
+	
+	private OnMaxBitmapDimensionChangedListener mBitmapDimensionListener = null;
+	private int mMaxDimension = 0;
 
 	public PinchImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -70,8 +78,14 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		mScaler = new Scroller(getContext());
 	}
 	
+	public void setOnMaxBitmapDimensionChangedListener(OnMaxBitmapDimensionChangedListener listener) {
+	    mBitmapDimensionListener = listener;
+	}
 	
 	
+	public int getMaxBitmapDimension() {
+	    return mMaxDimension;
+	}
 	
 	
 
@@ -485,7 +499,13 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
-	    
+	    if (DroidKit.isIceCreamSandwich() && mMaxDimension == 0) {
+	        mMaxDimension = HardwareAccelerationCompat.getCanvasMaxDimension(canvas);
+	        if (DroidKit.DEBUG) CLog.e("CANVAS MAX DIMENSION = " + mMaxDimension);
+	        if (mBitmapDimensionListener != null) {
+	            mBitmapDimensionListener.onMaxBitmapDimensionChanged(mMaxDimension);
+	        }
+	    }
 	    
 		if (mBitmap == null || mBitmap.isRecycled() || getWidth() == 0) { 
 			super.onDraw(canvas);
