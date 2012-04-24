@@ -69,7 +69,7 @@ public abstract class WakefulIntentService extends Service {
     private String mName;
     private boolean mRedelivery;
     
-    private ArrayList<Message> mMessages = null;
+    protected ArrayList<Message> mMessages = null;
 
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
@@ -180,16 +180,21 @@ public abstract class WakefulIntentService extends Service {
         if (mMessages == null)
             mMessages = new ArrayList<Message>();
         mMessages.add(msg);
+        onIntentAddedToQueue((Intent)msg.obj);
     }
     
     private synchronized void finishMessage(Message msg) {
         if (mMessages != null)
             mMessages.remove(msg);
+        onIntentFinished((Intent)msg.obj);
     }
     
     protected synchronized boolean isMessageQueueEmpty() {
         return mMessages == null || mMessages.isEmpty();
     }
+    
+    public void onIntentAddedToQueue(Intent intent) {}
+    public void onIntentFinished(Intent intent) {}
     
     protected static synchronized void lock(String name) {
         if (sServiceLocks == null)
