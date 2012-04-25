@@ -46,10 +46,13 @@ public class CLog {
     
     public static void e(String msg, Intent i) {
         if (android.util.Log.isLoggable(LOG_TAG, android.util.Log.ERROR)) {
-            if (i == null)
-                android.util.Log.e(LOG_TAG, msg);
-            else
-                android.util.Log.e(LOG_TAG, msg + "\n" + Log.describeIntent(i));
+            android.util.Log.e(LOG_TAG, msg);
+            if (i != null) {
+                String[] intentDesc = Log.describeIntent(i).split("\n");
+                for (int j = 0; j<intentDesc.length; j++) {
+                    android.util.Log.e(LOG_TAG, intentDesc[j]);
+                }
+            }
         }
     }
     
