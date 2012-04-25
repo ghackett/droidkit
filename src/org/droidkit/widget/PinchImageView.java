@@ -1,11 +1,14 @@
 package org.droidkit.widget;
 
 
+import org.droidkit.DroidKit;
+import org.droidkit.util.tricks.CLog;
 import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -18,6 +21,9 @@ import android.view.View.OnTouchListener;
 public class PinchImageView extends View implements OnScaleGestureListener, OnGestureListener, OnDoubleTapListener, OnTouchListener  {
 //	private static final String TAG = "PinchImageView";
 	
+    public interface OnMaxBitmapDimensionChangedListener {
+        public void onMaxBitmapDimensionChanged(int maxBitmapDimension);
+    }
 	
 	private ScaleGestureDetector mScaleGestureDetector;
 	private GestureDetector mNormalGestureDetector;
@@ -39,7 +45,12 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	private int mBitmapWidth = 0;
 	private int mBitmapHeight = 0;
 	
+	private Rect mBitmapRect = null;
+	
 	private int mRotation = 0;
+	
+	private OnMaxBitmapDimensionChangedListener mBitmapDimensionListener = null;
+	private int mMaxDimension = 0;
 
 	public PinchImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -67,8 +78,14 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		mScaler = new Scroller(getContext());
 	}
 	
+	public void setOnMaxBitmapDimensionChangedListener(OnMaxBitmapDimensionChangedListener listener) {
+	    mBitmapDimensionListener = listener;
+	}
 	
 	
+	public int getMaxBitmapDimension() {
+	    return mMaxDimension;
+	}
 	
 	
 
@@ -76,9 +93,11 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		if (bm == null) {
 			mBitmapHeight = 0;
 			mBitmapWidth = 0;
+			mBitmapRect = null;
 		} else {
 			mBitmapWidth = bm.getWidth();
 			mBitmapHeight = bm.getHeight();
+			mBitmapRect = new Rect(0, 0, mBitmapWidth, mBitmapHeight);
 		}
 		mBitmap = bm;
 		resetMinScale();
@@ -480,18 +499,25 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
+	    if (DroidKit.isIceCreamSandwich() && mMaxDimension == 0) {
+	        mMaxDimension = HardwareAccelerationCompat.getCanvasMaxDimension(canvas);
+	        if (DroidKit.DEBUG) CLog.e("CANVAS MAX DIMENSION = " + mMaxDimension);
+	        if (mBitmapDimensionListener != null) {
+	            mBitmapDimensionListener.onMaxBitmapDimensionChanged(mMaxDimension);
+	        }
+	    }
 	    
-	    
-		if (mBitmap == null || mBitmap.isRecycled() || getWidth() == 0) {
+		if (mBitmap == null || mBitmap.isRecycled() || getWidth() == 0) { 
 			super.onDraw(canvas);
 			return;
 		}
 		
+    		
 		if (mRotation != 0)
 		    canvas.rotate(mRotation, mBitmapWidth/2, mBitmapHeight/2);
 		
 		RectF imgRect = getImageRect();
-		canvas.drawBitmap(mBitmap, null, imgRect, null);
+		canvas.drawBitmap(mBitmap, mBitmapRect, imgRect, null);
 		
 		super.onDraw(canvas);
 		

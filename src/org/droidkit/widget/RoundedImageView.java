@@ -55,11 +55,12 @@ public class RoundedImageView extends ImageView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-
-        Path clipPath = new Path();
-        RectF rect = new RectF(0, 0, this.getWidth(), this.getHeight());
-        clipPath.addRoundRect(rect, mRadii, Path.Direction.CW);
-        canvas.clipPath(clipPath);
+        if (!DroidKit.isHoneycomb() || !HardwareAccelerationCompat.isCanvasHardwareAccelerated(canvas)) {
+            Path clipPath = new Path();
+            RectF rect = new RectF(0, 0, this.getWidth(), this.getHeight());
+            clipPath.addRoundRect(rect, mRadii, Path.Direction.CW);
+            canvas.clipPath(clipPath);
+        }
 
         super.onDraw(canvas);
     }
