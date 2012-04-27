@@ -214,6 +214,10 @@ public class DroidKit {
         sApplicationContext.sendBroadcast(intent);
     }
     
+    public static void sendBroadcast(Intent intent, String receiverPermission) {
+        sApplicationContext.sendBroadcast(intent, receiverPermission);
+    }
+    
     public static Resources getResources() {
         return sApplicationContext.getResources();
     }
