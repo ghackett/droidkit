@@ -38,7 +38,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     private View mRightView;
     private View mTopView;
 
-    private WeakReference<StoppableScrollView> mParentScrollview;
+    private WeakReference<StoppableScrollView> mTopScrollView;
     private int mVisibleSideMarginPx;
     private Scroller mScroller;
     private int mTouchSlop;
@@ -53,6 +53,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     private int mMaxScrollX;
     private int mCenterScrollX;
     private Integer mScrollXOnDown = null;
+    private Integer mTouchPointOnDown = null;
     
     private FrameLayout mLeftShadow = null;
     private FrameLayout mRightShadow = null;
@@ -82,7 +83,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         mIsBeingDragged = false;
         mIsBeingScrolled = false;
         mVelocityTracker = null;
-        mParentScrollview = null;
+        mTopScrollView = null;
         
         mScroller = new Scroller(getContext());
         
@@ -251,10 +252,16 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         case MotionEvent.ACTION_MOVE: {
             final float x = ev.getX();
             final int dx = (int)Math.abs(x - mLastMotionX);
-            if (dx > mTouchSlop) {
+            
+            boolean startDrag = dx > mTouchSlop;
+            if (mScrollXOnDown != null && mTouchPointOnDown != null && mScrollXOnDown == getCenterScrollX()) {
+                if (mTouchPointOnDown > mVisibleSideMarginPx && mTouchPointOnDown < (getWidth()-mVisibleSideMarginPx))
+                    startDrag = false;
+            }
+            if (startDrag) {
                 mIsBeingDragged = true;
                 mLastMotionX = x;
-                setParentScrollingAllowed(false);
+                setTopScrollingAllowed(false);
                 mScrollXOnDown = mTopContainer.getScrollX();
             }
             break;
@@ -262,6 +269,8 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         
         case MotionEvent.ACTION_DOWN: { 
             mScrollXOnDown = mTopContainer.getScrollX();
+            mTouchPointOnDown = (int) ev.getX();
+            
             final float x = ev.getX();
             mLastMotionX = x;
             mIsBeingDragged = !mScroller.isFinished();
@@ -271,8 +280,9 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         case MotionEvent.ACTION_CANCEL:
         case MotionEvent.ACTION_UP:
             mIsBeingDragged = false;
-            setParentScrollingAllowed(true);
+            setTopScrollingAllowed(true);
             mScrollXOnDown = null;
+            mTouchPointOnDown = null;
             break;
         }
         
@@ -307,11 +317,12 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
             case MotionEvent.ACTION_MOVE: {
                 if (mScrollXOnDown == null)
                     mScrollXOnDown = mTopContainer.getScrollX();
+                
                 if (!mScroller.isFinished()) {
                     mScroller.abortAnimation();
                     mIsBeingDragged = true;
                     mIsBeingScrolled = false;
-                    setParentScrollingAllowed(false);
+                    setTopScrollingAllowed(false);
                 }
                 final float x = event.getX();
                 final int deltaX = (int) (mLastMotionX - x);
@@ -340,8 +351,9 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
                     mVelocityTracker = null;
                 }
                 
-                setParentScrollingAllowed(true);
+                setTopScrollingAllowed(true);
                 mScrollXOnDown = null;
+                mTouchPointOnDown = null;
                 
                 break;
             }
@@ -359,7 +371,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
             mIsBeingDragged = false;
             mIsBeingScrolled = false;
             mScrollXOnDown = null;
-            setParentScrollingAllowed(true);
+            setTopScrollingAllowed(true);
         } else {
             if (scrollX < (centerX + minX)/2)
                 smoothScrollTo(minX);
@@ -370,9 +382,9 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         }
     }
     
-    private void setParentScrollingAllowed(boolean allowed) {
-        if (mParentScrollview != null) {
-            StoppableScrollView ss = mParentScrollview.get();
+    private void setTopScrollingAllowed(boolean allowed) {
+        if (mTopScrollView != null) {
+            StoppableScrollView ss = mTopScrollView.get();
             if (ss != null) {
                 if (allowed)
                     ss.allowScrolling();
@@ -382,11 +394,11 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         }
     }
     
-    public void setParentScrollView(StoppableScrollView parentScrollView) {
-        mParentScrollview = new WeakReference<StoppableScrollView>(parentScrollView);
+    public void setTopScrollView(StoppableScrollView parentScrollView) {
+        mTopScrollView = new WeakReference<StoppableScrollView>(parentScrollView);
     }
     
-    public void scrollTo(int scrollX, boolean invalidate) {
+    protected void scrollTo(int scrollX, boolean invalidate) {
         if (!invalidate) {
             preventInvalidate();
         }
@@ -412,19 +424,15 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         allowInvalidate();
     }
     
-    public void scrollBy(int dx, boolean invalidate) {
+    protected void scrollBy(int dx, boolean invalidate) {
         scrollTo(mTopContainer.getScrollX()+dx, invalidate);
     }
     
-    public void smoothScrollTo(int x) {
-        if (!mScroller.isFinished()) {
-            mScroller.abortAnimation();
-        }
-        mScroller.startScroll(mTopContainer.getScrollX(), 0, x - mTopContainer.getScrollX(), 0);
-        invalidate();
+    protected void smoothScrollTo(int x) {
+        smoothScrollTo(x, 250);
     }
     
-    public void smoothScrollTo(int x, int duration) {
+    protected void smoothScrollTo(int x, int duration) {
         if (!mScroller.isFinished()) {
             mScroller.abortAnimation();
         }
@@ -432,7 +440,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         invalidate();
     }
     
-    public void fling(int initVelocity) {
+    protected void fling(int initVelocity) {
         if (!mScroller.isFinished()) {
             mScroller.abortAnimation();
         }
