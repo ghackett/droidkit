@@ -2,6 +2,9 @@ package org.droidkit.cachekit;
 
 import java.util.Stack;
 
+import org.droidkit.DroidKit;
+import org.droidkit.util.tricks.CLog;
+
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,10 +32,13 @@ public class BoundLazyLoader {
         @Override
         protected void onObjectUnbound(Object object) {
             super.onObjectUnbound(object);
+            if (DroidKit.DEBUG) CLog.e("Unbound object");
             if (object != null && object instanceof Bitmap) {
                 Bitmap b = (Bitmap)object;
-                if (!b.isRecycled())
+                if (!b.isRecycled()) {
+                    if (DroidKit.DEBUG) CLog.e("RECYCLE!!!");
                     b.recycle();
+                }
             }
         }
         
