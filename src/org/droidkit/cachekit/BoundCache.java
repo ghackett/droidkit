@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.droidkit.DroidKit;
+import org.droidkit.util.tricks.CLog;
+
 /** 
  * The purpose of this class is to provide provide a cache where each cached object is bound to a weakly referenced 
  * binder object. Everytime the cache is cleaned (as opposed to cleared), if any of the binder objects dissapear (due to 
@@ -44,6 +47,13 @@ public class BoundCache<K, B, C> {
         mKeyMap.put(key, object);
         mCacheMap.put(object, key);
         C oldObject = mBinders.put(binder, object);
+        if (oldObject != null && oldObject == object) {
+            if (DroidKit.DEBUG) CLog.e("Same object bound to same view, returning");
+            return;
+        }
+            
+        if (DroidKit.DEBUG && oldObject != null)
+            CLog.e("SEEN THIS BINDER BEFORE");
         if (mObjectBindings.containsKey(object)) {
             mObjectBindings.get(object).add(new WeakReference<B>(binder));
         } else {
@@ -52,19 +62,42 @@ public class BoundCache<K, B, C> {
             mObjectBindings.put(object, binderList);
         }
         
-        if (cleanOldObject && oldObject != null) {
+        if (oldObject != null) {
             LinkedList<WeakReference<B>> bindings = mObjectBindings.get(oldObject);
-            if (bindings != null && !bindings.isEmpty()) {
-                LinkedList<WeakReference<B>> bindingsToRemove = new LinkedList<WeakReference<B>>();
-                for (WeakReference<B> b : bindings) {
-                    if (b.get() == null)
-                        bindingsToRemove.add(b);
+            
+            if (bindings != null) {
+                if (DroidKit.DEBUG) CLog.e("current binding size = " + bindings.size());
+                WeakReference<B> bindingToRemove = null;
+                for (WeakReference<B> ref : bindings) {
+                    B b = ref.get();
+                    if (b == binder) {
+                        bindingToRemove = ref;
+                    }
                 }
-                bindings.removeAll(bindingsToRemove);
+                if (bindingToRemove != null)
+                    bindings.remove(bindingToRemove);
             }
-            if (bindings == null || bindings.isEmpty()) {
-                mObjectBindings.remove(oldObject);
-                onObjectUnbound(oldObject);
+            
+            if (DroidKit.DEBUG && bindings != null && bindings.size() >= 1) {
+                CLog.e("oldBinding = " + bindings.get(0).toString());
+                CLog.e("newBinding = " + binder.toString());
+            }
+            
+            if (cleanOldObject) {
+                if (bindings != null && !bindings.isEmpty()) {
+                    LinkedList<WeakReference<B>> bindingsToRemove = new LinkedList<WeakReference<B>>();
+                    for (WeakReference<B> b : bindings) {
+                        if (b.get() == null)
+                            bindingsToRemove.add(b);
+                    }
+                    if (DroidKit.DEBUG) CLog.e("removing " + bindingsToRemove.size() + " more bindings");
+                    bindings.removeAll(bindingsToRemove);
+                    if (DroidKit.DEBUG) CLog.e("new bindings size: " + bindings.size());
+                }
+                if (bindings == null || bindings.isEmpty()) {
+                    mObjectBindings.remove(oldObject);
+                    onObjectUnbound(oldObject);
+                }
             }
         }
     }
