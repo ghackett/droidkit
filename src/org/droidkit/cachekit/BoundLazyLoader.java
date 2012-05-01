@@ -108,9 +108,10 @@ public class BoundLazyLoader {
         Object obj = sCache.bind(task.getViewTag(), task.getView(), false);
         if (obj != null) {
             task.setResultObject(obj);
-            task.onLoadComplete(obj);
+            task.onLoadComplete(task.getView(), obj);
             return false;
         }
+        task.onLoadingStarted(task.getView());
         return true;
     }
     
@@ -228,7 +229,7 @@ public class BoundLazyLoader {
         public void run() {
             try {
                 if (mTask.getView() != null && mTask.getViewTag().equals((String)mTask.getView().getTag())) {
-                    mTask.onLoadComplete(mTask.getResultObject());
+                    mTask.onLoadComplete(mTask.getView(), mTask.getResultObject());
                 }
             } catch (Throwable t) {
                 t.printStackTrace();

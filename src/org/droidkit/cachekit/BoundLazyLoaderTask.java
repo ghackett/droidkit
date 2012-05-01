@@ -4,7 +4,14 @@ import android.view.View;
 
 public abstract class BoundLazyLoaderTask {
     
+    private View mView;
     private Object mResultObject;
+    
+    public BoundLazyLoaderTask(View view) {
+        mView = view;
+        if (view == null)
+            throw new NullPointerException("cannot pass a null view to BoundLazyLoaderTask");
+    }
     
     public Object getResultObject() {
         return mResultObject;
@@ -12,6 +19,10 @@ public abstract class BoundLazyLoaderTask {
     
     public void setResultObject(Object resultObject) {
         mResultObject = resultObject;
+    }
+    
+    public View getView() {
+        return mView;
     }
     
     /**
@@ -26,7 +37,7 @@ public abstract class BoundLazyLoaderTask {
      * other tasks out of the processing stack - also its tag will be set
      * and then compared to at the end of the process
      */
-    public abstract View getView();
+//    public abstract View getView();
     
     /**
      * @return the tag that will be assigned to the view and then compared against
@@ -39,10 +50,11 @@ public abstract class BoundLazyLoaderTask {
      */
     public abstract Object loadInBackground();
     
+    public abstract void onLoadingStarted(View v);
     
     /**
      * Called on the UI thread after the lazy loading has completed
      */
-    public abstract void onLoadComplete(Object resultObject);
+    public abstract void onLoadComplete(View view, Object resultObject);
 }
 
