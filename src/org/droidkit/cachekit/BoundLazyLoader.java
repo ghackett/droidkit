@@ -194,9 +194,14 @@ public class BoundLazyLoader {
                     
                     if (task != null && task.getView() != null && task.getViewTag().equals((String)task.getView().getTag())) {
                         try {
-                            task.setResultObject(task.loadInBackground());
-                            if (task.getResultObject() != null)
-                                sCache.put(task.getViewTag(), task.getView(), task.getResultObject(), true);
+                            Object obj = sCache.bind(task.getViewTag(), task.getView(), true);
+                            if (obj != null) {
+                                task.setResultObject(obj);
+                            } else {
+                                task.setResultObject(task.loadInBackground());
+                                if (task.getResultObject() != null)
+                                    sCache.put(task.getViewTag(), task.getView(), task.getResultObject(), true);
+                            }
                             sCache.cleanCache();
                             mUiHandler.post(new UINotifierTask(task));
                         } catch (Throwable t) {
