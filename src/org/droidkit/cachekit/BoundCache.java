@@ -78,10 +78,10 @@ public class BoundCache<K, B, C> {
                     bindings.remove(bindingToRemove);
             }
             
-            if (DroidKit.DEBUG && bindings != null && bindings.size() >= 1) {
-                CLog.e("oldBinding = " + bindings.get(0).toString());
-                CLog.e("newBinding = " + binder.toString());
-            }
+//            if (DroidKit.DEBUG && bindings != null && bindings.size() >= 1) {
+//                CLog.e("oldBinding = " + bindings.get(0).toString());
+//                CLog.e("newBinding = " + binder.toString());
+//            }
             
             if (cleanOldObject) {
                 if (bindings != null && !bindings.isEmpty()) {
