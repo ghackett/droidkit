@@ -10,6 +10,7 @@ import java.lang.ref.WeakReference;
 
 import org.droidkit.DroidKit;
 import org.droidkit.R;
+import org.droidkit.util.tricks.CLog;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -21,6 +22,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -31,6 +33,16 @@ import android.widget.RelativeLayout;
 public class DeckView extends RelativeLayout implements StoppableScrollView {
     
     public static final int DEFAULT_VISIBLE_SIDE_MARGIN_DP = 80;
+    
+    private static final Interpolator sInterpolator = new Interpolator() {
+        public float getInterpolation(float t) {
+            // _o(t) = t * t * ((tension + 1) * t + tension)
+            // o(t) = _o(t - 1) + 1
+            t -= 1.0f;
+            return t * t * t + 1.0f;
+        }
+    };
+
     
     private RelativeLayout mTopContainer;
     
@@ -47,6 +59,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     private boolean mIsBeingDragged;
     private boolean mIsBeingScrolled;
     private float mLastMotionX;
+    private float mLastMotionY;
     private VelocityTracker mVelocityTracker;
     private boolean mPreventInvalidate = false;
     private int mMinScrollX;
@@ -85,7 +98,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         mVelocityTracker = null;
         mTopScrollView = null;
         
-        mScroller = new Scroller(getContext());
+        mScroller = new Scroller(getContext(), sInterpolator);
         
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
@@ -212,13 +225,17 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     }
     
     private boolean isOkToScroll(MotionEvent ev) {
-        if (mScrollingDisabled)
+        int action = ev.getAction() & MotionEvent.ACTION_MASK;
+        
+        if (mScrollingDisabled) {
+            if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP)
+                allowScrolling();
             return false;
+        }
         
         if (mIsBeingDragged || mIsBeingScrolled)
             return true;
         
-        int action = ev.getAction() & MotionEvent.ACTION_MASK;
         
         if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP)
             return true;
@@ -238,6 +255,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        CLog.e("onInterceptTouchEvent");
         
         if (!isOkToScroll(ev))
             return false;
@@ -251,13 +269,19 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         
         case MotionEvent.ACTION_MOVE: {
             final float x = ev.getX();
+            final float y = ev.getY();
             final int dx = (int)Math.abs(x - mLastMotionX);
+            final int dy = (int)Math.abs(y - mLastMotionY);
+            
+            if (dy > mTouchSlop) {
+                stopScrolling();
+            }
             
             boolean startDrag = dx > mTouchSlop;
-            if (mScrollXOnDown != null && mTouchPointOnDown != null && mScrollXOnDown == getCenterScrollX()) {
-                if (mTouchPointOnDown > mVisibleSideMarginPx && mTouchPointOnDown < (getWidth()-mVisibleSideMarginPx))
-                    startDrag = false;
-            }
+//            if (mScrollXOnDown != null && mTouchPointOnDown != null && mScrollXOnDown == getCenterScrollX()) {
+//                if (mTouchPointOnDown > mVisibleSideMarginPx && mTouchPointOnDown < (getWidth()-mVisibleSideMarginPx))
+//                    startDrag = false;
+//            }
             if (startDrag) {
                 mIsBeingDragged = true;
                 mLastMotionX = x;
@@ -272,7 +296,9 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
             mTouchPointOnDown = (int) ev.getX();
             
             final float x = ev.getX();
+            final float y = ev.getY();
             mLastMotionX = x;
+            mLastMotionY = y;
             mIsBeingDragged = !mScroller.isFinished();
             break;
         }
@@ -292,6 +318,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        CLog.e("onTouchEvent");
         
         if (!isOkToScroll(event))
             return false;
