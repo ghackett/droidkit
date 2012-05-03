@@ -10,7 +10,6 @@ import java.lang.ref.WeakReference;
 
 import org.droidkit.DroidKit;
 import org.droidkit.R;
-import org.droidkit.util.tricks.CLog;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -27,9 +26,6 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 
-/*
-* IMPORTANT: if you turn autoscrolling on, remember to turn it off in your activity's onPause
-*/
 public class DeckView extends RelativeLayout implements StoppableScrollView {
     
     public static final int DEFAULT_VISIBLE_SIDE_MARGIN_DP = 80;
@@ -255,7 +251,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        CLog.e("onInterceptTouchEvent");
+//        CLog.e("onInterceptTouchEvent");
         
         if (!isOkToScroll(ev))
             return false;
@@ -314,7 +310,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        CLog.e("onTouchEvent");
+//        CLog.e("onTouchEvent");
         
         if (!isOkToScroll(event))
             return false;
@@ -471,7 +467,9 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         float dxf = (float)Math.abs(dx);
         
         int maxWidth = getWidth()-mVisibleSideMarginPx;
+//        float millisPerPixel = 0.35714287f;
         float millisPerPixel = 200f/(float)maxWidth;
+//        CLog.e("millisPerPixel = " + millisPerPixel);
         float duration = millisPerPixel*dxf;
         return (int)duration;
     }
@@ -499,7 +497,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         if (scrollX < centerX)
             maxX = centerX;
         
-        CLog.e("init fling velocity = " + initVelocity);
+//        CLog.e("init fling velocity = " + initVelocity);
         int destX = initVelocity < 0 ? minX : maxX;
         int dx = destX - scrollX;
         
