@@ -456,7 +456,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     }
     
     protected void smoothScrollTo(int x) {
-        smoothScrollTo(x, 250);
+        smoothScrollTo(x, 150);
     }
     
     protected void smoothScrollTo(int x, int duration) {
@@ -490,7 +490,12 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         if (scrollX < centerX)
             maxX = centerX;
         
-        mScroller.fling(scrollX, 0, initVelocity, 0, minX, maxX, 0, 0);
+        CLog.e("init fling velocity = " + initVelocity);
+        int destX = initVelocity < 0 ? minX : maxX;
+        int dx = destX - scrollX;
+        
+//        mScroller.fling(scrollX, 0, initVelocity, 0, minX, maxX, 0, 0);
+        mScroller.startScroll(scrollX, 0, dx, 0, 150);
         invalidate();
     }
     
