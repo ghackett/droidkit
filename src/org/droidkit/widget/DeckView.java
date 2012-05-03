@@ -451,16 +451,29 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         scrollTo(mTopContainer.getScrollX()+dx, invalidate);
     }
     
-    protected void smoothScrollTo(int x) {
-        smoothScrollTo(x, 150);
-    }
+//    protected void smoothScrollTo(int x) {
+//        smoothScrollTo(x, 150);
+//    }
     
-    protected void smoothScrollTo(int x, int duration) {
+    protected void smoothScrollTo(int x) { //, int duration) {
         if (!mScroller.isFinished()) {
             mScroller.abortAnimation();
         }
-        mScroller.startScroll(mTopContainer.getScrollX(), 0, x - mTopContainer.getScrollX(), 0, duration);
+        
+        int scrollX = mTopContainer.getScrollX();
+        int dx = x - scrollX;
+        
+        mScroller.startScroll(scrollX, 0, dx, 0, calculateScrollDuration(dx));
         invalidate();
+    }
+    
+    protected int calculateScrollDuration(int dx) {
+        float dxf = (float)Math.abs(dx);
+        
+        int maxWidth = getWidth()-mVisibleSideMarginPx;
+        float millisPerPixel = 200f/(float)maxWidth;
+        float duration = millisPerPixel*dxf;
+        return (int)duration;
     }
     
     protected void fling(int initVelocity) {
@@ -491,7 +504,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         int dx = destX - scrollX;
         
 //        mScroller.fling(scrollX, 0, initVelocity, 0, minX, maxX, 0, 0);
-        mScroller.startScroll(scrollX, 0, dx, 0, 150);
+        mScroller.startScroll(scrollX, 0, dx, 0, calculateScrollDuration(dx));
         invalidate();
     }
     
