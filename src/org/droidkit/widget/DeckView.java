@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-/*
- * THIS CLASS IS STILL IN DEVELOPMENT, DO NOT USE
- */
-
 package org.droidkit.widget;
 
-//org.droidkit.widget.HandyPagedView
+//org.droidkit.widget.DeckView
 
 import java.lang.ref.WeakReference;
 
