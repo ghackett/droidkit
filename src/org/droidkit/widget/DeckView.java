@@ -66,7 +66,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     private int mMaxScrollX;
     private int mCenterScrollX;
     private Integer mScrollXOnDown = null;
-    private Integer mTouchPointOnDown = null;
+//    private Integer mTouchPointOnDown = null;
     
     private FrameLayout mLeftShadow = null;
     private FrameLayout mRightShadow = null;
@@ -275,14 +275,10 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
             
             if (dy > mTouchSlop) {
                 stopScrolling();
+                return false;
             }
-            
-            boolean startDrag = dx > mTouchSlop;
-//            if (mScrollXOnDown != null && mTouchPointOnDown != null && mScrollXOnDown == getCenterScrollX()) {
-//                if (mTouchPointOnDown > mVisibleSideMarginPx && mTouchPointOnDown < (getWidth()-mVisibleSideMarginPx))
-//                    startDrag = false;
-//            }
-            if (startDrag) {
+
+            if (dx > mTouchSlop) {
                 mIsBeingDragged = true;
                 mLastMotionX = x;
                 setTopScrollingAllowed(false);
@@ -293,7 +289,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         
         case MotionEvent.ACTION_DOWN: { 
             mScrollXOnDown = mTopContainer.getScrollX();
-            mTouchPointOnDown = (int) ev.getX();
+//            mTouchPointOnDown = (int) ev.getX();
             
             final float x = ev.getX();
             final float y = ev.getY();
@@ -308,7 +304,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
             mIsBeingDragged = false;
             setTopScrollingAllowed(true);
             mScrollXOnDown = null;
-            mTouchPointOnDown = null;
+//            mTouchPointOnDown = null;
             break;
         }
         
@@ -380,7 +376,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
                 
                 setTopScrollingAllowed(true);
                 mScrollXOnDown = null;
-                mTouchPointOnDown = null;
+//                mTouchPointOnDown = null;
                 
                 break;
             }
