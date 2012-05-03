@@ -46,7 +46,7 @@ import android.widget.TextView;
  */
 /**
  * 
- * @author ghackett
+ * @author Geoff Hackett
  *
  */
 public class HandyCarouselView extends FrameLayout {
