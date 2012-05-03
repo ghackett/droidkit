@@ -18,8 +18,6 @@ package org.droidkit.widget;
 
 //org.droidkit.widget.DeckView
 
-import java.lang.ref.WeakReference;
-
 import org.droidkit.DroidKit;
 import org.droidkit.R;
 
@@ -62,7 +60,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     private View mRightView;
     private View mTopView;
 
-    private WeakReference<StoppableScrollView> mTopScrollView;
+//    private WeakReference<StoppableScrollView> mTopScrollView;
     private int mVisibleSideMarginPx;
     private Scroller mScroller;
     private int mTouchSlop;
@@ -108,7 +106,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         mIsBeingDragged = false;
         mIsBeingScrolled = false;
         mVelocityTracker = null;
-        mTopScrollView = null;
+//        mTopScrollView = null;
         
         mScroller = new Scroller(getContext(), sInterpolator);
         
@@ -417,21 +415,22 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         }
     }
     
+    @Deprecated
     private void setTopScrollingAllowed(boolean allowed) {
-        if (mTopScrollView != null) {
-            StoppableScrollView ss = mTopScrollView.get();
-            if (ss != null) {
-                if (allowed)
-                    ss.allowScrolling();
-                else 
-                    ss.stopScrolling();
-            }
-        }
+//        if (mTopScrollView != null) {
+//            StoppableScrollView ss = mTopScrollView.get();
+//            if (ss != null) {
+//                if (allowed)
+//                    ss.allowScrolling();
+//                else 
+//                    ss.stopScrolling();
+//            }
+//        }
     }
-    
-    public void setTopScrollView(StoppableScrollView parentScrollView) {
-        mTopScrollView = new WeakReference<StoppableScrollView>(parentScrollView);
-    }
+//    
+//    public void setTopScrollView(StoppableScrollView parentScrollView) {
+//        mTopScrollView = new WeakReference<StoppableScrollView>(parentScrollView);
+//    }
     
     protected void scrollTo(int scrollX, boolean invalidate) {
         if (!invalidate) {
