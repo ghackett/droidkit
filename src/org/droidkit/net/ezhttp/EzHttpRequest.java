@@ -456,7 +456,7 @@ public class EzHttpRequest implements ProgressListener {
 		        response = execute();
 		    } catch (Throwable t) {
 		        t.printStackTrace();
-		        
+		        HttpClientFactory.getInstance().resetSharedClient();
 		        if (tryCount == mNumberOfRetrysToAttempt) {
 		            response = generateExceptionResponse(t);
 		        }

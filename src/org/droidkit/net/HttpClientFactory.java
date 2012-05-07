@@ -45,6 +45,10 @@ public class HttpClientFactory {
         }
     }
     
+    public synchronized void resetSharedClient() {
+        sClientInstance = null;
+    }
+    
     public synchronized void setTrustAllSSLCerts(boolean trustAllCerts) {
         mTrustAllCerts = trustAllCerts;
         sClientInstance = null;
