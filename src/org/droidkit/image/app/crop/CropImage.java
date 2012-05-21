@@ -197,6 +197,7 @@ public class CropImage extends MonitoredActivity {
     
     
 
+    @SuppressWarnings("deprecation")
     @Override
 	protected Dialog onCreateDialog(int id) {
 		if (id == DIALOG_CROPPING) {
@@ -380,7 +381,8 @@ public class CropImage extends MonitoredActivity {
     	Uri returnedUri = null;
     	File returnedFile = null;
 
-		@Override
+		@SuppressWarnings("deprecation")
+        @Override
 		protected void onPreExecute() {
 			showDialog(DIALOG_CROPPING);
 			mImageView.clear();
@@ -397,7 +399,8 @@ public class CropImage extends MonitoredActivity {
 			return null;
 		}
 
-		@Override
+		@SuppressWarnings("deprecation")
+        @Override
 		protected void onPostExecute(Void result) {
 			try {
 				dismissDialog(DIALOG_CROPPING);

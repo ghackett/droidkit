@@ -23,6 +23,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 
+@Deprecated
 class TabBar extends LinearLayout {
     private Vector<TabItem> mTabItems;
     private TabWidget mWidget;

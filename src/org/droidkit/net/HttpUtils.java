@@ -47,6 +47,7 @@ import android.os.Bundle;
 /**
  * @author mrn
  */
+@Deprecated
 public class HttpUtils {
     public static final int METHOD_GET = 0x1;
     public static final int METHOD_POST = 0x2;

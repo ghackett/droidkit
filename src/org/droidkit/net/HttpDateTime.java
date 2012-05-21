@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 /**
  * Helper for parsing an HTTP date.
  */
+@Deprecated
 public final class HttpDateTime {
 
     /*

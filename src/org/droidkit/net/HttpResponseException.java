@@ -15,6 +15,7 @@
  */
 package org.droidkit.net;
 
+@Deprecated
 @SuppressWarnings("serial")
 public class HttpResponseException extends Exception {
     private String mResponseMessage;

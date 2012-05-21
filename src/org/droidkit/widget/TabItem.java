@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+@Deprecated
 public class TabItem extends RelativeLayout {
     public static final int TYPE_INTENT = 0x1;
     public static final int TYPE_VIEW = 0x2;
@@ -61,7 +62,7 @@ public class TabItem extends RelativeLayout {
         mLabel = new TextView(getContext());
         mBackground = new ImageView(getContext());
                 
-        LayoutParams bgParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+        LayoutParams bgParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         addView(mBackground, bgParams);
         
         LayoutParams iconParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);

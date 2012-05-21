@@ -15,6 +15,8 @@
  */
 package org.droidkit.widget;
 
+import org.droidkit.R;
+
 import android.app.LocalActivityManager;
 import android.content.Context;
 import android.util.AttributeSet;
@@ -26,8 +28,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import org.droidkit.R;
-
+@Deprecated
 public class TabWidget extends RelativeLayout {
     private LocalActivityManager mLocalActivityManager;
     private TabBar mTabBar;
@@ -65,15 +66,15 @@ public class TabWidget extends RelativeLayout {
         
         float height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64.0f, getContext().getResources().getDisplayMetrics());
         
-        LayoutParams tabBarParams = new LayoutParams(LayoutParams.FILL_PARENT, new Float(height).intValue());
+        LayoutParams tabBarParams = new LayoutParams(LayoutParams.MATCH_PARENT, new Float(height).intValue());
         addView(mTabBar, tabBarParams);
         
-        LayoutParams contentParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+        LayoutParams contentParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         contentParams.addRule(BELOW, TAB_BAR_ID);
         addView(mContent, contentParams);
         
         float shadow = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5.0f, getContext().getResources().getDisplayMetrics());
-        LayoutParams shadowParams = new LayoutParams(LayoutParams.FILL_PARENT, new Float(shadow).intValue());
+        LayoutParams shadowParams = new LayoutParams(LayoutParams.MATCH_PARENT, new Float(shadow).intValue());
         shadowParams.addRule(ALIGN_TOP, CONTENT_ID);
         addView(mShadow, shadowParams);
     }
@@ -115,7 +116,7 @@ public class TabWidget extends RelativeLayout {
         
         if (mChildView != wd) {
             mChildView = wd;
-            mContent.addView(mChildView, new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+            mContent.addView(mChildView, new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         }
     }
     
@@ -130,7 +131,7 @@ public class TabWidget extends RelativeLayout {
         
         if (mChildView != v) {
             mChildView = v;
-            mContent.addView(mChildView, new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+            mContent.addView(mChildView, new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         }
     }
     

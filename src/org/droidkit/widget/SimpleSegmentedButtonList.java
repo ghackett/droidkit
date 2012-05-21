@@ -164,7 +164,7 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 				mTitleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
 				mTitleView.setTextColor(Color.DKGRAY);
 				mTitleView.setTypeface(Typeface.DEFAULT_BOLD);
-				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				lp.bottomMargin = DroidKit.getPixels(4);
 				lp.leftMargin = DroidKit.getPixels(4);
 				mTitleView.setLayoutParams(lp);
@@ -177,9 +177,9 @@ public class SimpleSegmentedButtonList extends LinearLayout implements OnClickLi
 				LinearLayout newView = new LinearLayout(getContext());
 				if (sbv.mView.getParent() != null)
 					((ViewGroup)sbv.mView.getParent()).removeView(sbv.mView);
-				newView.addView(sbv.mView, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+				newView.addView(sbv.mView, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				
-				LinearLayout.LayoutParams parentParams = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+				LinearLayout.LayoutParams parentParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				
 				if (sbv.mOnClickListener != null) {
 					newView.setTag(Integer.valueOf(i));

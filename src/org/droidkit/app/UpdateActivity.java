@@ -46,6 +46,7 @@ import java.io.File;
  * @since 1
  * @author mrn
  */
+@Deprecated
 public class UpdateActivity extends Activity {
 
     ImageView mIconView;

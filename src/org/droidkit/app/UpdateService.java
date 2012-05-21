@@ -57,6 +57,7 @@ import java.io.InputStreamReader;
  * @since 1
  * @author mrn
  */
+@Deprecated
 public class UpdateService extends Service {
 
     public static final int UPDATE_AVAILABLE = 1;
