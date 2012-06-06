@@ -67,6 +67,10 @@ public class BoundCache<K, B, C> {
             mObjectBindings.put(object, binderList);
         }
         
+        removeBinderFromObject(oldObject, binder, cleanOldObject);
+    }
+    
+    private void removeBinderFromObject(C oldObject, B binder, boolean cleanOldObject) {
         if (oldObject != null) {
             LinkedList<WeakReference<B>> bindings = mObjectBindings.get(oldObject);
             
@@ -105,6 +109,8 @@ public class BoundCache<K, B, C> {
                 }
             }
         }
+        
+        if (DroidKit.DEBUG) CLog.e("Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
     }
     
 
@@ -120,12 +126,20 @@ public class BoundCache<K, B, C> {
         }
         if (obj != null) {
             put(key, binder, obj, cleanOldObject);
+        } else {
+            //TODO: remove binder, since it's obviously bound to something else now
+            C oldObject = mBinders.remove(binder);
+            if (oldObject != null) {
+                if (DroidKit.DEBUG) CLog.e("didnt find object for key, but found one for the binder, so lets remove the binding");
+                removeBinderFromObject(oldObject, binder, cleanOldObject);
+            }
         }
         return obj;
     }
     
     public synchronized void cleanCache() {
         if (mObjectBindings.isEmpty()) {
+            if (DroidKit.DEBUG) CLog.e("Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
             return;
         }
         
@@ -153,6 +167,7 @@ public class BoundCache<K, B, C> {
                 onObjectUnbound(obj);
             }
         }
+        if (DroidKit.DEBUG) CLog.e("Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
     }
     
     protected void onObjectUnbound(C object) {
