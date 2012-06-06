@@ -85,6 +85,7 @@ public class BoundCache<K, B, C> {
                 }
                 if (bindingToRemove != null)
                     bindings.remove(bindingToRemove);
+                if (DroidKit.DEBUG) CLog.e("new binding size = " + bindings.size());
             }
             
 //            if (DroidKit.DEBUG && bindings != null && bindings.size() >= 1) {
@@ -141,6 +142,8 @@ public class BoundCache<K, B, C> {
             if (DroidKit.DEBUG) CLog.e("Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
             return;
         }
+        
+        System.gc();
         
         LinkedList<C> unboundObjects = new LinkedList<C>();
         LinkedList<WeakReference<B>> bindingsToRemove = new LinkedList<WeakReference<B>>();
