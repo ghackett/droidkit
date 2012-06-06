@@ -44,6 +44,7 @@ public class BoundCache<K, B, C> {
     public synchronized void put(K key, B binder, C object, boolean cleanOldObject) {
         if (key == null || binder == null || object == null)
             throw new NullPointerException("cant use any nulls in " + this.getClass().getSimpleName() + ".put()");
+        if (DroidKit.DEBUG) CLog.e("PUT " + key.toString());
         mKeyMap.put(key, object);
         mCacheMap.put(object, key);
         C oldObject = mBinders.put(binder, object);
@@ -54,9 +55,13 @@ public class BoundCache<K, B, C> {
             
         if (DroidKit.DEBUG && oldObject != null)
             CLog.e("SEEN THIS BINDER BEFORE");
+            
+        
         if (mObjectBindings.containsKey(object)) {
+            if (DroidKit.DEBUG) CLog.e("seen this object before, adding binder to its binder list");
             mObjectBindings.get(object).add(new WeakReference<B>(binder));
         } else {
+            if (DroidKit.DEBUG) CLog.e("this object is new, creating a binderList for it");
             LinkedList<WeakReference<B>> binderList = new LinkedList<WeakReference<B>>();
             binderList.add(new WeakReference<B>(binder));
             mObjectBindings.put(object, binderList);
@@ -104,7 +109,15 @@ public class BoundCache<K, B, C> {
     
 
     public synchronized C bind(K key, B binder, boolean cleanOldObject) {
+        if (DroidKit.DEBUG) CLog.e("BIND " + key.toString());
         C obj = mKeyMap.get(key);
+        if (DroidKit.DEBUG) {
+            if (obj == null) {
+                CLog.e("no object found");
+            } else {
+                CLog.e("object found");
+            }
+        }
         if (obj != null) {
             put(key, binder, obj, cleanOldObject);
         }
@@ -144,7 +157,8 @@ public class BoundCache<K, B, C> {
     
     protected void onObjectUnbound(C object) {
         K key = mCacheMap.remove(object);
-        mCacheMap.remove(key);
+        if (key != null)
+            mKeyMap.remove(key);
     }
     
     public synchronized void clearCache() {

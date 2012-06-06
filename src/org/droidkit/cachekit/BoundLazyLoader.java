@@ -216,6 +216,8 @@ public class BoundLazyLoader {
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
+                    } else {
+                        sCache.cleanCache();
                     }
                     
                     
