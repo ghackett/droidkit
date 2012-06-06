@@ -127,7 +127,6 @@ public class BoundCache<K, B, C> {
         if (obj != null) {
             put(key, binder, obj, cleanOldObject);
         } else {
-            //TODO: remove binder, since it's obviously bound to something else now
             C oldObject = mBinders.remove(binder);
             if (oldObject != null) {
                 if (DroidKit.DEBUG) CLog.e("didnt find object for key, but found one for the binder, so lets remove the binding");
