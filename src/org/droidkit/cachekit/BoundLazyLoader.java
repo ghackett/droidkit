@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
 
 public class BoundLazyLoader {
     
@@ -113,6 +114,28 @@ public class BoundLazyLoader {
         }
     }
     
+    /**
+     * This will traverse your view tree and remove any view binders that it
+     * contains (triggering a cleanCache in 250ms).
+     * 
+     * ONLY USE THIS METHOD IN YOUR Activity.onDestroy or Fragment.onDestroyView METHODS!
+     * @param v the root of your view tree
+     */
+    public void onViewDestroyed(View v) {
+        if (v == null)
+            return;
+        sCache.destroyBinder(v, false);
+        if (v instanceof ViewGroup) {
+            ViewGroup p = (ViewGroup) v;
+            int childCount = p.getChildCount();
+            for (int i = 0; i<childCount; i++) {
+                onViewDestroyed(p.getChildAt(i));
+            }
+        }
+        resetLoadTimer();
+    }
+
+
     private boolean shouldAddTask(BoundLazyLoaderTask task) {
         Object obj = sCache.bind(task.getViewTag(), task.getView(), false);
         if (obj != null) {

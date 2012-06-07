@@ -137,6 +137,37 @@ public class BoundCache<K, B, C> {
         return obj;
     }
     
+    public void destroyBinder(B binder, boolean cleanOldObject) {
+        if (binder == null)
+            return;
+        C oldObject = mBinders.remove(binder);
+        if (oldObject != null) {
+            LinkedList<WeakReference<B>> bindings = mObjectBindings.get(oldObject);
+            WeakReference<B> bindingToRemove = null;
+            for (WeakReference<B> ref : bindings) {
+                B b = ref.get();
+                if (b != null && b == binder) {
+                    bindingToRemove = ref;
+                    break;
+                }
+            }
+            if (bindingToRemove != null) {
+                bindings.remove(bindingToRemove);
+                bindingToRemove.clear();
+            }
+            
+            if (cleanOldObject) {
+                if (bindings == null || bindings.isEmpty()) {
+                    mObjectBindings.remove(oldObject);
+                    onObjectUnbound(oldObject);
+                }
+            }
+        }
+        
+        
+
+    }
+    
     public synchronized void cleanCache() {
         if (mObjectBindings.isEmpty()) {
             if (DroidKit.DEBUG) CLog.e("Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
