@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.droidkit.DroidKit;
+import org.droidkit.cachekit.CacheManager.CacheInterface;
 import org.droidkit.util.tricks.CLog;
 
 /** 
@@ -26,7 +27,7 @@ import org.droidkit.util.tricks.CLog;
  * @param <B> the type of the binder object
  * @param <C> the type of the cached object
  */
-public class BoundCache<K, B, C> {
+public class BoundCache<K, B, C> implements CacheInterface {
     
 
     protected HashMap<C, LinkedList<WeakReference<B>>> mObjectBindings;
@@ -39,6 +40,7 @@ public class BoundCache<K, B, C> {
         mBinders = new WeakHashMap<B, C>();
         mCacheMap = new HashMap<C, K>();
         mKeyMap = new HashMap<K, C>();
+        CacheManager.registerCache(this);
     }
     
     public synchronized void put(K key, B binder, C object, boolean cleanOldObject) {

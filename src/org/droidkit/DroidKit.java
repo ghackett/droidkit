@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Locale;
 
 import org.droidkit.cachekit.BoundLazyLoader;
+import org.droidkit.cachekit.CacheManager;
 import org.droidkit.net.HttpConnectionMonitor;
 import org.droidkit.util.tricks.StorageTricks;
 
@@ -94,6 +95,7 @@ public class DroidKit {
         sConnectionMonitor = null;
         sHandler = null;
         BoundLazyLoader.shutdownInstance();
+        CacheManager.clearAllCaches();
     }
     
     public static Context getContext() {
