@@ -3,9 +3,8 @@ package org.droidkit;
 import java.io.File;
 import java.util.Locale;
 
+import org.droidkit.cachekit.BoundLazyLoader;
 import org.droidkit.net.HttpConnectionMonitor;
-import org.droidkit.ref.CacheManager;
-import org.droidkit.util.LazyLoader;
 import org.droidkit.util.tricks.StorageTricks;
 
 import android.accounts.Account;
@@ -92,10 +91,9 @@ public class DroidKit {
         sCanAcceptPush = null;
         sPackageInfo = null;
         sTelephonyManager = null;
-        LazyLoader.shutdownInstance();
-        CacheManager.clearAllCaches();
         sConnectionMonitor = null;
         sHandler = null;
+        BoundLazyLoader.shutdownInstance();
     }
     
     public static Context getContext() {
