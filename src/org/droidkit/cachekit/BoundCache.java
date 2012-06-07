@@ -46,24 +46,18 @@ public class BoundCache<K, B, C> implements CacheInterface {
     public synchronized void put(K key, B binder, C object, boolean cleanOldObject) {
         if (key == null || binder == null || object == null)
             throw new NullPointerException("cant use any nulls in " + this.getClass().getSimpleName() + ".put()");
-        if (DroidKit.DEBUG) CLog.e("PUT " + key.toString());
         mKeyMap.put(key, object);
         mCacheMap.put(object, key);
         C oldObject = mBinders.put(binder, object);
         if (oldObject != null && oldObject == object) {
-            if (DroidKit.DEBUG) CLog.e("Same object bound to same view, returning");
             return;
         }
             
-        if (DroidKit.DEBUG && oldObject != null)
-            CLog.e("SEEN THIS BINDER BEFORE");
             
         
         if (mObjectBindings.containsKey(object)) {
-            if (DroidKit.DEBUG) CLog.e("seen this object before, adding binder to its binder list");
             mObjectBindings.get(object).add(new WeakReference<B>(binder));
         } else {
-            if (DroidKit.DEBUG) CLog.e("this object is new, creating a binderList for it");
             LinkedList<WeakReference<B>> binderList = new LinkedList<WeakReference<B>>();
             binderList.add(new WeakReference<B>(binder));
             mObjectBindings.put(object, binderList);
@@ -77,7 +71,6 @@ public class BoundCache<K, B, C> implements CacheInterface {
             LinkedList<WeakReference<B>> bindings = mObjectBindings.get(oldObject);
             
             if (bindings != null) {
-                if (DroidKit.DEBUG) CLog.e("current binding size = " + bindings.size());
                 WeakReference<B> bindingToRemove = null;
                 for (WeakReference<B> ref : bindings) {
                     B b = ref.get();
@@ -87,13 +80,9 @@ public class BoundCache<K, B, C> implements CacheInterface {
                 }
                 if (bindingToRemove != null)
                     bindings.remove(bindingToRemove);
-                if (DroidKit.DEBUG) CLog.e("new binding size = " + bindings.size());
             }
             
-//            if (DroidKit.DEBUG && bindings != null && bindings.size() >= 1) {
-//                CLog.e("oldBinding = " + bindings.get(0).toString());
-//                CLog.e("newBinding = " + binder.toString());
-//            }
+
             
             if (cleanOldObject) {
                 if (bindings != null && !bindings.isEmpty()) {
@@ -102,9 +91,7 @@ public class BoundCache<K, B, C> implements CacheInterface {
                         if (b.get() == null)
                             bindingsToRemove.add(b);
                     }
-                    if (DroidKit.DEBUG) CLog.e("removing " + bindingsToRemove.size() + " more bindings");
                     bindings.removeAll(bindingsToRemove);
-                    if (DroidKit.DEBUG) CLog.e("new bindings size: " + bindings.size());
                 }
                 if (bindings == null || bindings.isEmpty()) {
                     mObjectBindings.remove(oldObject);
@@ -118,15 +105,8 @@ public class BoundCache<K, B, C> implements CacheInterface {
     
 
     public synchronized C bind(K key, B binder, boolean cleanOldObject) {
-        if (DroidKit.DEBUG) CLog.e("BIND " + key.toString());
         C obj = mKeyMap.get(key);
-        if (DroidKit.DEBUG) {
-            if (obj == null) {
-                CLog.e("no object found");
-            } else {
-                CLog.e("object found");
-            }
-        }
+
         if (obj != null) {
             put(key, binder, obj, cleanOldObject);
         } else {
