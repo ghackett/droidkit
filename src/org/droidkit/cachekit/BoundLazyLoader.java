@@ -85,10 +85,10 @@ public class BoundLazyLoader {
     public void addTask(BoundLazyLoaderTask task) {
         if (task == null)
             return;
-        if (TextUtils.isEmpty(task.getViewTag()))
+        if (TextUtils.isEmpty(task.getObjectKey()))
             return;
         
-        task.getView().setTag(task.getViewTag());
+        task.getView().setTag(task.getObjectKey());
         
         
         
@@ -137,7 +137,7 @@ public class BoundLazyLoader {
 
 
     private boolean shouldAddTask(BoundLazyLoaderTask task) {
-        Object obj = sCache.bind(task.getViewTag(), task.getView(), false);
+        Object obj = sCache.bind(task.getObjectKey(), task.getView(), false);
         if (obj != null) {
             task.setResultObject(obj);
             task.onLoadComplete(task.getView(), obj);
@@ -224,15 +224,15 @@ public class BoundLazyLoader {
                         }
                     }
                     
-                    if (task != null && task.getView() != null && task.getViewTag().equals((String)task.getView().getTag())) {
+                    if (task != null && task.getView() != null && task.getObjectKey().equals((String)task.getView().getTag())) {
                         try {
-                            Object obj = sCache.bind(task.getViewTag(), task.getView(), true);
+                            Object obj = sCache.bind(task.getObjectKey(), task.getView(), true);
                             if (obj != null) {
                                 task.setResultObject(obj);
                             } else {
                                 task.setResultObject(task.loadInBackground());
                                 if (task.getResultObject() != null)
-                                    sCache.put(task.getViewTag(), task.getView(), task.getResultObject(), true);
+                                    sCache.put(task.getObjectKey(), task.getView(), task.getResultObject(), true);
                             }
                             sCache.cleanCache();
                             mUiHandler.post(new UINotifierTask(task));
@@ -267,7 +267,7 @@ public class BoundLazyLoader {
         @Override
         public void run() {
             try {
-                if (mTask.getView() != null && mTask.getViewTag().equals((String)mTask.getView().getTag())) {
+                if (mTask.getView() != null && mTask.getObjectKey().equals((String)mTask.getView().getTag())) {
                     mTask.onLoadComplete(mTask.getView(), mTask.getResultObject());
                 }
             } catch (Throwable t) {

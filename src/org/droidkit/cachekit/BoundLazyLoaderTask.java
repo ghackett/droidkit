@@ -26,24 +26,15 @@ public abstract class BoundLazyLoaderTask {
     }
     
     /**
-     * shouldAddTask gets called inSync when the task is added to the LazyImageLoader
-     * @return true if the task should be added to the processing stack, false if you 
-     * took care of it in this method
+     * @return The cache key to lookup/store the object. This key should be 100% unique 
+     * to the Object being returned in loadInBackground(). For example, if you're using
+     * the lazy loader to fetch remote bitmaps, the key should be the url of that bitmap 
+     * (assuming you're not doing anything else to the bitmap before retruning it).
+     * 
+     *   This key will also be set as the tag on the view. This is done to ensure that the
+     *   lazy loader never binds the wrong object to a view.
      */
-//    public boolean shouldAddTask();
-    
-    /**
-     * @return the View that should be used to knock this task or
-     * other tasks out of the processing stack - also its tag will be set
-     * and then compared to at the end of the process
-     */
-//    public abstract View getView();
-    
-    /**
-     * @return the tag that will be assigned to the view and then compared against
-     * before calling onLoadComplete - this should be 100% unique
-     */
-    public abstract String getViewTag();
+    public abstract String getObjectKey();
     
     /**
      * do the actual lazy loading in this method
