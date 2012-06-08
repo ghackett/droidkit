@@ -20,6 +20,7 @@ package org.droidkit.widget;
 
 import org.droidkit.DroidKit;
 import org.droidkit.R;
+import org.droidkit.util.tricks.CLog;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -258,7 +259,9 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     private boolean isOkToScroll(MotionEvent ev) {
         int action = ev.getAction() & MotionEvent.ACTION_MASK;
         
+        
         if (mScrollingDisabled) {
+//            CLog.e("scrolling disabled " + action);
             if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP)
                 allowScrolling();
             return false;
@@ -288,8 +291,10 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 //        CLog.e("onInterceptTouchEvent");
         
-        if (!isOkToScroll(ev))
+        if (!isOkToScroll(ev)) {
+//            CLog.e("not ok to scroll");
             return false;
+        }
         
         final int action = ev.getAction();
         if (action == MotionEvent.ACTION_MOVE && mIsBeingDragged) {
@@ -305,7 +310,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
             final int dy = (int)Math.abs(y - mLastMotionY);
             
             if (dy > mTouchSlop) {
-                stopScrolling();
+                stopScrolling(true);
                 return false;
             }
 
@@ -347,8 +352,10 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     public boolean onTouchEvent(MotionEvent event) {
 //        CLog.e("onTouchEvent");
         
-        if (!isOkToScroll(event))
+        if (!isOkToScroll(event)) {
+//            CLog.e("not ok to scroll");
             return false;
+        }
         
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
@@ -626,12 +633,21 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
 
     @Override
     public void stopScrolling() {
+        stopScrolling(false);
+    }
+    
+    public void stopScrolling(boolean resetTimer) {
         mScrollingDisabled = true;
+        if (resetTimer)
+            resetAllowScrollingTimer();
+        else
+            cancelAllowScrollingTimer();
     }
 
     @Override
     public void allowScrolling() {
         mScrollingDisabled = false;
+        cancelAllowScrollingTimer();
     }
 
     @Override
@@ -639,6 +655,22 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         return !mScrollingDisabled;
     }
     
+    private Runnable mAllowScrollingRunnable = new Runnable() {
+        
+        @Override
+        public void run() {
+            allowScrolling();
+        }
+    };
+    
+    private void resetAllowScrollingTimer() {
+        getHandler().removeCallbacks(mAllowScrollingRunnable);
+        getHandler().postDelayed(mAllowScrollingRunnable, 100);
+    }
+    
+    private void cancelAllowScrollingTimer() {
+        getHandler().removeCallbacks(mAllowScrollingRunnable);
+    }
     
 }
 
