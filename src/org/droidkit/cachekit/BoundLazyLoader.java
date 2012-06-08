@@ -1,5 +1,6 @@
 package org.droidkit.cachekit;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 import org.droidkit.DroidKit;
@@ -45,9 +46,6 @@ public class BoundLazyLoader {
         
     };
     
-//    public static boolean hasInstance() {
-//        return sInstance != null;
-//    }
     
     public static void shutdownInstance() {
         synchronized (sLock) {
@@ -63,6 +61,7 @@ public class BoundLazyLoader {
     private Stack<BoundLazyLoaderTask> mTaskQueue;
     private boolean mPaused = false;
     private int mDelay = 500;
+    private ArrayList<View> mViewsToDestroy = new ArrayList<View>();
 
     
     public BoundLazyLoader(int delay) {
@@ -116,7 +115,7 @@ public class BoundLazyLoader {
     
     /**
      * This will traverse your view tree and remove any view binders that it
-     * contains (triggering a cleanCache in 250ms).
+     * contains (triggering a cleanCache in 500ms).
      * 
      * ONLY USE THIS METHOD IN YOUR Activity.onDestroy or Fragment.onDestroyView METHODS!
      * @param v the root of your view tree
@@ -124,7 +123,9 @@ public class BoundLazyLoader {
     public void onViewDestroyed(View v) {
         if (v == null)
             return;
-        sCache.destroyBinder(v, false);
+        synchronized (mViewsToDestroy) {
+            mViewsToDestroy.add(v);
+        }
         if (v instanceof ViewGroup) {
             ViewGroup p = (ViewGroup) v;
             int childCount = p.getChildCount();
@@ -214,6 +215,34 @@ public class BoundLazyLoader {
                 
                 @Override
                 public void handleMessage(Message msg) {
+
+                    
+                    boolean returnNow = false;
+                    synchronized (mViewsToDestroy) {
+                        if (!mViewsToDestroy.isEmpty()) {
+                            returnNow = true;
+                            for (View v : mViewsToDestroy) {
+                                synchronized (mTaskQueue) {
+                                    for (int i = 0; i<mTaskQueue.size();) {
+                                        BoundLazyLoaderTask waitingTask = mTaskQueue.get(i);
+                                        if (waitingTask.getView() == v) {
+                                            mTaskQueue.remove(i);
+                                        } else {
+                                            i++;
+                                        }
+                                    }
+                                }
+                                sCache.destroyBinder(v, false);
+                            }
+                            mViewsToDestroy.clear();
+                        }
+                    }
+                    
+                    if (returnNow) {
+                        resetLoadTimer();
+                        return;
+                    }
+                    
                     if (mPaused)
                         return;
                     
