@@ -120,29 +120,49 @@ public class BoundLazyLoader {
      * ONLY USE THIS METHOD IN YOUR Activity.onDestroy or Fragment.onDestroyView METHODS!
      * @param v the root of your view tree
      */
-    public void onViewDestroyed(View v) {
+    public void onViewDestroyed(View v, boolean inSync) {
         if (v == null)
             return;
-        synchronized (mViewsToDestroy) {
-            mViewsToDestroy.add(v);
+        if (inSync) {
+            destroyView(v);
+        } else {
+            synchronized (mViewsToDestroy) {
+                mViewsToDestroy.add(v);
+            }
         }
         if (v instanceof ViewGroup) {
             ViewGroup p = (ViewGroup) v;
             int childCount = p.getChildCount();
             for (int i = 0; i<childCount; i++) {
-                onViewDestroyed(p.getChildAt(i));
+                onViewDestroyed(p.getChildAt(i), inSync);
             }
         }
         resetLoadTimer();
     }
+    
+    private void destroyView(View v) {
+        synchronized (mTaskQueue) {
+            for (int i = 0; i<mTaskQueue.size();) {
+                BoundLazyLoaderTask waitingTask = mTaskQueue.get(i);
+                if (waitingTask.getView() == v) {
+                    mTaskQueue.remove(i);
+                } else {
+                    i++;
+                }
+            }
+        }
+        sCache.destroyBinder(v, false);
+    }
 
 
     private boolean shouldAddTask(BoundLazyLoaderTask task) {
-        Object obj = sCache.bind(task.getObjectKey(), task.getView(), false);
-        if (obj != null) {
-            task.setResultObject(obj);
-            task.onLoadComplete(task.getView(), obj);
-            return false;
+        if (!mPaused) {
+            Object obj = sCache.bind(task.getObjectKey(), task.getView(), false);
+            if (obj != null) {
+                task.setResultObject(obj);
+                task.onLoadComplete(task.getView(), obj);
+                return false;
+            }
         }
         task.onLoadingStarted(task.getView());
         return true;
@@ -222,17 +242,7 @@ public class BoundLazyLoader {
                         if (!mViewsToDestroy.isEmpty()) {
                             returnNow = true;
                             for (View v : mViewsToDestroy) {
-                                synchronized (mTaskQueue) {
-                                    for (int i = 0; i<mTaskQueue.size();) {
-                                        BoundLazyLoaderTask waitingTask = mTaskQueue.get(i);
-                                        if (waitingTask.getView() == v) {
-                                            mTaskQueue.remove(i);
-                                        } else {
-                                            i++;
-                                        }
-                                    }
-                                }
-                                sCache.destroyBinder(v, false);
+                                destroyView(v);
                             }
                             mViewsToDestroy.clear();
                         }
@@ -263,20 +273,23 @@ public class BoundLazyLoader {
                                 if (task.getResultObject() != null)
                                     sCache.put(task.getObjectKey(), task.getView(), task.getResultObject(), true);
                             }
-                            sCache.cleanCache();
+//                            sCache.cleanCache();
                             mUiHandler.post(new UINotifierTask(task));
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
+                        if (mThreadHandler != null)
+                            resetLoadTimer(10);
                     } else {
                         sCache.cleanCache();
+                        synchronized (mTaskQueue) {
+                            if (mTaskQueue.size() > 0 && mThreadHandler != null)
+                                resetLoadTimer(10);
+                        }
                     }
                     
                     
-                    synchronized (mTaskQueue) {
-                        if (mTaskQueue.size() > 0 && mThreadHandler != null)
-                            resetLoadTimer(10);
-                    }
+
                 }
                 
             };

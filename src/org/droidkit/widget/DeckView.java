@@ -53,6 +53,11 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         }
     };
 
+    public interface OnDeckFocusChangedListener {
+        public void onCenterFocused();
+        public void onLeftViewFocused();
+        public void onRightViewFocused();
+    }
     
     private RelativeLayout mTopContainer;
     
@@ -76,6 +81,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     private int mMaxScrollX;
     private int mCenterScrollX;
     private Integer mScrollXOnDown = null;
+    private OnDeckFocusChangedListener mFocusChangedListener = null;
 //    private Integer mTouchPointOnDown = null;
     
     private FrameLayout mLeftShadow = null;
@@ -116,6 +122,10 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         mMaxVelocity = configuration.getScaledMaximumFlingVelocity();
         
         mTopContainer = new RelativeLayout(getContext());
+    }
+    
+    public void setOnDeckFocusChangedListener(OnDeckFocusChangedListener listener) {
+        mFocusChangedListener = listener;
     }
     
     public void setViews(View leftView, View rightView, View topView, boolean useShadows) {
@@ -219,6 +229,9 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         addView(mLeftView);
         addView(mRightView);
         addView(mTopContainer);
+        
+        if (mFocusChangedListener != null)
+            mFocusChangedListener.onCenterFocused();
     }
     
     public void showLeft(boolean animated) {
@@ -405,14 +418,23 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     
     private void finishScroll() {
         int scrollX = mTopContainer.getScrollX();
-        int maxX = getMaxScrollX();
-        int minX = getMinScrollX();
-        int centerX = getCenterScrollX();
+        final int maxX = getMaxScrollX();
+        final int minX = getMinScrollX();
+        final int centerX = getCenterScrollX();
         if (scrollX == centerX || scrollX == maxX || scrollX == minX) {
             mIsBeingDragged = false;
             mIsBeingScrolled = false;
             mScrollXOnDown = null;
             setTopScrollingAllowed(true);
+            if (mFocusChangedListener != null) {
+                if (scrollX == centerX) {
+                    mFocusChangedListener.onCenterFocused();
+                } else if (scrollX == minX) {
+                    mFocusChangedListener.onLeftViewFocused();
+                } else if (scrollX == maxX) {
+                    mFocusChangedListener.onRightViewFocused();
+                }
+            }
         } else {
             if (scrollX < (centerX + minX)/2)
                 smoothScrollTo(minX);

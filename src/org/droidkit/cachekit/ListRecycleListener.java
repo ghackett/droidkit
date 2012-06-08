@@ -20,9 +20,9 @@ public class ListRecycleListener implements RecyclerListener {
         mRecycledViews.add(view);
     }
     
-    public void clearBindings() {
+    public void clearBindings(boolean inSync) {
         for (View v : mRecycledViews) {
-            mLazyLoader.onViewDestroyed(v);
+            mLazyLoader.onViewDestroyed(v, inSync);
         }
         mRecycledViews.clear();
     }
