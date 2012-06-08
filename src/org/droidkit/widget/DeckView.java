@@ -171,6 +171,14 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     
     private void updateLayout() {
         if (getWidth() <= 0 || mLeftView == null || mRightView == null || mTopView == null) {
+            if (mLeftView != null && mRightView != null && mTopView != null) {
+                mTopContainer.removeAllViews();
+                removeAllViews();
+                mTopContainer.addView(mTopView);
+                addView(mLeftView);
+                addView(mRightView);
+                addView(mTopContainer);
+            }
             return;
         }
         
