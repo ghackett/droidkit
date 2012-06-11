@@ -35,14 +35,13 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 
 /**
  * 
  * @author Geoff Hackett
  *
  */
-public class DeckView extends RelativeLayout implements StoppableScrollView {
+public class DeckView extends FrameLayout implements StoppableScrollView {
     
     public static final int DEFAULT_VISIBLE_SIDE_MARGIN_DP = 80;
     
@@ -201,33 +200,25 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
 
     private void updateLayout() {
         if (getWidth() <= 0 || mLeftView == null || mRightView == null || mTopView == null) {
-//            if (mLeftView != null && mRightView != null && mTopView != null) {
-//                mTopContainer.removeAllViews();
-//                removeAllViews();
-//                mTopContainer.addView(mTopView);
-//                addView(mLeftView);
-//                addView(mRightView);
-//                addView(mTopContainer);
-//            }
+
             return;
         }
         
-        CLog.e("UPDATE LAYOUT");
-        
-        
-//        mTopContainer.removeAllViews();
-//        removeAllViews();
+
         resetScrollBarriers();
         
-        RelativeLayout.LayoutParams leftViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
+        FrameLayout.LayoutParams leftViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
         mLeftView.setLayoutParams(leftViewLayoutParams);
         
-        RelativeLayout.LayoutParams rightViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
-        rightViewLayoutParams.addRule(ALIGN_PARENT_RIGHT);
+        FrameLayout.LayoutParams rightViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
+        rightViewLayoutParams.leftMargin = mVisibleSideMarginPx;
+        rightViewLayoutParams.gravity = Gravity.TOP;
+//        rightViewLayoutParams.addRule(ALIGN_PARENT_RIGHT);
         mRightView.setLayoutParams(rightViewLayoutParams);
         
         int topContainerWidth = (getWidth() * 3) - (mVisibleSideMarginPx * 2);
-        RelativeLayout.LayoutParams topContainerLayoutParams = new LayoutParams(topContainerWidth, getHeight());
+        FrameLayout.LayoutParams topContainerLayoutParams = new LayoutParams(topContainerWidth, getHeight());
+        topContainerLayoutParams.gravity = Gravity.TOP;
         topContainerLayoutParams.leftMargin = (-topContainerWidth) + getWidth();
         mTopContainer.setLayoutParams(topContainerLayoutParams);
         mTopContainer.setBackgroundColor(Color.TRANSPARENT);
@@ -239,7 +230,6 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         topViewLayoutParams.gravity = Gravity.TOP;
         mTopView.setLayoutParams(topViewLayoutParams);
         
-//        mTopContainer.addView(mTopView);
         
         if (mLeftShadow != null && mRightShadow != null) {
             
@@ -251,13 +241,8 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
             mLeftShadow.setLayoutParams(leftParams);
             mRightShadow.setLayoutParams(rightParams);
             
-//            mTopContainer.addView(mLeftShadow, leftParams);
-//            mTopContainer.addView(mRightShadow, rightParams);
         }
         
-//        addView(mLeftView);
-//        addView(mRightView);
-//        addView(mTopContainer);
         
         if (mFocusChangedListener != null)
             mFocusChangedListener.onCenterFocused();
