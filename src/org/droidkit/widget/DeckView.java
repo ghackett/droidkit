@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -60,7 +61,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         public void onRightViewFocused();
     }
     
-    private RelativeLayout mTopContainer;
+    private FrameLayout mTopContainer;
     
     private View mLeftView;
     private View mRightView;
@@ -106,8 +107,8 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     }
    
     private void initDeckView() {
-        setWillNotCacheDrawing(true);
-        setWillNotDraw(false);
+//        setWillNotCacheDrawing(false);
+//        setWillNotDraw(true);
         
         mVisibleSideMarginPx = DroidKit.getPixels(DEFAULT_VISIBLE_SIDE_MARGIN_DP);
         mIsBeingDragged = false;
@@ -122,7 +123,9 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         mMinVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaxVelocity = configuration.getScaledMaximumFlingVelocity();
         
-        mTopContainer = new RelativeLayout(getContext());
+        mTopContainer = new FrameLayout(getContext());
+        
+        addView(mTopContainer);
     }
     
     public void setOnDeckFocusChangedListener(OnDeckFocusChangedListener listener) {
@@ -130,18 +133,33 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     }
     
     public void setViews(View leftView, View rightView, View topView, boolean useShadows) {
+        
+        if (mLeftView != null && mLeftView.getParent() != null)
+            removeView(mLeftView);
+        if (mRightView != null && mRightView.getParent() != null)
+            removeView(mRightView);
+        if (mTopView != null && mTopContainer.getParent() != null)
+            mTopContainer.removeView(mTopView);
+            
+        
         mLeftView = leftView;
         mRightView = rightView;
         mTopView = topView;
+        
+        mTopContainer.addView(mTopView);
+        addView(mLeftView, 0);
+        addView(mRightView, 0);
         
         if (useShadows) {
             if (mLeftShadow == null) {
                 mLeftShadow = new FrameLayout(getContext());
                 mLeftShadow.setBackgroundResource(R.drawable.bg_shadow_left);
+                mTopContainer.addView(mLeftShadow);
             }
             if (mRightShadow == null) {
                 mRightShadow = new FrameLayout(getContext());
                 mRightShadow.setBackgroundResource(R.drawable.bg_shadow_right);
+                mTopContainer.addView(mRightShadow);
             }
         } else {
             if (mLeftShadow != null) {
@@ -169,6 +187,7 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
             int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (changed) {
+            CLog.e("ON LAYOUT - CHANGED");
             getHandler().post(new Runnable() {
                 @Override
                 public void run() {
@@ -179,22 +198,25 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
     }
     
     
-    
+
     private void updateLayout() {
         if (getWidth() <= 0 || mLeftView == null || mRightView == null || mTopView == null) {
-            if (mLeftView != null && mRightView != null && mTopView != null) {
-                mTopContainer.removeAllViews();
-                removeAllViews();
-                mTopContainer.addView(mTopView);
-                addView(mLeftView);
-                addView(mRightView);
-                addView(mTopContainer);
-            }
+//            if (mLeftView != null && mRightView != null && mTopView != null) {
+//                mTopContainer.removeAllViews();
+//                removeAllViews();
+//                mTopContainer.addView(mTopView);
+//                addView(mLeftView);
+//                addView(mRightView);
+//                addView(mTopContainer);
+//            }
             return;
         }
         
-        mTopContainer.removeAllViews();
-        removeAllViews();
+        CLog.e("UPDATE LAYOUT");
+        
+        
+//        mTopContainer.removeAllViews();
+//        removeAllViews();
         resetScrollBarriers();
         
         RelativeLayout.LayoutParams leftViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
@@ -211,25 +233,31 @@ public class DeckView extends RelativeLayout implements StoppableScrollView {
         mTopContainer.setBackgroundColor(Color.TRANSPARENT);
         mTopContainer.scrollTo(getCenterScrollX(), 0);
         
-        RelativeLayout.LayoutParams topViewLayoutParams = new RelativeLayout.LayoutParams(getWidth(), getHeight());
+        FrameLayout.LayoutParams topViewLayoutParams = new FrameLayout.LayoutParams(getWidth(), getHeight());
+        
         topViewLayoutParams.leftMargin = getWidth() - mVisibleSideMarginPx;
+        topViewLayoutParams.gravity = Gravity.TOP;
         mTopView.setLayoutParams(topViewLayoutParams);
         
-        mTopContainer.addView(mTopView);
+//        mTopContainer.addView(mTopView);
         
         if (mLeftShadow != null && mRightShadow != null) {
             
-            RelativeLayout.LayoutParams leftParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
-            RelativeLayout.LayoutParams rightParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
+            FrameLayout.LayoutParams leftParams = new FrameLayout.LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
+            FrameLayout.LayoutParams rightParams = new FrameLayout.LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
             rightParams.leftMargin = (getWidth()*2 - mVisibleSideMarginPx);
+            rightParams.gravity = Gravity.TOP;
             
-            mTopContainer.addView(mLeftShadow, leftParams);
-            mTopContainer.addView(mRightShadow, rightParams);
+            mLeftShadow.setLayoutParams(leftParams);
+            mRightShadow.setLayoutParams(rightParams);
+            
+//            mTopContainer.addView(mLeftShadow, leftParams);
+//            mTopContainer.addView(mRightShadow, rightParams);
         }
         
-        addView(mLeftView);
-        addView(mRightView);
-        addView(mTopContainer);
+//        addView(mLeftView);
+//        addView(mRightView);
+//        addView(mTopContainer);
         
         if (mFocusChangedListener != null)
             mFocusChangedListener.onCenterFocused();

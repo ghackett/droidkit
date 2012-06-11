@@ -7,6 +7,7 @@ public abstract class BoundLazyLoaderTask {
     private View mView;
     private Object mResultObject;
     
+
     public BoundLazyLoaderTask(View view) {
         mView = view;
         if (view == null)

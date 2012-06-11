@@ -84,18 +84,29 @@ public class BoundLazyLoader {
     public void addTask(BoundLazyLoaderTask task) {
         if (task == null)
             return;
-        if (TextUtils.isEmpty(task.getObjectKey()))
+        
+        String key = task.getObjectKey();
+        View view = task.getView();
+        
+        if (TextUtils.isEmpty(key))
             return;
         
-        task.getView().setTag(task.getObjectKey());
+        if (view == null)
+            return;
         
+//        if (key.equals(view.getTag()))
+//            return;
         
+        view.setTag(key);
         
         if (shouldAddTask(task)) {
             synchronized (mTaskQueue) {
                 for (int i = 0; i<mTaskQueue.size();) {
                     BoundLazyLoaderTask waitingTask = mTaskQueue.get(i);
-                    if (waitingTask.getView() == task.getView()) {
+                    View waitingView = waitingTask.getView();
+                    if (waitingView == view) {
+//                        if (key.equals(waitingTask.getObjectKey()))
+//                            return;
                         mTaskQueue.remove(i);
                     } else {
                         i++;
@@ -108,9 +119,23 @@ public class BoundLazyLoader {
             if (mThreadHandler == null) {
                 mUiHandler.postDelayed(mRetrySendMessageTask, mDelay);
             } else { 
+                if (DroidKit.DEBUG) CLog.e("resetting load timer");
                 resetLoadTimer();
             }
         }
+    }
+    
+    private boolean shouldAddTask(BoundLazyLoaderTask task) {
+        if (!mPaused) {
+            Object obj = sCache.bind(task.getObjectKey(), task.getView(), false);
+            if (obj != null) {
+                task.setResultObject(obj);
+                task.onLoadComplete(task.getView(), obj);
+                return false;
+            }
+        }
+        task.onLoadingStarted(task.getView());
+        return true;
     }
     
     /**
@@ -141,6 +166,7 @@ public class BoundLazyLoader {
     }
     
     private void destroyView(View v) {
+//        v.setTag(null);
         synchronized (mTaskQueue) {
             for (int i = 0; i<mTaskQueue.size();) {
                 BoundLazyLoaderTask waitingTask = mTaskQueue.get(i);
@@ -151,22 +177,12 @@ public class BoundLazyLoader {
                 }
             }
         }
+        
         sCache.destroyBinder(v, false);
     }
 
 
-    private boolean shouldAddTask(BoundLazyLoaderTask task) {
-        if (!mPaused) {
-            Object obj = sCache.bind(task.getObjectKey(), task.getView(), false);
-            if (obj != null) {
-                task.setResultObject(obj);
-                task.onLoadComplete(task.getView(), obj);
-                return false;
-            }
-        }
-        task.onLoadingStarted(task.getView());
-        return true;
-    }
+
     
     
     public void clearQueue() {
@@ -196,11 +212,11 @@ public class BoundLazyLoader {
         }
     }
     
-    private void resetLoadTimer() {
+    public void resetLoadTimer() {
         resetLoadTimer(mDelay);
     }
     
-    private void resetLoadTimer(long timer) {
+    public void resetLoadTimer(long timer) {
         try {
             mThreadHandler.removeMessages(0);
             mThreadHandler.sendEmptyMessageDelayed(0, timer);
