@@ -58,6 +58,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         public void onCenterFocused();
         public void onLeftViewFocused();
         public void onRightViewFocused();
+        public void onLeftViewVisible();
+        public void onRightViewVisible();
     }
     
     private FrameLayout mTopContainer;
@@ -223,6 +225,9 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         mTopContainer.setLayoutParams(topContainerLayoutParams);
         mTopContainer.setBackgroundColor(Color.TRANSPARENT);
         mTopContainer.scrollTo(getCenterScrollX(), 0);
+        
+        mLeftView.setVisibility(View.INVISIBLE);
+        mRightView.setVisibility(View.INVISIBLE);
         
         FrameLayout.LayoutParams topViewLayoutParams = new FrameLayout.LayoutParams(getWidth(), getHeight());
         
@@ -497,11 +502,19 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             scrollX = maxX;
         
         if (scrollX < centerX) {
-            mLeftView.setVisibility(VISIBLE);
-            mRightView.setVisibility(INVISIBLE);
+            if (mLeftView.getVisibility() != VISIBLE) {
+                mLeftView.setVisibility(VISIBLE);
+                mRightView.setVisibility(INVISIBLE);
+                if (mFocusChangedListener != null)
+                    mFocusChangedListener.onLeftViewVisible();
+            }
         } else if (scrollX > centerX) {
-            mLeftView.setVisibility(INVISIBLE);
-            mRightView.setVisibility(VISIBLE);
+            if (mRightView.getVisibility() != VISIBLE) {
+                mLeftView.setVisibility(INVISIBLE);
+                mRightView.setVisibility(VISIBLE);
+                if (mFocusChangedListener != null)
+                    mFocusChangedListener.onRightViewVisible();
+            }
         }
         
         mTopContainer.scrollTo(scrollX, 0);
