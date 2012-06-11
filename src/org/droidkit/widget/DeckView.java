@@ -274,6 +274,24 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             scrollTo(getCenterScrollX(), true);
     }
     
+    public boolean isTopFocused() {
+        int centerX = getCenterScrollX();
+        int scrollX = mTopContainer.getScrollX();
+        return scrollX == centerX;
+    }
+
+    public boolean isLeftFocused() {
+        int leftX = getMinScrollX();
+        int scrollX = mTopContainer.getScrollX();
+        return scrollX == leftX;
+    }
+    
+    public boolean isRightFocused() {
+        int rightX = getMaxScrollX();
+        int scrollX = mTopContainer.getScrollX();
+        return scrollX == rightX;
+    }
+    
     private boolean isOkToScroll(MotionEvent ev) {
         int action = ev.getAction() & MotionEvent.ACTION_MASK;
         
