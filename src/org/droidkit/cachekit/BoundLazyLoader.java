@@ -82,6 +82,10 @@ public class BoundLazyLoader {
     }
     
     public void addTask(BoundLazyLoaderTask task) {
+        addTask(task, false);
+    }
+    
+    public void addTask(BoundLazyLoaderTask task, boolean shortDelay) {
         if (task == null)
             return;
         
@@ -120,7 +124,10 @@ public class BoundLazyLoader {
                 mUiHandler.postDelayed(mRetrySendMessageTask, mDelay);
             } else { 
                 if (DroidKit.DEBUG) CLog.e("resetting load timer");
-                resetLoadTimer();
+                if (shortDelay)
+                    resetLoadTimer(10);
+                else
+                    resetLoadTimer();
             }
         }
     }
