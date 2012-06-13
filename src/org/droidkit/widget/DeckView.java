@@ -78,6 +78,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     private boolean mIsBeingScrolled;
     private float mLastMotionX;
     private float mLastMotionY;
+    private boolean mTouchMightBeTap = false;
     private VelocityTracker mVelocityTracker;
     private boolean mPreventInvalidate = false;
     private int mMinScrollX;
@@ -323,6 +324,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             return trueX < (getCenterScrollX() + getWidth());
     }
     
+    
+    
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 //        CLog.e("onInterceptTouchEvent");
@@ -368,6 +371,10 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             mLastMotionX = x;
             mLastMotionY = y;
             mIsBeingDragged = !mScroller.isFinished();
+            if (mScrollXOnDown != getCenterScrollX()) {
+                mTouchMightBeTap = true;
+                return true;
+            }
             break;
         }
         
@@ -422,24 +429,36 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
                     setTopScrollingAllowed(false);
                 }
                 final float x = event.getX();
+                final float y = event.getY();
                 final int deltaX = (int) (mLastMotionX - x);
+                final int deltaY = (int) (mLastMotionY - y);
+                mLastMotionY = y;
                 mLastMotionX = x;
+                if (mTouchMightBeTap && (deltaX > mTouchSlop || deltaY > mTouchSlop)) {
+                    mTouchMightBeTap = false;
+                }
                 scrollBy(deltaX, true);
                 break;
             }
             
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
-                final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000, mMaxVelocity);
-                
-                int initialVelocity = (int) velocityTracker.getXVelocity();
-                
-                mIsBeingDragged = false;
-                if (Math.abs(initialVelocity) > mMinVelocity) {
-                    fling(-initialVelocity);
+                if (mTouchMightBeTap) {
+                    mTouchMightBeTap = false;
+                    showTop(true);
                 } else {
-                    finishScroll();
+                
+                    final VelocityTracker velocityTracker = mVelocityTracker;
+                    velocityTracker.computeCurrentVelocity(1000, mMaxVelocity);
+                    
+                    int initialVelocity = (int) velocityTracker.getXVelocity();
+                    
+                    mIsBeingDragged = false;
+                    if (Math.abs(initialVelocity) > mMinVelocity) {
+                        fling(-initialVelocity);
+                    } else {
+                        finishScroll();
+                    }
                 }
                 
                 
