@@ -62,6 +62,7 @@ public class BoundLazyLoader {
     private boolean mPaused = false;
     private int mDelay = 500;
     private ArrayList<View> mViewsToDestroy = new ArrayList<View>();
+    private int mInOrderCount = 0;
 
     
     public BoundLazyLoader(int delay) {
@@ -132,12 +133,28 @@ public class BoundLazyLoader {
         }
     }
     
+    /**
+     * Call this in your fragment or activity's onResume, and the next 3 
+     * lazy load tasks will be loaded in order, instead of reverse order
+     * (if the queue is already empty)
+     */
+    public void onResume() {
+        synchronized (mTaskQueue) {
+            if (mTaskQueue.isEmpty())
+                mInOrderCount = 3;
+            else
+                mInOrderCount = 0;
+        }
+    }
+    
     private boolean shouldAddTask(BoundLazyLoaderTask task) {
         if (!mPaused) {
             Object obj = sCache.bind(task.getObjectKey(), task.getView(), false);
             if (obj != null) {
                 task.setResultObject(obj);
                 task.onLoadComplete(task.getView(), obj);
+                if (mInOrderCount > 0)
+                    mInOrderCount--;
                 return false;
             }
         }
@@ -281,8 +298,15 @@ public class BoundLazyLoader {
                     
                     BoundLazyLoaderTask task = null;
                     synchronized (mTaskQueue) {
-                        if (mTaskQueue.size() > 0) {
-                            task = mTaskQueue.pop();
+                        int size = mTaskQueue.size();
+                        if (size > 0) {
+                            if (mInOrderCount > 0) {
+                                mInOrderCount--;
+                                task = mTaskQueue.remove(0);
+                            } else {
+                                task = mTaskQueue.pop();
+                            }
+                            
                         }
                     }
                     
