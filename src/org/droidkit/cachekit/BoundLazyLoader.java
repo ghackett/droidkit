@@ -159,7 +159,7 @@ public class BoundLazyLoader {
             }
         }
         task.onLoadingStarted(task.getView());
-        return true;
+        return task.isTaskValid();
     }
     
     /**

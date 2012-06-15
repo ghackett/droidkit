@@ -48,5 +48,13 @@ public abstract class BoundLazyLoaderTask {
      * Called on the UI thread after the lazy loading has completed
      */
     public abstract void onLoadComplete(View view, Object resultObject);
+    
+    /**
+     * This is your chance to check if this task is valid (i.e. if your loading a remote image
+     *  you can check to make sure your URL isn't null). Putting that logic in this method
+     *  can help simplify your adapters.
+     * @return false if it should not be added to the taskQueue, true otherwise
+     */
+    public abstract boolean isTaskValid();
 }
 
