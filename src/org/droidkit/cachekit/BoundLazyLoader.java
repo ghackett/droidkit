@@ -6,6 +6,7 @@ import java.util.Stack;
 import org.droidkit.DroidKit;
 import org.droidkit.util.tricks.CLog;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,11 +15,14 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
+@SuppressLint("HandlerLeak")
 public class BoundLazyLoader {
     
     private static BoundLazyLoader sInstance = null;
     
     private static final Object sLock = new Object();
+    
+    private static final Handler UI_HANDLER = new Handler();
     
     public static BoundLazyLoader get() {
         synchronized (sLock) {
@@ -57,7 +61,7 @@ public class BoundLazyLoader {
     }
     
     private Handler mThreadHandler = null;
-    private final Handler mUiHandler = new Handler();
+    
     private Stack<BoundLazyLoaderTask> mTaskQueue;
     private boolean mPaused = false;
     private int mDelay = 500;
@@ -120,17 +124,17 @@ public class BoundLazyLoader {
                 }
                 mTaskQueue.push(task);
             }
-            
-            
-            if (mThreadHandler == null) {
-                mUiHandler.postDelayed(mRetrySendMessageTask, mDelay);
-            } else { 
-                if (DroidKit.DEBUG) CLog.e("resetting load timer");
-                if (shortDelay)
-                    resetLoadTimer(10);
-                else
-                    resetLoadTimer();
-            }
+
+        }
+        
+        if (mThreadHandler == null) {
+            UI_HANDLER.postDelayed(mRetrySendMessageTask, mDelay);
+        } else { 
+            if (DroidKit.DEBUG) CLog.e("resetting load timer");
+            if (shortDelay)
+                resetLoadTimer(20);
+            else
+                resetLoadTimer();
         }
     }
     
@@ -228,7 +232,7 @@ public class BoundLazyLoader {
                     mThreadHandler.sendEmptyMessage(0);
                 }
             } else if (!mPaused) {
-                mUiHandler.postDelayed(mRetrySendMessageTask, mDelay);
+                UI_HANDLER.postDelayed(mRetrySendMessageTask, mDelay);
             }
         }
     }
@@ -265,7 +269,7 @@ public class BoundLazyLoader {
             if (mThreadHandler != null) {
                 resetLoadTimer();
             } else {
-                mUiHandler.postDelayed(mRetrySendMessageTask, mDelay);
+                UI_HANDLER.postDelayed(mRetrySendMessageTask, mDelay);
             }
         }
     };
@@ -334,7 +338,7 @@ public class BoundLazyLoader {
                                     sCache.put(task.getObjectKey(), task.getView(), task.getResultObject(), true);
                             }
 //                            sCache.cleanCache();
-                            mUiHandler.post(new UINotifierTask(task));
+                            UI_HANDLER.post(new UINotifierTask(task));
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
@@ -358,7 +362,7 @@ public class BoundLazyLoader {
         }
     }
     
-    private class UINotifierTask implements Runnable {
+    private static class UINotifierTask implements Runnable {
 
         BoundLazyLoaderTask mTask = null;
         
