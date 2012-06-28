@@ -63,6 +63,7 @@ public class BoundLazyLoader {
     private int mDelay = 500;
     private ArrayList<View> mViewsToDestroy = new ArrayList<View>();
     private int mInOrderCount = 0;
+    private boolean mResumeMode = false;
 
     
     public BoundLazyLoader(int delay) {
@@ -83,7 +84,7 @@ public class BoundLazyLoader {
     }
     
     public void addTask(BoundLazyLoaderTask task) {
-        addTask(task, false);
+        addTask(task, mResumeMode);
     }
     
     public void addTask(BoundLazyLoaderTask task, boolean shortDelay) {
@@ -140,10 +141,13 @@ public class BoundLazyLoader {
      */
     public void onResume() {
         synchronized (mTaskQueue) {
-            if (mTaskQueue.isEmpty())
+            if (mTaskQueue.isEmpty()) {
                 mInOrderCount = 3;
-            else
+                mResumeMode = true;
+            } else {
                 mInOrderCount = 0;
+                mResumeMode = false;
+            }
         }
     }
     
@@ -278,19 +282,22 @@ public class BoundLazyLoader {
 
                     
                     boolean returnNow = false;
-                    synchronized (mViewsToDestroy) {
-                        if (!mViewsToDestroy.isEmpty()) {
-                            returnNow = true;
-                            for (View v : mViewsToDestroy) {
-                                destroyView(v);
-                            }
-                            mViewsToDestroy.clear();
-                        }
-                    }
                     
-                    if (returnNow) {
-                        resetLoadTimer();
-                        return;
+                    if (!mResumeMode) {
+                        synchronized (mViewsToDestroy) {
+                            if (!mViewsToDestroy.isEmpty()) {
+                                returnNow = true;
+                                for (View v : mViewsToDestroy) {
+                                    destroyView(v);
+                                }
+                                mViewsToDestroy.clear();
+                            }
+                        }
+                        
+                        if (returnNow) {
+                            resetLoadTimer();
+                            return;
+                        }
                     }
                     
                     if (mPaused)
@@ -307,6 +314,12 @@ public class BoundLazyLoader {
                                 task = mTaskQueue.pop();
                             }
                             
+                        } else {
+                            if (mResumeMode) {
+                                mResumeMode = false;
+                                resetLoadTimer(10);
+                                return;
+                            }
                         }
                     }
                     
