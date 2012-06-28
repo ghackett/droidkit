@@ -132,7 +132,7 @@ public class BoundLazyLoader {
         } else { 
             if (DroidKit.DEBUG) CLog.e("resetting load timer");
             if (shortDelay)
-                resetLoadTimer(20);
+                resetLoadTimer(10);
             else
                 resetLoadTimer();
         }
@@ -153,6 +153,7 @@ public class BoundLazyLoader {
                 mResumeMode = false;
             }
         }
+//        resetLoadTimer(10);
     }
     
     private boolean shouldAddTask(BoundLazyLoaderTask task) {
