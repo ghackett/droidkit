@@ -540,17 +540,17 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         
         if (scrollX < centerX) {
             if (mLeftView.getVisibility() != VISIBLE) {
-                mLeftView.setVisibility(VISIBLE);
-                mRightView.setVisibility(INVISIBLE);
                 if (mFocusChangedListener != null)
                     mFocusChangedListener.onLeftViewVisible();
+                mLeftView.setVisibility(VISIBLE);
+                mRightView.setVisibility(INVISIBLE);
             }
         } else if (scrollX > centerX) {
             if (mRightView.getVisibility() != VISIBLE) {
-                mLeftView.setVisibility(INVISIBLE);
-                mRightView.setVisibility(VISIBLE);
                 if (mFocusChangedListener != null)
                     mFocusChangedListener.onRightViewVisible();
+                mLeftView.setVisibility(INVISIBLE);
+                mRightView.setVisibility(VISIBLE);
             }
         } else if (scrollX == centerX) {
             mLeftView.setVisibility(INVISIBLE);
