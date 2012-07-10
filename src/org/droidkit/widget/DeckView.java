@@ -422,6 +422,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
                 if (mScrollXOnDown == null)
                     mScrollXOnDown = mTopContainer.getScrollX();
                 
+//                int newScrollX = mTopContainer.getScrollX();
+                
                 if (!mScroller.isFinished()) {
                     mScroller.abortAnimation();
                     mIsBeingDragged = true;
@@ -434,7 +436,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
                 final int deltaY = (int) (mLastMotionY - y);
                 mLastMotionY = y;
                 mLastMotionX = x;
-                if (mTouchMightBeTap && (deltaX > mTouchSlop || deltaY > mTouchSlop)) {
+                if (mTouchMightBeTap && (Math.abs(deltaX) > mTouchSlop || Math.abs(deltaY) > mTouchSlop)) {
                     mTouchMightBeTap = false;
                 }
                 scrollBy(deltaX, true);
@@ -445,6 +447,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             case MotionEvent.ACTION_UP: {
                 if (mTouchMightBeTap) {
                     mTouchMightBeTap = false;
+                    if (DroidKit.DEBUG) CLog.e("TOUCH MIGHT BE TAP, SHGOWING TOP");
                     showTop(true);
                 } else {
                 
@@ -617,6 +620,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         
 //        CLog.e("init fling velocity = " + initVelocity);
         int destX = initVelocity < 0 ? minX : maxX;
+        if (DroidKit.DEBUG) CLog.e("FLING DEST X = " + destX);
         int dx = destX - scrollX;
         
 //        mScroller.fling(scrollX, 0, initVelocity, 0, minX, maxX, 0, 0);
