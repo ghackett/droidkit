@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -217,8 +218,23 @@ public class HandyListView extends ListView implements StoppableScrollView {
         return mScrollingAllowed;
     }
 
-
+    @Override
+    public void onDraw(Canvas canvas) {
+        try {
+            super.onDraw(canvas);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
     
+    @Override
+    public void draw(Canvas canvas) {
+        try {
+            super.draw(canvas);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
     
 	
 }
