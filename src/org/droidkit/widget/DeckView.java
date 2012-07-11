@@ -299,42 +299,65 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
                 break;
             }
             case MODE_1_SIDE: {
-                FrameLayout.LayoutParams leftViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
+                FrameLayout.LayoutParams leftViewLayoutParams = new LayoutParams(mLeftPanelWidth, getHeight());
                 mLeftView.setLayoutParams(leftViewLayoutParams);
                 
-                FrameLayout.LayoutParams rightViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
-                rightViewLayoutParams.leftMargin = mVisibleSideMarginPx;
+                FrameLayout.LayoutParams rightViewLayoutParams = new LayoutParams(mLeftPanelWidth, getHeight());
+                rightViewLayoutParams.leftMargin = getWidth()-mLeftPanelWidth;
                 rightViewLayoutParams.gravity = Gravity.TOP;
 //                rightViewLayoutParams.addRule(ALIGN_PARENT_RIGHT);
                 mRightView.setLayoutParams(rightViewLayoutParams);
                 
-                int topContainerWidth = (getWidth() * 3) - (mVisibleSideMarginPx * 2);
+                int topContainerWidth = getWidth() + mLeftPanelWidth;
                 FrameLayout.LayoutParams topContainerLayoutParams = new LayoutParams(topContainerWidth, getHeight());
                 topContainerLayoutParams.gravity = Gravity.TOP;
-                topContainerLayoutParams.leftMargin = (-topContainerWidth) + getWidth();
+                topContainerLayoutParams.leftMargin = -mLeftPanelWidth;
                 mTopContainer.setLayoutParams(topContainerLayoutParams);
                 mTopContainer.setBackgroundColor(Color.TRANSPARENT);
                 
 
                 
-                FrameLayout.LayoutParams topViewLayoutParams = new FrameLayout.LayoutParams(getWidth(), getHeight());
+                FrameLayout.LayoutParams topViewLayoutParams = new FrameLayout.LayoutParams(getWidth()-mLeftPanelWidth, getHeight());
                 
-                topViewLayoutParams.leftMargin = getWidth() - mVisibleSideMarginPx;
+                topViewLayoutParams.leftMargin = mLeftPanelWidth;
                 topViewLayoutParams.gravity = Gravity.TOP;
                 mTopView.setLayoutParams(topViewLayoutParams);
                 
                 
                 if (mLeftShadow != null && mRightShadow != null) {
                     
-                    FrameLayout.LayoutParams leftParams = new FrameLayout.LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
-                    FrameLayout.LayoutParams rightParams = new FrameLayout.LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
-                    rightParams.leftMargin = (getWidth()*2 - mVisibleSideMarginPx);
+                    FrameLayout.LayoutParams leftParams = new FrameLayout.LayoutParams(mLeftPanelWidth, LayoutParams.MATCH_PARENT);
+                    FrameLayout.LayoutParams rightParams = new FrameLayout.LayoutParams(mLeftPanelWidth, LayoutParams.MATCH_PARENT);
+                    rightParams.leftMargin = (getWidth());
                     rightParams.gravity = Gravity.TOP;
                     
                     mLeftShadow.setLayoutParams(leftParams);
                     mRightShadow.setLayoutParams(rightParams);
                     
                 }
+                
+                int newFocus = DECK_UNKNOWN;
+                switch(mCurrentDeckFocus) {
+                    case DECK_UNKNOWN:
+                    case DECK_TOP:
+                    case DECK_LEFT:
+                        mTopContainer.scrollTo(getMinScrollX(), 0);
+                        mLeftView.setVisibility(View.VISIBLE);
+                        mRightView.setVisibility(View.INVISIBLE);
+                        newFocus = DECK_LEFT;
+                        break;
+                    case DECK_RIGHT:
+                        mTopContainer.scrollTo(getMaxScrollX(), 0);
+                        mLeftView.setVisibility(View.INVISIBLE);
+                        mRightView.setVisibility(View.VISIBLE);
+                        newFocus = DECK_RIGHT;
+                        break;
+                }
+                onDeckFocusChanged(newFocus);
+                if (mFocusChangedListener != null) {
+                    mFocusChangedListener.onVisibilityChanged(mCurrentDeckFocus);
+                }
+                
                 break;
             }
             case MODE_2_SIDES: {
@@ -389,6 +412,10 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         
     }
     
+    public int getDeckMode() {
+        return mDeckMode;
+    }
+    
     public void showLeft(boolean animated) {
         if (mDeckMode == MODE_2_SIDES)
             return;
@@ -408,7 +435,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     public void showTop(boolean animated) {
-        if (mDeckMode == MODE_2_SIDES)
+        if (mDeckMode == MODE_2_SIDES || mDeckMode == MODE_1_SIDE)
             return;
         if (animated)
             smoothScrollTo(getCenterScrollX());
@@ -463,12 +490,15 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         int centerX = getCenterScrollX();
         int trueX = scrollX + (int)x;
         
-        if (scrollX == centerX)
-            return true;
-        else if (scrollX < centerX)
-            return trueX > getCenterScrollX();
-        else
-            return trueX < (getCenterScrollX() + getWidth());
+        if (mDeckMode == MODE_0_SIDES) {
+            if (scrollX == centerX)
+                return true;
+            else if (scrollX < centerX)
+                return trueX > getCenterScrollX();
+            else
+                return trueX < (getCenterScrollX() + getWidth());
+        }
+        return true;
     }
     
     
@@ -521,7 +551,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             mLastMotionX = x;
             mLastMotionY = y;
             mIsBeingDragged = !mScroller.isFinished();
-            if (mScrollXOnDown != getCenterScrollX()) {
+            if (mDeckMode == MODE_0_SIDES && mScrollXOnDown != getCenterScrollX()) {
                 mTouchMightBeTap = true;
                 return true;
             }
@@ -654,12 +684,21 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             }
             onDeckFocusChanged(newFocus);
         } else {
-            if (scrollX < (centerX + minX)/2)
-                smoothScrollTo(minX);
-            else if (scrollX > (centerX + maxX)/2)
-                smoothScrollTo(maxX);
-            else
-                smoothScrollTo(centerX);
+            if (mDeckMode == MODE_0_SIDES) {
+                if (scrollX < (centerX + minX)/2)
+                    smoothScrollTo(minX);
+                else if (scrollX > (centerX + maxX)/2)
+                    smoothScrollTo(maxX);
+                else
+                    smoothScrollTo(centerX);
+            } else if (mDeckMode == MODE_1_SIDE) {
+                int midX = (maxX + minX)/2;
+                if (scrollX < midX) {
+                    smoothScrollTo(minX);
+                } else {
+                    smoothScrollTo(maxX);
+                }
+            }
         }
     }
     
@@ -703,23 +742,46 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         if (scrollX > maxX)
             scrollX = maxX;
         
-        if (scrollX < centerX) {
-            if (mLeftView.getVisibility() != VISIBLE) {
-                if (mFocusChangedListener != null)
-                    mFocusChangedListener.onVisibilityChanged(DECK_LEFT);
-                mLeftView.setVisibility(VISIBLE);
+        if (mDeckMode == MODE_0_SIDES) {
+            if (scrollX < centerX) {
+                if (mLeftView.getVisibility() != VISIBLE) {
+                    if (mFocusChangedListener != null)
+                        mFocusChangedListener.onVisibilityChanged(DECK_LEFT);
+                    mLeftView.setVisibility(VISIBLE);
+                    mRightView.setVisibility(INVISIBLE);
+                }
+            } else if (scrollX > centerX) {
+                if (mRightView.getVisibility() != VISIBLE) {
+                    if (mFocusChangedListener != null)
+                        mFocusChangedListener.onVisibilityChanged(DECK_RIGHT);
+                    mLeftView.setVisibility(INVISIBLE);
+                    mRightView.setVisibility(VISIBLE);
+                }
+            } else if (scrollX == centerX) {
+                mLeftView.setVisibility(INVISIBLE);
                 mRightView.setVisibility(INVISIBLE);
             }
-        } else if (scrollX > centerX) {
-            if (mRightView.getVisibility() != VISIBLE) {
-                if (mFocusChangedListener != null)
-                    mFocusChangedListener.onVisibilityChanged(DECK_RIGHT);
-                mLeftView.setVisibility(INVISIBLE);
-                mRightView.setVisibility(VISIBLE);
+        } else if (mDeckMode == MODE_1_SIDE) {
+            if (scrollX > minX) {
+                if (mLeftView.getVisibility() != VISIBLE) {
+                    if (mFocusChangedListener != null)
+                        mFocusChangedListener.onVisibilityChanged(DECK_LEFT);
+                    mLeftView.setVisibility(VISIBLE);
+//                    mRightView.setVisibility(INVISIBLE);
+                }
             }
-        } else if (scrollX == centerX) {
-            mLeftView.setVisibility(INVISIBLE);
-            mRightView.setVisibility(INVISIBLE);
+            if (scrollX < maxX) {
+                if (mRightView.getVisibility() != VISIBLE) {
+                    if (mFocusChangedListener != null)
+                        mFocusChangedListener.onVisibilityChanged(DECK_RIGHT);
+//                    mLeftView.setVisibility(INVISIBLE);
+                    mRightView.setVisibility(VISIBLE);
+                }
+            }
+            if (scrollX == maxX)
+                mLeftView.setVisibility(INVISIBLE);
+            if (scrollX == minX) 
+                mRightView.setVisibility(INVISIBLE);
         }
         
         mTopContainer.scrollTo(scrollX, 0);
@@ -767,18 +829,20 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         int minX = getMinScrollX();
         int centerX = getCenterScrollX();
         
-        if (mScrollXOnDown != null) {
-            if ((mScrollXOnDown > centerX && scrollX < centerX) 
-                    || (mScrollXOnDown < centerX && scrollX > centerX)){
-                finishScroll();
-                return;
+        if (mDeckMode == MODE_0_SIDES) {
+            if (mScrollXOnDown != null) {
+                if ((mScrollXOnDown > centerX && scrollX < centerX) 
+                        || (mScrollXOnDown < centerX && scrollX > centerX)){
+                    finishScroll();
+                    return;
+                }
             }
+            
+            if (scrollX > centerX)
+                minX = centerX;
+            if (scrollX < centerX)
+                maxX = centerX;
         }
-        
-        if (scrollX > centerX)
-            minX = centerX;
-        if (scrollX < centerX)
-            maxX = centerX;
         
 //        CLog.e("init fling velocity = " + initVelocity);
         int destX = initVelocity < 0 ? minX : maxX;
@@ -794,8 +858,20 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         if (getWidth() <= 0)
             return;
         mMaxScrollX = 0;
-        mMinScrollX = -((getWidth() * 2) - (mVisibleSideMarginPx * 2));
-        mCenterScrollX = -(getWidth() - mVisibleSideMarginPx);
+        switch(mDeckMode) {
+            case MODE_0_SIDES:
+                mMinScrollX = -((getWidth() * 2) - (mVisibleSideMarginPx * 2));
+                mCenterScrollX = -(getWidth() - mVisibleSideMarginPx);
+                break;
+            case MODE_1_SIDE:
+                mMinScrollX = -mLeftPanelWidth;
+                mCenterScrollX = Integer.MIN_VALUE;
+                break;
+            case MODE_2_SIDES:
+                mMinScrollX = 0;
+                mCenterScrollX = 0;
+                break;
+        }
     }
     
     private int getMaxScrollX() {
