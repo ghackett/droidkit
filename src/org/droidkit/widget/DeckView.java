@@ -45,6 +45,11 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     
     public static final int DEFAULT_VISIBLE_SIDE_MARGIN_DP = 80;
     
+    public static final int DECK_FOCUS_TOP = 0;
+    public static final int DECK_FOCUS_LEFT = -1;
+    public static final int DECK_FOCUS_RIGHT = 1;
+    public static final int DECK_FOCUS_UNKNOWN = Integer.MAX_VALUE;
+    
     private static final Interpolator sInterpolator = new Interpolator() {
         public float getInterpolation(float t) {
             // _o(t) = t * t * ((tension + 1) * t + tension)
@@ -92,6 +97,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     private FrameLayout mRightShadow = null;
     
     private boolean mScrollingDisabled = false;
+    
+    private int mCurrentDeckFocus = DECK_FOCUS_UNKNOWN;
 
     public DeckView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -190,14 +197,17 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         super.onLayout(changed, left, top, right, bottom);
         if (changed) {
             CLog.e("ON LAYOUT - CHANGED");
-            getHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    updateLayout();
-                }
-            });
+            getHandler().post(mUpdateLayoutRunnable);
         }
     }
+    
+    private Runnable mUpdateLayoutRunnable = new Runnable() {
+        
+        @Override
+        public void run() {
+            updateLayout();
+        }
+    };
     
     
 
@@ -225,10 +235,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         topContainerLayoutParams.leftMargin = (-topContainerWidth) + getWidth();
         mTopContainer.setLayoutParams(topContainerLayoutParams);
         mTopContainer.setBackgroundColor(Color.TRANSPARENT);
-        mTopContainer.scrollTo(getCenterScrollX(), 0);
         
-        mLeftView.setVisibility(View.INVISIBLE);
-        mRightView.setVisibility(View.INVISIBLE);
+
         
         FrameLayout.LayoutParams topViewLayoutParams = new FrameLayout.LayoutParams(getWidth(), getHeight());
         
@@ -249,9 +257,28 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             
         }
         
+        switch (mCurrentDeckFocus) {
+            case DECK_FOCUS_UNKNOWN:
+            case DECK_FOCUS_TOP:
+                mTopContainer.scrollTo(getCenterScrollX(), 0);
+                mLeftView.setVisibility(View.INVISIBLE);
+                mRightView.setVisibility(View.INVISIBLE);
+                onCenterFocused();
+                break;
+            case DECK_FOCUS_LEFT:
+                mTopContainer.scrollTo(getMinScrollX(), 0);
+                mLeftView.setVisibility(View.VISIBLE);
+                mRightView.setVisibility(View.INVISIBLE);
+                onLeftViewFocused();
+                break;
+            case DECK_FOCUS_RIGHT:
+                mTopContainer.scrollTo(getMaxScrollX(), 0);
+                mLeftView.setVisibility(View.INVISIBLE);
+                mRightView.setVisibility(View.VISIBLE);
+                onRightViewFocused();
+                break;
+        }
         
-        if (mFocusChangedListener != null)
-            mFocusChangedListener.onCenterFocused();
     }
     
     public void showLeft(boolean animated) {
@@ -491,14 +518,12 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             mIsBeingScrolled = false;
             mScrollXOnDown = null;
             setTopScrollingAllowed(true);
-            if (mFocusChangedListener != null) {
-                if (scrollX == centerX) {
-                    mFocusChangedListener.onCenterFocused();
-                } else if (scrollX == minX) {
-                    mFocusChangedListener.onLeftViewFocused();
-                } else if (scrollX == maxX) {
-                    mFocusChangedListener.onRightViewFocused();
-                }
+            if (scrollX == centerX) {
+                onCenterFocused();
+            } else if (scrollX == minX) {
+                onLeftViewFocused();
+            } else if (scrollX == maxX) {
+                onRightViewFocused();
             }
         } else {
             if (scrollX < (centerX + minX)/2)
@@ -507,6 +532,30 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
                 smoothScrollTo(maxX);
             else
                 smoothScrollTo(centerX);
+        }
+    }
+    
+    public void onCenterFocused() {
+        if (mCurrentDeckFocus != DECK_FOCUS_TOP) {
+            mCurrentDeckFocus = DECK_FOCUS_TOP;
+            if (mFocusChangedListener != null)
+                mFocusChangedListener.onCenterFocused();
+        }
+    }
+    
+    public void onLeftViewFocused() {
+        if (mCurrentDeckFocus != DECK_FOCUS_LEFT) {
+            mCurrentDeckFocus = DECK_FOCUS_LEFT;
+            if (mFocusChangedListener != null)
+                mFocusChangedListener.onLeftViewFocused();
+        }
+    }
+    
+    public void onRightViewFocused() {
+        if (mCurrentDeckFocus != DECK_FOCUS_RIGHT) {
+            mCurrentDeckFocus = DECK_FOCUS_RIGHT;
+            if (mFocusChangedListener != null)
+                mFocusChangedListener.onRightViewFocused();
         }
     }
     
