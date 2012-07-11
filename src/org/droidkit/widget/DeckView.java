@@ -50,6 +50,10 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     public static final int DECK_RIGHT = 1;
     public static final int DECK_UNKNOWN = Integer.MAX_VALUE;
     
+    public static final int MODE_0_SIDES = 0; //default
+    public static final int MODE_1_SIDE = 1; //always show one of the panels in addition to the top view (top will never be hidden)
+    public static final int MODE_2_SIDES = 2; //always show both of the panels (top will never be hidden and will never scroll left or right)
+    
     private static final Interpolator sInterpolator = new Interpolator() {
         public float getInterpolation(float t) {
             // _o(t) = t * t * ((tension + 1) * t + tension)
@@ -71,7 +75,6 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     private View mTopView;
 
 //    private WeakReference<StoppableScrollView> mTopScrollView;
-    private int mVisibleSideMarginPx;
     private Scroller mScroller;
     private int mTouchSlop;
     private int mMinVelocity;
@@ -96,6 +99,11 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     private boolean mScrollingDisabled = false;
     
     private int mCurrentDeckFocus = DECK_UNKNOWN;
+    private int mDeckMode = MODE_0_SIDES;
+    
+    private int mVisibleSideMarginPx; //only used for MODE_0_SIDES
+    private int mLeftPanelWidth; //only used for MODE_1_SIDE and MODE_2_SIDES
+    private int mRightPanelWidth; //only used for MODE_2_SIDES
 
     public DeckView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -183,9 +191,23 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         updateLayout();
     }
     
-    public void setVisibleSideMarginPx(int visibleSideMarginPx) {
+    public void setDeckMode0Sides(int visibleSideMarginPx) {
+        mDeckMode = MODE_0_SIDES;
         mVisibleSideMarginPx = visibleSideMarginPx;
         updateLayout();
+    }
+    
+    public void setDeckMode1Side(int panelWidthPx) {
+        mDeckMode = MODE_1_SIDE;
+        mLeftPanelWidth = panelWidthPx;
+        mRightPanelWidth = panelWidthPx;
+        updateLayout();
+    }
+    
+    public void setDeckMode2Sides(int leftPanelWidthPx, int rightPanelWidthPx) {
+        mDeckMode = MODE_2_SIDES;
+        mLeftPanelWidth = leftPanelWidthPx;
+        mRightPanelWidth = rightPanelWidthPx;
     }
     
     @Override
@@ -217,66 +239,159 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
 
         resetScrollBarriers();
         
-        FrameLayout.LayoutParams leftViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
-        mLeftView.setLayoutParams(leftViewLayoutParams);
-        
-        FrameLayout.LayoutParams rightViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
-        rightViewLayoutParams.leftMargin = mVisibleSideMarginPx;
-        rightViewLayoutParams.gravity = Gravity.TOP;
-//        rightViewLayoutParams.addRule(ALIGN_PARENT_RIGHT);
-        mRightView.setLayoutParams(rightViewLayoutParams);
-        
-        int topContainerWidth = (getWidth() * 3) - (mVisibleSideMarginPx * 2);
-        FrameLayout.LayoutParams topContainerLayoutParams = new LayoutParams(topContainerWidth, getHeight());
-        topContainerLayoutParams.gravity = Gravity.TOP;
-        topContainerLayoutParams.leftMargin = (-topContainerWidth) + getWidth();
-        mTopContainer.setLayoutParams(topContainerLayoutParams);
-        mTopContainer.setBackgroundColor(Color.TRANSPARENT);
+        switch(mDeckMode) {
+            case MODE_0_SIDES: {
+                FrameLayout.LayoutParams leftViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
+                mLeftView.setLayoutParams(leftViewLayoutParams);
+                
+                FrameLayout.LayoutParams rightViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
+                rightViewLayoutParams.leftMargin = mVisibleSideMarginPx;
+                rightViewLayoutParams.gravity = Gravity.TOP;
+//                rightViewLayoutParams.addRule(ALIGN_PARENT_RIGHT);
+                mRightView.setLayoutParams(rightViewLayoutParams);
+                
+                int topContainerWidth = (getWidth() * 3) - (mVisibleSideMarginPx * 2);
+                FrameLayout.LayoutParams topContainerLayoutParams = new LayoutParams(topContainerWidth, getHeight());
+                topContainerLayoutParams.gravity = Gravity.TOP;
+                topContainerLayoutParams.leftMargin = (-topContainerWidth) + getWidth();
+                mTopContainer.setLayoutParams(topContainerLayoutParams);
+                mTopContainer.setBackgroundColor(Color.TRANSPARENT);
+                
+
+                
+                FrameLayout.LayoutParams topViewLayoutParams = new FrameLayout.LayoutParams(getWidth(), getHeight());
+                
+                topViewLayoutParams.leftMargin = getWidth() - mVisibleSideMarginPx;
+                topViewLayoutParams.gravity = Gravity.TOP;
+                mTopView.setLayoutParams(topViewLayoutParams);
+                
+                
+                if (mLeftShadow != null && mRightShadow != null) {
+                    
+                    FrameLayout.LayoutParams leftParams = new FrameLayout.LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
+                    FrameLayout.LayoutParams rightParams = new FrameLayout.LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
+                    rightParams.leftMargin = (getWidth()*2 - mVisibleSideMarginPx);
+                    rightParams.gravity = Gravity.TOP;
+                    
+                    mLeftShadow.setLayoutParams(leftParams);
+                    mRightShadow.setLayoutParams(rightParams);
+                    
+                }
+                
+                switch (mCurrentDeckFocus) {
+                    case DECK_UNKNOWN:
+                    case DECK_TOP:
+                        mTopContainer.scrollTo(getCenterScrollX(), 0);
+                        mLeftView.setVisibility(View.INVISIBLE);
+                        mRightView.setVisibility(View.INVISIBLE);
+                        break;
+                    case DECK_LEFT:
+                        mTopContainer.scrollTo(getMinScrollX(), 0);
+                        mLeftView.setVisibility(View.VISIBLE);
+                        mRightView.setVisibility(View.INVISIBLE);
+                        break;
+                    case DECK_RIGHT:
+                        mTopContainer.scrollTo(getMaxScrollX(), 0);
+                        mLeftView.setVisibility(View.INVISIBLE);
+                        mRightView.setVisibility(View.VISIBLE);
+                        break;
+                }
+                break;
+            }
+            case MODE_1_SIDE: {
+                FrameLayout.LayoutParams leftViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
+                mLeftView.setLayoutParams(leftViewLayoutParams);
+                
+                FrameLayout.LayoutParams rightViewLayoutParams = new LayoutParams(getWidth() - mVisibleSideMarginPx, getHeight());
+                rightViewLayoutParams.leftMargin = mVisibleSideMarginPx;
+                rightViewLayoutParams.gravity = Gravity.TOP;
+//                rightViewLayoutParams.addRule(ALIGN_PARENT_RIGHT);
+                mRightView.setLayoutParams(rightViewLayoutParams);
+                
+                int topContainerWidth = (getWidth() * 3) - (mVisibleSideMarginPx * 2);
+                FrameLayout.LayoutParams topContainerLayoutParams = new LayoutParams(topContainerWidth, getHeight());
+                topContainerLayoutParams.gravity = Gravity.TOP;
+                topContainerLayoutParams.leftMargin = (-topContainerWidth) + getWidth();
+                mTopContainer.setLayoutParams(topContainerLayoutParams);
+                mTopContainer.setBackgroundColor(Color.TRANSPARENT);
+                
+
+                
+                FrameLayout.LayoutParams topViewLayoutParams = new FrameLayout.LayoutParams(getWidth(), getHeight());
+                
+                topViewLayoutParams.leftMargin = getWidth() - mVisibleSideMarginPx;
+                topViewLayoutParams.gravity = Gravity.TOP;
+                mTopView.setLayoutParams(topViewLayoutParams);
+                
+                
+                if (mLeftShadow != null && mRightShadow != null) {
+                    
+                    FrameLayout.LayoutParams leftParams = new FrameLayout.LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
+                    FrameLayout.LayoutParams rightParams = new FrameLayout.LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
+                    rightParams.leftMargin = (getWidth()*2 - mVisibleSideMarginPx);
+                    rightParams.gravity = Gravity.TOP;
+                    
+                    mLeftShadow.setLayoutParams(leftParams);
+                    mRightShadow.setLayoutParams(rightParams);
+                    
+                }
+                break;
+            }
+            case MODE_2_SIDES: {
+                FrameLayout.LayoutParams leftViewLayoutParams = new LayoutParams(mLeftPanelWidth, getHeight());
+                mLeftView.setLayoutParams(leftViewLayoutParams);
+                
+                FrameLayout.LayoutParams rightViewLayoutParams = new LayoutParams(mRightPanelWidth, getHeight());
+                rightViewLayoutParams.leftMargin = getWidth() - mRightPanelWidth;
+                rightViewLayoutParams.gravity = Gravity.TOP;
+//                rightViewLayoutParams.addRule(ALIGN_PARENT_RIGHT);
+                mRightView.setLayoutParams(rightViewLayoutParams);
+                
+                int topContainerWidth = getWidth();
+                FrameLayout.LayoutParams topContainerLayoutParams = new LayoutParams(topContainerWidth, getHeight());
+                topContainerLayoutParams.gravity = Gravity.TOP;
+//                topContainerLayoutParams.leftMargin = -mLeftPanelWidth;
+                mTopContainer.setLayoutParams(topContainerLayoutParams);
+                mTopContainer.setBackgroundColor(Color.TRANSPARENT);
+                
+
+                
+                FrameLayout.LayoutParams topViewLayoutParams = new FrameLayout.LayoutParams(getWidth()-mLeftPanelWidth-mRightPanelWidth, getHeight());
+                
+                topViewLayoutParams.leftMargin = mLeftPanelWidth;
+                topViewLayoutParams.gravity = Gravity.TOP;
+                mTopView.setLayoutParams(topViewLayoutParams);
+                
+                
+                if (mLeftShadow != null && mRightShadow != null) {
+                    
+                    FrameLayout.LayoutParams leftParams = new FrameLayout.LayoutParams(mLeftPanelWidth, LayoutParams.MATCH_PARENT);
+                    FrameLayout.LayoutParams rightParams = new FrameLayout.LayoutParams(mRightPanelWidth, LayoutParams.MATCH_PARENT);
+                    rightParams.leftMargin = (getWidth() - mRightPanelWidth);
+                    rightParams.gravity = Gravity.TOP;
+                    
+                    mLeftShadow.setLayoutParams(leftParams);
+                    mRightShadow.setLayoutParams(rightParams);
+                    
+                }
+                
+//                mTopContainer.scrollTo(-mLeftPanelWidth, 0);
+                if (mFocusChangedListener != null) {
+                    mFocusChangedListener.onVisibilityChanged(DECK_LEFT);
+                    mFocusChangedListener.onVisibilityChanged(DECK_RIGHT);
+                }
+                break;
+            }
+        }
         
 
-        
-        FrameLayout.LayoutParams topViewLayoutParams = new FrameLayout.LayoutParams(getWidth(), getHeight());
-        
-        topViewLayoutParams.leftMargin = getWidth() - mVisibleSideMarginPx;
-        topViewLayoutParams.gravity = Gravity.TOP;
-        mTopView.setLayoutParams(topViewLayoutParams);
-        
-        
-        if (mLeftShadow != null && mRightShadow != null) {
-            
-            FrameLayout.LayoutParams leftParams = new FrameLayout.LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
-            FrameLayout.LayoutParams rightParams = new FrameLayout.LayoutParams(getWidth() - mVisibleSideMarginPx, LayoutParams.MATCH_PARENT);
-            rightParams.leftMargin = (getWidth()*2 - mVisibleSideMarginPx);
-            rightParams.gravity = Gravity.TOP;
-            
-            mLeftShadow.setLayoutParams(leftParams);
-            mRightShadow.setLayoutParams(rightParams);
-            
-        }
-        
-        switch (mCurrentDeckFocus) {
-            case DECK_UNKNOWN:
-            case DECK_TOP:
-                mTopContainer.scrollTo(getCenterScrollX(), 0);
-                mLeftView.setVisibility(View.INVISIBLE);
-                mRightView.setVisibility(View.INVISIBLE);
-                break;
-            case DECK_LEFT:
-                mTopContainer.scrollTo(getMinScrollX(), 0);
-                mLeftView.setVisibility(View.VISIBLE);
-                mRightView.setVisibility(View.INVISIBLE);
-                break;
-            case DECK_RIGHT:
-                mTopContainer.scrollTo(getMaxScrollX(), 0);
-                mLeftView.setVisibility(View.INVISIBLE);
-                mRightView.setVisibility(View.VISIBLE);
-                break;
-        }
         onDeckFocusChanged(mCurrentDeckFocus);
         
     }
     
     public void showLeft(boolean animated) {
+        if (mDeckMode == MODE_2_SIDES)
+            return;
         if (animated)
             smoothScrollTo(getMinScrollX());
         else
@@ -284,6 +399,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     public void showRight(boolean animated) {
+        if (mDeckMode == MODE_2_SIDES)
+            return;
         if (animated)
             smoothScrollTo(getMaxScrollX());
         else
@@ -291,6 +408,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     public void showTop(boolean animated) {
+        if (mDeckMode == MODE_2_SIDES)
+            return;
         if (animated)
             smoothScrollTo(getCenterScrollX());
         else
@@ -298,18 +417,24 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     public boolean isTopFocused() {
+        if (mDeckMode == MODE_2_SIDES || mDeckMode == MODE_1_SIDE)
+            return true;
         int centerX = getCenterScrollX();
         int scrollX = mTopContainer.getScrollX();
         return scrollX == centerX;
     }
 
     public boolean isLeftFocused() {
+        if (mDeckMode == MODE_2_SIDES)
+            return true;
         int leftX = getMinScrollX();
         int scrollX = mTopContainer.getScrollX();
         return scrollX == leftX;
     }
     
     public boolean isRightFocused() {
+        if (mDeckMode == MODE_2_SIDES)
+            return true;
         int rightX = getMaxScrollX();
         int scrollX = mTopContainer.getScrollX();
         return scrollX == rightX;
@@ -351,6 +476,9 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 //        CLog.e("onInterceptTouchEvent");
+        
+        if (mDeckMode == MODE_2_SIDES)
+            return false;
         
         if (!isOkToScroll(ev)) {
 //            CLog.e("not ok to scroll");
@@ -416,6 +544,9 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 //        CLog.e("onTouchEvent");
+        
+        if (mDeckMode == MODE_2_SIDES)
+            return false;
         
         if (!isOkToScroll(event)) {
 //            CLog.e("not ok to scroll");
