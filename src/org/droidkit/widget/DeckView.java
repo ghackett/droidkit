@@ -45,10 +45,10 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     
     public static final int DEFAULT_VISIBLE_SIDE_MARGIN_DP = 80;
     
-    public static final int DECK_FOCUS_TOP = 0;
-    public static final int DECK_FOCUS_LEFT = -1;
-    public static final int DECK_FOCUS_RIGHT = 1;
-    public static final int DECK_FOCUS_UNKNOWN = Integer.MAX_VALUE;
+    public static final int DECK_TOP = 0;
+    public static final int DECK_LEFT = -1;
+    public static final int DECK_RIGHT = 1;
+    public static final int DECK_UNKNOWN = Integer.MAX_VALUE;
     
     private static final Interpolator sInterpolator = new Interpolator() {
         public float getInterpolation(float t) {
@@ -60,11 +60,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     };
 
     public interface OnDeckFocusChangedListener {
-        public void onCenterFocused();
-        public void onLeftViewFocused();
-        public void onRightViewFocused();
-        public void onLeftViewVisible();
-        public void onRightViewVisible();
+        public void onDeckFocusChanged(int newFocus);
+        public void onVisibilityChanged(int visibleSide);
     }
     
     private FrameLayout mTopContainer;
@@ -98,7 +95,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     
     private boolean mScrollingDisabled = false;
     
-    private int mCurrentDeckFocus = DECK_FOCUS_UNKNOWN;
+    private int mCurrentDeckFocus = DECK_UNKNOWN;
 
     public DeckView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -258,26 +255,24 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         }
         
         switch (mCurrentDeckFocus) {
-            case DECK_FOCUS_UNKNOWN:
-            case DECK_FOCUS_TOP:
+            case DECK_UNKNOWN:
+            case DECK_TOP:
                 mTopContainer.scrollTo(getCenterScrollX(), 0);
                 mLeftView.setVisibility(View.INVISIBLE);
                 mRightView.setVisibility(View.INVISIBLE);
-                onCenterFocused();
                 break;
-            case DECK_FOCUS_LEFT:
+            case DECK_LEFT:
                 mTopContainer.scrollTo(getMinScrollX(), 0);
                 mLeftView.setVisibility(View.VISIBLE);
                 mRightView.setVisibility(View.INVISIBLE);
-                onLeftViewFocused();
                 break;
-            case DECK_FOCUS_RIGHT:
+            case DECK_RIGHT:
                 mTopContainer.scrollTo(getMaxScrollX(), 0);
                 mLeftView.setVisibility(View.INVISIBLE);
                 mRightView.setVisibility(View.VISIBLE);
-                onRightViewFocused();
                 break;
         }
+        onDeckFocusChanged(mCurrentDeckFocus);
         
     }
     
@@ -518,13 +513,15 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             mIsBeingScrolled = false;
             mScrollXOnDown = null;
             setTopScrollingAllowed(true);
+            int newFocus = DECK_UNKNOWN;
             if (scrollX == centerX) {
-                onCenterFocused();
+                newFocus = DECK_TOP;
             } else if (scrollX == minX) {
-                onLeftViewFocused();
+                newFocus = DECK_LEFT;
             } else if (scrollX == maxX) {
-                onRightViewFocused();
+                newFocus = DECK_RIGHT;
             }
+            onDeckFocusChanged(newFocus);
         } else {
             if (scrollX < (centerX + minX)/2)
                 smoothScrollTo(minX);
@@ -535,29 +532,14 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         }
     }
     
-    public void onCenterFocused() {
-        if (mCurrentDeckFocus != DECK_FOCUS_TOP) {
-            mCurrentDeckFocus = DECK_FOCUS_TOP;
+    protected void onDeckFocusChanged(int newFocus) {
+        if (mCurrentDeckFocus != newFocus) {
+            mCurrentDeckFocus = newFocus;
             if (mFocusChangedListener != null)
-                mFocusChangedListener.onCenterFocused();
+                mFocusChangedListener.onDeckFocusChanged(newFocus);
         }
     }
     
-    public void onLeftViewFocused() {
-        if (mCurrentDeckFocus != DECK_FOCUS_LEFT) {
-            mCurrentDeckFocus = DECK_FOCUS_LEFT;
-            if (mFocusChangedListener != null)
-                mFocusChangedListener.onLeftViewFocused();
-        }
-    }
-    
-    public void onRightViewFocused() {
-        if (mCurrentDeckFocus != DECK_FOCUS_RIGHT) {
-            mCurrentDeckFocus = DECK_FOCUS_RIGHT;
-            if (mFocusChangedListener != null)
-                mFocusChangedListener.onRightViewFocused();
-        }
-    }
     
     @Deprecated
     private void setTopScrollingAllowed(boolean allowed) {
@@ -593,14 +575,14 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         if (scrollX < centerX) {
             if (mLeftView.getVisibility() != VISIBLE) {
                 if (mFocusChangedListener != null)
-                    mFocusChangedListener.onLeftViewVisible();
+                    mFocusChangedListener.onVisibilityChanged(DECK_LEFT);
                 mLeftView.setVisibility(VISIBLE);
                 mRightView.setVisibility(INVISIBLE);
             }
         } else if (scrollX > centerX) {
             if (mRightView.getVisibility() != VISIBLE) {
                 if (mFocusChangedListener != null)
-                    mFocusChangedListener.onRightViewVisible();
+                    mFocusChangedListener.onVisibilityChanged(DECK_RIGHT);
                 mLeftView.setVisibility(INVISIBLE);
                 mRightView.setVisibility(VISIBLE);
             }
