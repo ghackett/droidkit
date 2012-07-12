@@ -215,7 +215,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (changed) {
-            CLog.e("ON LAYOUT - CHANGED");
+            CLog.v("ON LAYOUT - CHANGED");
             getHandler().post(mUpdateLayoutRunnable);
         }
     }
@@ -475,7 +475,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         
         
         if (mScrollingDisabled) {
-//            CLog.e("scrolling disabled " + action);
+//            CLog.v("scrolling disabled " + action);
             if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP)
                 allowScrolling();
             return false;
@@ -513,13 +513,13 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        CLog.e("onInterceptTouchEvent");
+//        CLog.v("onInterceptTouchEvent");
         
         if (mDeckMode == MODE_2_SIDES)
             return false;
         
         if (!isOkToScroll(ev)) {
-//            CLog.e("not ok to scroll");
+//            CLog.v("not ok to scroll");
             return false;
         }
         
@@ -581,13 +581,13 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-//        CLog.e("onTouchEvent");
+//        CLog.v("onTouchEvent");
         
         if (mDeckMode == MODE_2_SIDES)
             return false;
         
         if (!isOkToScroll(event)) {
-//            CLog.e("not ok to scroll");
+//            CLog.v("not ok to scroll");
             return false;
         }
         
@@ -638,7 +638,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             case MotionEvent.ACTION_UP: {
                 if (mTouchMightBeTap) {
                     mTouchMightBeTap = false;
-                    if (DroidKit.DEBUG) CLog.e("TOUCH MIGHT BE TAP, SHGOWING TOP");
+                    if (DroidKit.DEBUG) CLog.v("TOUCH MIGHT BE TAP, SHGOWING TOP");
                     showTop(true);
                 } else {
                 
@@ -822,7 +822,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         int maxWidth = getWidth()-mVisibleSideMarginPx;
 //        float millisPerPixel = 0.35714287f;
         float millisPerPixel = 200f/(float)maxWidth;
-//        CLog.e("millisPerPixel = " + millisPerPixel);
+//        CLog.v("millisPerPixel = " + millisPerPixel);
         float duration = millisPerPixel*dxf;
         return (int)duration;
     }
@@ -852,9 +852,9 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
                 maxX = centerX;
         }
         
-//        CLog.e("init fling velocity = " + initVelocity);
+//        CLog.v("init fling velocity = " + initVelocity);
         int destX = initVelocity < 0 ? minX : maxX;
-        if (DroidKit.DEBUG) CLog.e("FLING DEST X = " + destX);
+        if (DroidKit.DEBUG) CLog.v("FLING DEST X = " + destX);
         int dx = destX - scrollX;
         
 //        mScroller.fling(scrollX, 0, initVelocity, 0, minX, maxX, 0, 0);

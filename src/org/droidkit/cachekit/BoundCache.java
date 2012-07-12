@@ -63,7 +63,7 @@ public class BoundCache<K, B, C> implements CacheInterface {
             mObjectBindings.put(object, binderList);
         }
         
-//        if (DroidKit.DEBUG) CLog.e("calling remove from put " + key.toString());
+//        if (DroidKit.DEBUG) CLog.v("calling remove from put " + key.toString());
         removeBinderFromObject(oldObject, binder, cleanOldObject);
     }
     
@@ -105,7 +105,7 @@ public class BoundCache<K, B, C> implements CacheInterface {
                     onObjectUnbound(oldObject);
                 }
             }
-//            if (DroidKit.DEBUG) CLog.e("rbfo Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
+//            if (DroidKit.DEBUG) CLog.v("rbfo Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
         }
         
         
@@ -117,13 +117,13 @@ public class BoundCache<K, B, C> implements CacheInterface {
         C obj = mKeyMap.get(key);
 
         if (obj != null) {
-//            if (DroidKit.DEBUG) CLog.e("calling put from bind " + key.toString());
+//            if (DroidKit.DEBUG) CLog.v("calling put from bind " + key.toString());
             put(key, binder, obj, cleanOldObject);
         } else {
             C oldObject = mBinders.remove(binder);
             if (oldObject != null) {
-//                if (DroidKit.DEBUG) CLog.e("didnt find object for key, but found one for the binder, so lets remove the binding");
-                if (DroidKit.DEBUG) CLog.e("calling remove from bind " + key.toString());
+//                if (DroidKit.DEBUG) CLog.v("didnt find object for key, but found one for the binder, so lets remove the binding");
+                if (DroidKit.DEBUG) CLog.v("calling remove from bind " + key.toString());
                 removeBinderFromObject(oldObject, binder, cleanOldObject);
             }
         }
@@ -163,7 +163,7 @@ public class BoundCache<K, B, C> implements CacheInterface {
     
     public synchronized void cleanCache() {
         if (mObjectBindings.isEmpty()) {
-            if (DroidKit.DEBUG) CLog.e("cc1 Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
+            if (DroidKit.DEBUG) CLog.v("cc1 Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
             return;
         }
         
@@ -193,7 +193,7 @@ public class BoundCache<K, B, C> implements CacheInterface {
                 onObjectUnbound(obj);
             }
         }
-        if (DroidKit.DEBUG) CLog.e("cc2 Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
+        if (DroidKit.DEBUG) CLog.v("cc2 Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
     }
     
     protected void onObjectUnbound(C object) {

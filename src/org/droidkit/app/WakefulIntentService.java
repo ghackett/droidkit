@@ -162,7 +162,7 @@ public abstract class WakefulIntentService extends Service {
     public void onDestroy() {
         unlock();
         mServiceLooper.quit();
-        if (DroidKit.DEBUG) CLog.e("********SERVICE DESTROYED " + mName + "**********");
+        if (DroidKit.DEBUG) CLog.v("********SERVICE DESTROYED " + mName + "**********");
         super.onDestroy();
     }
 
@@ -210,7 +210,7 @@ public abstract class WakefulIntentService extends Service {
         
         if (!sServiceLocks.contains(name)) {
             sServiceLocks.add(name);
-            if (DroidKit.DEBUG) CLog.e("********WAKE LOCK ACQUIRED FOR " + name + "**********");
+            if (DroidKit.DEBUG) CLog.v("********WAKE LOCK ACQUIRED FOR " + name + "**********");
         }
     }
     
@@ -219,14 +219,14 @@ public abstract class WakefulIntentService extends Service {
             sServiceLocks = new ArrayList<String>();
         
         if (sServiceLocks.remove(name)) {
-            if (DroidKit.DEBUG) CLog.e("********WAKE LOCK RELEASED FOR " + name + "**********");
+            if (DroidKit.DEBUG) CLog.v("********WAKE LOCK RELEASED FOR " + name + "**********");
         }
         
         if (sServiceLocks.isEmpty()) {
             if (sLock != null && sLock.isHeld()) {
                 sLock.release();
                 long lockTimeSecs = (System.currentTimeMillis() - sLockStartTime)/1000;
-                if (DroidKit.DEBUG) CLog.e("WAKE LOCK HELD FOR " + lockTimeSecs + " seconds");
+                if (DroidKit.DEBUG) CLog.v("WAKE LOCK HELD FOR " + lockTimeSecs + " seconds");
             }
             sLock = null;
         }
