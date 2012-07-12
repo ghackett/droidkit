@@ -494,9 +494,14 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             if (scrollX == centerX)
                 return true;
             else if (scrollX < centerX)
-                return trueX > getCenterScrollX();
+                return trueX > centerX;
             else
-                return trueX < (getCenterScrollX() + getWidth());
+                return trueX < (centerX + getWidth());
+        } else if (mDeckMode == MODE_1_SIDE) {
+            if (scrollX == getMinScrollX())
+                return x > mLeftPanelWidth;
+            if (scrollX == getMaxScrollX())
+                return x < (getWidth()-mRightPanelWidth);
         }
         return true;
     }
