@@ -38,11 +38,11 @@ public class BoundLazyLoader {
         @Override
         protected void onObjectUnbound(Object object) {
             super.onObjectUnbound(object);
-            if (DroidKit.DEBUG) CLog.e("Unbound object");
+            if (DroidKit.DEBUG) CLog.v("Unbound object");
             if (object != null && object instanceof Bitmap) {
                 Bitmap b = (Bitmap)object;
                 if (!b.isRecycled()) {
-                    if (DroidKit.DEBUG) CLog.e("RECYCLE!!!");
+                    if (DroidKit.DEBUG) CLog.v("RECYCLE!!!");
                     b.recycle();
                 }
             }
@@ -130,7 +130,7 @@ public class BoundLazyLoader {
         if (mThreadHandler == null) {
             UI_HANDLER.postDelayed(mRetrySendMessageTask, mDelay);
         } else { 
-            if (DroidKit.DEBUG) CLog.e("resetting load timer");
+            if (DroidKit.DEBUG) CLog.v("resetting load timer");
             if (shortDelay)
                 resetLoadTimer(10);
             else

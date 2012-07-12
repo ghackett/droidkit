@@ -230,7 +230,7 @@ public class ImageTricks {
     public static Bitmap scaleDownImageUriToBitmap(Uri imageUri, int maxDimension, boolean deleteOriginal, boolean preferSmaller) {
     	try {
     	    
-    	    if (DroidKit.DEBUG) CLog.e("SCALE DOWN IMAGE - max dimension = " + maxDimension);
+    	    if (DroidKit.DEBUG) CLog.v("SCALE DOWN IMAGE - max dimension = " + maxDimension);
     	    
     		InputStream mediaStream = DroidKit.getContentResolver().openInputStream(imageUri);
     		
@@ -243,7 +243,7 @@ public class ImageTricks {
         	mediaStream = null;
         	int maxSideSize = Math.max(opts.outWidth, opts.outHeight);
         	
-        	if (DroidKit.DEBUG) CLog.e("SCALE DOWN IMAGE - max original side = " + maxSideSize);
+        	if (DroidKit.DEBUG) CLog.v("SCALE DOWN IMAGE - max original side = " + maxSideSize);
         	
         	mediaStream = DroidKit.getContentResolver().openInputStream(imageUri);
 
@@ -256,7 +256,7 @@ public class ImageTricks {
             	    opts.inSampleSize++;
         	}
         	
-        	if (DroidKit.DEBUG) CLog.e("SCALE DOWN IMAGE - new sample size = " + opts.inSampleSize);
+        	if (DroidKit.DEBUG) CLog.v("SCALE DOWN IMAGE - new sample size = " + opts.inSampleSize);
         	
             Bitmap bitmap = null;
             
@@ -270,7 +270,7 @@ public class ImageTricks {
         	mediaStream.close();
         	mediaStream = null;
         	
-        	if (DroidKit.DEBUG) CLog.e("SCALE DOWN IMAGE - new bitmap width = " + bitmap.getWidth() + ", height = " + bitmap.getHeight());
+        	if (DroidKit.DEBUG) CLog.v("SCALE DOWN IMAGE - new bitmap width = " + bitmap.getWidth() + ", height = " + bitmap.getHeight());
         	
         	if (deleteOriginal)
         		DroidKit.getContentResolver().delete(imageUri, null, null);
