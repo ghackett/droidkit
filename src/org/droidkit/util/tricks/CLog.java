@@ -96,16 +96,16 @@ public class CLog {
     
     
     public static void v(String msg) {
-        d(msg, null);
+        v(msg, null);
     }
     
     public static void v(String msg, Throwable t) {
-        if (android.util.Log.isLoggable(LOG_TAG, android.util.Log.VERBOSE)) {
+//        if (android.util.Log.isLoggable(LOG_TAG, android.util.Log.VERBOSE)) {
             if (t == null)
                 android.util.Log.v(LOG_TAG, msg);
             else
                 android.util.Log.v(LOG_TAG, msg, t);
-        }
+//        }
     }
     
     
