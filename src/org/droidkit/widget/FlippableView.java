@@ -244,16 +244,18 @@ public class FlippableView extends FrameLayout {
     private void fling(int initVelocity) {
     	if (!mScroller.isFinished())
     		mScroller.abortAnimation();
-    	finishScroll(true);
-//    	mScroller.fling(mScrollX, 0, initVelocity, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 0);
-//    	final int width = getWidth();
-//    	final int remainder = mScrollX % width;
-//		int div = mScrollX / width;
-//		int scrollTo = div * width;
-//		if (initVelocity > 0)
-//			scrollTo += width;
-//		mScroller.startScroll(mScrollX, 0, scrollTo - mScrollX, 0);
-//		invalidate();
+    	final int width = getWidth();
+		int div = mScrollX / width;
+		int scrollTo = div * width;
+		if (mScrollX < 0) {
+			if (initVelocity < 0)
+				scrollTo -= width;
+		} else {
+			if (initVelocity > 0)
+				scrollTo += width;
+		}
+		mScroller.startScroll(mScrollX, 0, scrollTo - mScrollX, 0);
+		invalidate();
     }
     
     private void finishScroll(boolean invalidate) {
@@ -271,7 +273,7 @@ public class FlippableView extends FrameLayout {
 	    		if (remainder >= (width/2))
 	    			scrollTo += width;
     		}
-    		mScroller.startScroll(mScrollX, 0, scrollTo - mScrollX, 0, 1000);
+    		mScroller.startScroll(mScrollX, 0, scrollTo - mScrollX, 0);
     		if (invalidate)
     			invalidate();
     	}
