@@ -16,6 +16,8 @@ import android.widget.FrameLayout;
 
 public class FlippableView extends FrameLayout {
 	
+	public static final float MIN_SCALE = 0.5f;
+	
 	protected Scroller mScroller;
     private int mTouchSlop;
     private int mMinVelocity;
@@ -283,12 +285,9 @@ public class FlippableView extends FrameLayout {
 		
 		final Camera camera = mCamera;
 		
-		
-		
     	final int width = getWidth();
     	final int adjustedScroll = mScrollX - (width/2);
     	final int height = getHeight();
-    	final int div = adjustedScroll / width;
     	final int remainder = adjustedScroll % width;
     	
     	float percent = (float)remainder / (float)width;
@@ -301,20 +300,28 @@ public class FlippableView extends FrameLayout {
     	
     	CLog.e("DEGREES = " + degrees);
     	
-//    	final Matrix m = new Matrix();
+    	float scaleRange = 1f - MIN_SCALE;
+    	int scaleRemainder = mScrollX % (width);
+    	float scalePercent = Math.abs((float)scaleRemainder / (width));
+    	scalePercent = Math.abs(scalePercent - 0.5f)*2f;
+    	float scale = MIN_SCALE + ((scalePercent) * scaleRange);
+    	
+    	CLog.e("SCALE PERCENT = " + scalePercent);
+    	CLog.e("SCALE = " + scale);
+    	
+    	
+    	
     	mCameraMatrix.reset();
     	final int centerX = width/2;
     	final int centerY = height/2;
-//    	canvas.translate(-centerX, -centerY);
     	camera.save();
     	camera.rotateY(degrees);
     	camera.getMatrix(mCameraMatrix);
     	mCameraMatrix.preTranslate(-centerX, -centerY);
     	mCameraMatrix.postTranslate(centerX, centerY);
-    	mCameraMatrix.preScale(0.9f, 0.9f, (float)centerX, (float)centerY);
+    	mCameraMatrix.preScale(scale, scale, (float)centerX, (float)centerY);
     	camera.restore();
     	canvas.concat(mCameraMatrix);
-//    	canvas.translate(centerX, centerY);
     	
 	}
 	
