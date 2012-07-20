@@ -214,7 +214,7 @@ public class FlippableView extends FrameLayout {
                 if (Math.abs(initialVelocity) > mMinVelocity) {
                 	fling(-initialVelocity);
                 } else {
-                	finishScroll();
+                	finishScroll(true);
                 }
                 
 				break;
@@ -244,12 +244,37 @@ public class FlippableView extends FrameLayout {
     private void fling(int initVelocity) {
     	if (!mScroller.isFinished())
     		mScroller.abortAnimation();
-    	mScroller.fling(mScrollX, 0, initVelocity, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 0);
+    	finishScroll(true);
+//    	mScroller.fling(mScrollX, 0, initVelocity, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 0);
+//    	final int width = getWidth();
+//    	final int remainder = mScrollX % width;
+//		int div = mScrollX / width;
+//		int scrollTo = div * width;
+//		if (initVelocity > 0)
+//			scrollTo += width;
+//		mScroller.startScroll(mScrollX, 0, scrollTo - mScrollX, 0);
+//		invalidate();
     }
     
-    private void finishScroll() {
+    private void finishScroll(boolean invalidate) {
     	if (!mScroller.isFinished())
     		mScroller.abortAnimation();
+    	final int width = getWidth();
+    	final int remainder = Math.abs(mScrollX) % width;
+    	if (remainder != 0) {
+    		int div = mScrollX / width;
+    		int scrollTo = div * width;
+    		if (mScrollX < 0) {
+    			if (remainder >= (width/2))
+	    			scrollTo -= width;
+    		} else {
+	    		if (remainder >= (width/2))
+	    			scrollTo += width;
+    		}
+    		mScroller.startScroll(mScrollX, 0, scrollTo - mScrollX, 0, 1000);
+    		if (invalidate)
+    			invalidate();
+    	}
     }
     
 //    private void updateViewVisiblilty() {
@@ -273,7 +298,11 @@ public class FlippableView extends FrameLayout {
 	@Override
 	public void computeScroll() {
 		if (mScroller.computeScrollOffset()) {
-			scrollTo(mScroller.getCurrX(), false);
+			final int x = mScroller.getCurrX();
+			scrollTo(x, false);
+			if (x == mScroller.getFinalX()) {
+				finishScroll(false);
+			}
 			postInvalidate();
 		}
 		super.computeScroll();
