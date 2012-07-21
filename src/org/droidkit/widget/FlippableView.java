@@ -279,16 +279,37 @@ public class FlippableView extends FrameLayout {
     	}
     }
     
-//    private void updateViewVisiblilty() {
-//    	final int width = getWidth();
-//    	final int div = mScrollX / width;
+    private void updateViewVisiblilty() {
+        final int width = getWidth();
+        final int remainder = Math.abs(mScrollX) % width;
+        int div = mScrollX / width;
+        if (mScrollX < 0) {
+            if (remainder >= (width/2))
+                div -= 1;
+        } else {
+            if (remainder >= (width/2))
+                div += 1;
+        }
+        if (div % 2 == 0) {
+            if (mFrontView.getVisibility() != View.VISIBLE) {
+                mFrontView.setVisibility(View.VISIBLE);
+                mBackView.setVisibility(View.GONE);
+            }
+        } else {
+            if (mBackView.getVisibility() != View.VISIBLE) {
+                mBackView.setVisibility(View.VISIBLE);
+                mFrontView.setVisibility(View.GONE);
+            }
+        }
 //    	final int remainder = mScrollX % width;
-//    	
-//    }
+    	
+    }
+    
     
     private void scrollTo(int x, boolean invalidate) {
 //    	CLog.e("Scrolling: mScrollX = " + mScrollX + ", new = " + x);
     	mScrollX = x;
+    	updateViewVisiblilty();
     	if (invalidate)
     		invalidate();
     }
