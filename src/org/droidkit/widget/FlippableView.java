@@ -29,6 +29,7 @@ public class FlippableView extends FrameLayout {
     
     private int mScrollX = 0;
     private boolean mScrollingDisabled = false;
+    private boolean mFlippingDisabled = false;
     
     protected Camera mCamera;
     protected Matrix mCameraMatrix;
@@ -122,7 +123,39 @@ public class FlippableView extends FrameLayout {
 		super.addView(child);
 	}
 	
-	public void setScrollingDisabled(boolean scrollingDisabled) {
+	public void setFlippingDisabled(boolean disabled) {
+	    if (mFlippingDisabled != disabled) {
+	        mFlippingDisabled = disabled;
+	        int width = getWidth();
+	        if (mFlippingDisabled && width > 0 && mScrollX%width != 0)
+	            finishScroll(true);
+	    }
+	}
+	
+	public boolean isFlippingDisabled() {
+	    return mFlippingDisabled;
+	}
+	
+	public void flip(boolean animated) {
+	    if (mFlippingDisabled)
+	        return;
+	    if (animated) {
+	        if (mScrollX % getWidth() == 0) {
+	            int div = mScrollX / getWidth();
+	            int scrollBy = div % 2 == 0 ? getWidth() : -getWidth();
+	            mScroller.startScroll(mScrollX, 0, scrollBy, 0, 750);
+	            invalidate();
+	        }
+	    } else {
+	        if (mFrontView.getVisibility() == VISIBLE) {
+	            scrollTo(getWidth(), true);
+	        } else {
+	            scrollTo(0, true);
+	        }
+	    }
+	}
+	
+	protected void setScrollingDisabled(boolean scrollingDisabled) {
 		mScrollingDisabled = scrollingDisabled;
 		if (mScrollingDisabled)
 			resetAllowScrollingTimer();
@@ -131,6 +164,8 @@ public class FlippableView extends FrameLayout {
 	}
 	
 	protected boolean isOkToScroll(int action, int x, int y) {
+	    if (mFlippingDisabled)
+	        return false;
 		if (mScrollingDisabled) {
 			if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
 				setScrollingDisabled(false);
