@@ -66,11 +66,27 @@ public class FlippableView extends FrameLayout {
         mCameraMatrix = new Matrix();
 	}
 	
+	
 
 	@Override
+    protected void onLayout(boolean changed, int left, int top, int right,
+            int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (changed && getWidth() > 0) {
+            if (mFrontView.getVisibility() == VISIBLE) {
+                scrollTo(0, true);
+            } else {
+                scrollTo(getWidth(), true);
+            }
+        }
+    }
+
+    @Override
 	public void addView(View child, int width, int height) {
 		super.addView(child, width, height);
 	}
+	
+	
 
 	@Override
 	public void addView(View child, int index, android.view.ViewGroup.LayoutParams params) {
@@ -301,8 +317,6 @@ public class FlippableView extends FrameLayout {
                 mFrontView.setVisibility(View.GONE);
             }
         }
-//    	final int remainder = mScrollX % width;
-    	
     }
     
     
