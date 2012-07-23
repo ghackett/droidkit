@@ -16,7 +16,7 @@ import android.widget.FrameLayout;
 
 public class FlippableView extends FrameLayout {
 	
-	public static final float MIN_SCALE = 0.5f;
+	public static final float MIN_SCALE = 0.75f;
 	
 	protected Scroller mScroller;
     private int mTouchSlop;
@@ -322,7 +322,9 @@ public class FlippableView extends FrameLayout {
         if (div % 2 == 0) {
             if (mFrontView.getVisibility() != View.VISIBLE) {
                 mFrontView.setVisibility(View.VISIBLE);
-//                mBackView.setVisibility(View.GONE);
+            }
+            if (remainder != 0 && mBackView.getVisibility() != View.GONE) {
+            	mBackView.setVisibility(View.GONE);
             }
         } else {
             if (mFrontView.getVisibility() != View.GONE) {
