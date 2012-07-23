@@ -1,7 +1,5 @@
 package org.droidkit.widget;
 
-import org.droidkit.util.tricks.CLog;
-
 import android.content.Context;
 import android.graphics.Camera;
 import android.graphics.Canvas;
@@ -18,6 +16,10 @@ public class FlippableView extends FrameLayout {
 	
 	public static final float MIN_SCALE = 0.75f;
 	
+	public interface OnFlipListener {
+		public void onViewFlipped(FlippableView view, boolean frontIsShowing);
+	}
+	
 	protected Scroller mScroller;
     private int mTouchSlop;
     private int mMinVelocity;
@@ -31,11 +33,15 @@ public class FlippableView extends FrameLayout {
     private boolean mScrollingDisabled = false;
     private boolean mFlippingDisabled = false;
     
+    private boolean mFlipNeededOnLayout = false;
+    
     protected Camera mCamera;
     protected Matrix mCameraMatrix;
 	
 	protected View mFrontView;
 	protected View mBackView;
+	
+	protected OnFlipListener mListener = null;
 
 	public FlippableView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -67,6 +73,9 @@ public class FlippableView extends FrameLayout {
         mCameraMatrix = new Matrix();
 	}
 	
+	public void setOnFlipListener(OnFlipListener listener) {
+		mListener = listener;
+	}
 	
 
 	@Override
@@ -75,9 +84,19 @@ public class FlippableView extends FrameLayout {
         super.onLayout(changed, left, top, right, bottom);
         if (changed && getWidth() > 0) {
             if (mFrontView.getVisibility() == VISIBLE) {
-                scrollTo(0, true);
+            	if (mFlipNeededOnLayout) {
+            		mFlipNeededOnLayout = false;
+            		scrollTo(getWidth(), true);
+            	} else {
+            		scrollTo(0, true);
+            	}
             } else {
-                scrollTo(getWidth(), true);
+            	if (mFlipNeededOnLayout) {
+            		mFlipNeededOnLayout = false;
+            		scrollTo(0, true);
+            	} else {
+            		scrollTo(getWidth(), true);
+            	}
             }
         }
     }
@@ -117,6 +136,10 @@ public class FlippableView extends FrameLayout {
 	public void flip(boolean animated) {
 	    if (mFlippingDisabled)
 	        return;
+	    if (getWidth() == 0) {
+	    	mFlipNeededOnLayout = !mFlipNeededOnLayout;
+	    	return;
+	    }
 	    if (animated) {
 	        if (mScrollX % getWidth() == 0) {
 	            int div = mScrollX / getWidth();
@@ -136,7 +159,10 @@ public class FlippableView extends FrameLayout {
 	public void flipBackwardAnimated() {
 		if (mFlippingDisabled)
 	        return;
-		
+		if (getWidth() == 0) {
+	    	mFlipNeededOnLayout = !mFlipNeededOnLayout;
+	    	return;
+	    }
         if (mScrollX % getWidth() == 0) {
             mScroller.startScroll(mScrollX, 0, getWidth(), 0, 750);
             invalidate();
@@ -147,7 +173,10 @@ public class FlippableView extends FrameLayout {
 	public void flipForwardAnimated() {
 		if (mFlippingDisabled)
 	        return;
-		
+		if (getWidth() == 0) {
+	    	mFlipNeededOnLayout = !mFlipNeededOnLayout;
+	    	return;
+	    }
         if (mScrollX % getWidth() == 0) {
             mScroller.startScroll(mScrollX, 0, -getWidth(), 0, 750);
             invalidate();
@@ -342,19 +371,27 @@ public class FlippableView extends FrameLayout {
         }
         if (div % 2 == 0) {
             if (mFrontView.getVisibility() != View.VISIBLE) {
+            	notifyListener(true);
                 mFrontView.setVisibility(View.VISIBLE);
             }
+            //since both views start off as visibile, hide the back view if scrolling
             if (remainder != 0 && mBackView.getVisibility() != View.GONE) {
             	mBackView.setVisibility(View.GONE);
             }
         } else {
             if (mFrontView.getVisibility() != View.GONE) {
+            	notifyListener(false);
                 mBackView.setVisibility(View.VISIBLE);
                 mFrontView.setVisibility(View.GONE);
             }
         }
     }
     
+    private void notifyListener(boolean frontShowing) {
+    	if (mListener != null) {
+    		mListener.onViewFlipped(this, frontShowing);
+    	}
+    }
     
     private void scrollTo(int x, boolean invalidate) {
 //    	CLog.e("Scrolling: mScrollX = " + mScrollX + ", new = " + x);
