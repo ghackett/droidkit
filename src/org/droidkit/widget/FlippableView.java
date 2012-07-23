@@ -377,7 +377,7 @@ public class FlippableView extends FrameLayout {
     	else
     		degrees-= 90;
     	
-    	CLog.e("DEGREES = " + degrees);
+//    	CLog.e("DEGREES = " + degrees);
     	
     	float scaleRange = 1f - MIN_SCALE;
     	int scaleRemainder = mScrollX % (width);
@@ -385,8 +385,8 @@ public class FlippableView extends FrameLayout {
     	scalePercent = Math.abs(scalePercent - 0.5f)*2f;
     	float scale = MIN_SCALE + ((scalePercent) * scaleRange);
     	
-    	CLog.e("SCALE PERCENT = " + scalePercent);
-    	CLog.e("SCALE = " + scale);
+//    	CLog.e("SCALE PERCENT = " + scalePercent);
+//    	CLog.e("SCALE = " + scale);
     	
     	
     	
