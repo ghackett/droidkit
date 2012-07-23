@@ -82,13 +82,6 @@ public class FlippableView extends FrameLayout {
         }
     }
 
-    @Override
-	public void addView(View child, int width, int height) {
-		super.addView(child, width, height);
-	}
-	
-	
-
 	@Override
 	public void addView(View child, int index, android.view.ViewGroup.LayoutParams params) {
 		int childCount = getChildCount();
@@ -100,27 +93,12 @@ public class FlippableView extends FrameLayout {
 				break;
 			case 1:
 				mBackView = child;
-				mBackView.setVisibility(View.GONE);
-				super.addView(child, index, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+				mBackView.setVisibility(View.VISIBLE);
+				super.addView(child, 0, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 				break;
 			default:
 				throw new RuntimeException("Can't add more than 2 views to FlippableView");
 		}
-	}
-
-	@Override
-	public void addView(View child, int index) {
-		super.addView(child, index);
-	}
-
-	@Override
-	public void addView(View child, android.view.ViewGroup.LayoutParams params) {
-		super.addView(child, params);
-	}
-
-	@Override
-	public void addView(View child) {
-		super.addView(child);
 	}
 	
 	public void setFlippingDisabled(boolean disabled) {
@@ -344,10 +322,10 @@ public class FlippableView extends FrameLayout {
         if (div % 2 == 0) {
             if (mFrontView.getVisibility() != View.VISIBLE) {
                 mFrontView.setVisibility(View.VISIBLE);
-                mBackView.setVisibility(View.GONE);
+//                mBackView.setVisibility(View.GONE);
             }
         } else {
-            if (mBackView.getVisibility() != View.VISIBLE) {
+            if (mFrontView.getVisibility() != View.GONE) {
                 mBackView.setVisibility(View.VISIBLE);
                 mFrontView.setVisibility(View.GONE);
             }
