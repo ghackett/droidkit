@@ -17,7 +17,9 @@ public class FlippableView extends FrameLayout {
 	public static final float MIN_SCALE = 0.75f;
 	
 	public interface OnFlipListener {
+		public void onFlippableViewVisibilityChanged(FlippableView view, boolean frontIsShowing);
 		public void onViewFlipped(FlippableView view, boolean frontIsShowing);
+		public void onViewBeingScrolled(FlippableView view);
 	}
 	
 	protected Scroller mScroller;
@@ -342,8 +344,8 @@ public class FlippableView extends FrameLayout {
     		mScroller.abortAnimation();
     	final int width = getWidth();
     	final int remainder = Math.abs(mScrollX) % width;
+    	int div = mScrollX / width;
     	if (remainder != 0) {
-    		int div = mScrollX / width;
     		int scrollTo = div * width;
     		if (mScrollX < 0) {
     			if (remainder >= (width/2))
@@ -355,6 +357,8 @@ public class FlippableView extends FrameLayout {
     		mScroller.startScroll(mScrollX, 0, scrollTo - mScrollX, 0);
     		if (invalidate)
     			invalidate();
+    	} else {
+    		notifyFlip(div % 2 == 0);
     	}
     }
     
@@ -371,7 +375,7 @@ public class FlippableView extends FrameLayout {
         }
         if (div % 2 == 0) {
             if (mFrontView.getVisibility() != View.VISIBLE) {
-            	notifyListener(true);
+            	notifyVisibilityChange(true);
                 mFrontView.setVisibility(View.VISIBLE);
             }
             //since both views start off as visibile, hide the back view if scrolling
@@ -380,20 +384,33 @@ public class FlippableView extends FrameLayout {
             }
         } else {
             if (mFrontView.getVisibility() != View.GONE) {
-            	notifyListener(false);
+            	notifyVisibilityChange(false);
                 mBackView.setVisibility(View.VISIBLE);
                 mFrontView.setVisibility(View.GONE);
             }
         }
     }
     
-    private void notifyListener(boolean frontShowing) {
+    private void notifyVisibilityChange(boolean frontShowing) {
+    	if (mListener != null) {
+    		mListener.onFlippableViewVisibilityChanged(this, frontShowing);
+    	}
+    }
+    
+    private void notifyFlip(boolean frontShowing) {
     	if (mListener != null) {
     		mListener.onViewFlipped(this, frontShowing);
     	}
     }
     
+    private void notifyScrolling() {
+    	if (mListener != null) {
+    		mListener.onViewBeingScrolled(this);
+    	}
+    }
+    
     private void scrollTo(int x, boolean invalidate) {
+    	notifyScrolling();
 //    	CLog.e("Scrolling: mScrollX = " + mScrollX + ", new = " + x);
     	mScrollX = x;
     	updateViewVisiblilty();
