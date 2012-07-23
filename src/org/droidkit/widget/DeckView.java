@@ -192,6 +192,9 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     public void setDeckMode0Sides(int visibleSideMarginPx) {
+    	if (mDeckMode == MODE_1_SIDE) {
+    		mCurrentDeckFocus = DECK_TOP;
+    	}
         mDeckMode = MODE_0_SIDES;
         mVisibleSideMarginPx = visibleSideMarginPx;
         updateLayout();
