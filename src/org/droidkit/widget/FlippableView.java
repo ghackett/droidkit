@@ -133,6 +133,27 @@ public class FlippableView extends FrameLayout {
 	    }
 	}
 	
+	public void flipBackwardAnimated() {
+		if (mFlippingDisabled)
+	        return;
+		
+        if (mScrollX % getWidth() == 0) {
+            mScroller.startScroll(mScrollX, 0, getWidth(), 0, 750);
+            invalidate();
+        }
+        
+	}
+	
+	public void flipForwardAnimated() {
+		if (mFlippingDisabled)
+	        return;
+		
+        if (mScrollX % getWidth() == 0) {
+            mScroller.startScroll(mScrollX, 0, -getWidth(), 0, 750);
+            invalidate();
+        }
+	}
+	
 	protected void setScrollingDisabled(boolean scrollingDisabled) {
 		mScrollingDisabled = scrollingDisabled;
 		if (mScrollingDisabled)
