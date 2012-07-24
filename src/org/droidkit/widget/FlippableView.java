@@ -31,6 +31,7 @@ public class FlippableView extends FrameLayout {
     private int mLastMotionY = 0;
     private VelocityTracker mVelocityTracker;
     
+    private int mXOnDown = -1;
     private int mScrollX = 0;
     private boolean mScrollingDisabled = false;
     private boolean mFlippingDisabled = false;
@@ -42,6 +43,8 @@ public class FlippableView extends FrameLayout {
 	
 	protected View mFrontView;
 	protected View mBackView;
+	
+	protected int mFlipPadding = 0;
 	
 	protected OnFlipListener mListener = null;
 
@@ -75,6 +78,23 @@ public class FlippableView extends FrameLayout {
         mCameraMatrix = new Matrix();
 	}
 	
+	/**
+	 * normally the moving your finger 100% across the view will result in one full flip
+	 * however, if your visible front and back views have padding on them, that won't feel right
+	 * so you can assign a flip padding that adujust how far you have to scroll to get one full flip.
+	 * The flip padding is multiplied by two, the idea being if you're setting right and left padding
+	 * on the child views, you could use that same value as the flip padding. 
+	 * @param flipPadding
+	 */
+	public void setFlipPadding(int flipPadding) {
+		mFlipPadding = flipPadding;
+		updateLayout();
+	}
+	
+	private int getFullFlipWidth() {
+		return getWidth() - (mFlipPadding*2);
+	}
+	
 	public void setOnFlipListener(OnFlipListener listener) {
 		mListener = listener;
 	}
@@ -84,24 +104,30 @@ public class FlippableView extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right,
             int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if (changed && getWidth() > 0) {
-            if (mFrontView.getVisibility() == VISIBLE) {
-            	if (mFlipNeededOnLayout) {
-            		mFlipNeededOnLayout = false;
-            		scrollTo(getWidth(), true);
-            	} else {
-            		scrollTo(0, true);
-            	}
-            } else {
-            	if (mFlipNeededOnLayout) {
-            		mFlipNeededOnLayout = false;
-            		scrollTo(0, true);
-            	} else {
-            		scrollTo(getWidth(), true);
-            	}
-            }
+        if (changed) {
+        	updateLayout();
         }
     }
+	
+	private void updateLayout() {
+		if (getWidth() > 0) {
+	        if (mFrontView.getVisibility() == VISIBLE) {
+	        	if (mFlipNeededOnLayout) {
+	        		mFlipNeededOnLayout = false;
+	        		scrollTo(getFullFlipWidth(), true);
+	        	} else {
+	        		scrollTo(0, true);
+	        	}
+	        } else {
+	        	if (mFlipNeededOnLayout) {
+	        		mFlipNeededOnLayout = false;
+	        		scrollTo(0, true);
+	        	} else {
+	        		scrollTo(getFullFlipWidth(), true);
+	        	}
+	        }
+		}
+	}
 
 	@Override
 	public void addView(View child, int index, android.view.ViewGroup.LayoutParams params) {
@@ -125,7 +151,7 @@ public class FlippableView extends FrameLayout {
 	public void setFlippingDisabled(boolean disabled) {
 	    if (mFlippingDisabled != disabled) {
 	        mFlippingDisabled = disabled;
-	        int width = getWidth();
+	        int width = getFullFlipWidth();
 	        if (mFlippingDisabled && width > 0 && mScrollX%width != 0)
 	            finishScroll(true);
 	    }
@@ -143,15 +169,15 @@ public class FlippableView extends FrameLayout {
 	    	return;
 	    }
 	    if (animated) {
-	        if (mScrollX % getWidth() == 0) {
-	            int div = mScrollX / getWidth();
-	            int scrollBy = div % 2 == 0 ? getWidth() : -getWidth();
+	        if (mScrollX % getFullFlipWidth() == 0) {
+	            int div = mScrollX / getFullFlipWidth();
+	            int scrollBy = div % 2 == 0 ? getFullFlipWidth() : -getFullFlipWidth();
 	            mScroller.startScroll(mScrollX, 0, scrollBy, 0, 750);
 	            invalidate();
 	        }
 	    } else {
 	        if (mFrontView.getVisibility() == VISIBLE) {
-	            scrollTo(getWidth(), true);
+	            scrollTo(getFullFlipWidth(), true);
 	        } else {
 	            scrollTo(0, true);
 	        }
@@ -165,8 +191,8 @@ public class FlippableView extends FrameLayout {
 	    	mFlipNeededOnLayout = !mFlipNeededOnLayout;
 	    	return;
 	    }
-        if (mScrollX % getWidth() == 0) {
-            mScroller.startScroll(mScrollX, 0, getWidth(), 0, 750);
+        if (mScrollX % getFullFlipWidth() == 0) {
+            mScroller.startScroll(mScrollX, 0, getFullFlipWidth(), 0, 750);
             invalidate();
         }
         
@@ -179,18 +205,20 @@ public class FlippableView extends FrameLayout {
 	    	mFlipNeededOnLayout = !mFlipNeededOnLayout;
 	    	return;
 	    }
-        if (mScrollX % getWidth() == 0) {
-            mScroller.startScroll(mScrollX, 0, -getWidth(), 0, 750);
+        if (mScrollX % getFullFlipWidth() == 0) {
+            mScroller.startScroll(mScrollX, 0, -getFullFlipWidth(), 0, 750);
             invalidate();
         }
 	}
 	
 	protected void setScrollingDisabled(boolean scrollingDisabled) {
 		mScrollingDisabled = scrollingDisabled;
-		if (mScrollingDisabled)
+		if (mScrollingDisabled) {
+			mXOnDown = -1;
 			resetAllowScrollingTimer();
-		else
+		} else {
 			cancelAllowScrollingTimer();
+		}
 	}
 	
 	protected boolean isOkToScroll(int action, int x, int y) {
@@ -217,6 +245,8 @@ public class FlippableView extends FrameLayout {
 		
 		switch(action) {
 			case MotionEvent.ACTION_MOVE: {
+				if (mXOnDown < 0)
+					mXOnDown = x;
 				if (mIsBeingDragged)
 					return true;
 				int dx = mLastMotionX - x;
@@ -235,6 +265,7 @@ public class FlippableView extends FrameLayout {
 				break;
 			}
 			case MotionEvent.ACTION_DOWN: {
+				mXOnDown = x;
 				mLastMotionX = x;
 				mLastMotionY = y;
 				mIsBeingDragged = !mScroller.isFinished();
@@ -266,16 +297,36 @@ public class FlippableView extends FrameLayout {
 		
 		switch(action) {
 			case MotionEvent.ACTION_MOVE: {
+				if (mXOnDown < 0)
+					mXOnDown = x;
 				if (!mScroller.isFinished()) {
 					mScroller.abortAnimation();
 				}
 				
-				int dx = mLastMotionX - x;
-				scrollBy(dx, true);
+				if (Math.abs(x - mXOnDown) <= getFullFlipWidth()) {
+					int dx = mLastMotionX - x;
+					scrollBy(dx, true);
+				} else {
+			    	final int width = getFullFlipWidth();
+			    	final int remainder = Math.abs(mScrollX) % width;
+			    	int div = mScrollX / width;
+			    	if (remainder != 0) {
+			    		int scrollTo = div * width;
+			    		if (mScrollX < 0) {
+			    			if (remainder >= (width/2))
+				    			scrollTo -= width;
+			    		} else {
+				    		if (remainder >= (width/2))
+				    			scrollTo += width;
+			    		}
+			    		scrollTo(scrollTo, true);
+			    	}
+				}
 				mLastMotionX = x;
 				break;
 			}
 			case MotionEvent.ACTION_DOWN: {
+				mXOnDown = x;
 				if (!mScroller.isFinished())
 					mScroller.abortAnimation();
 				mLastMotionX = x;
@@ -292,12 +343,13 @@ public class FlippableView extends FrameLayout {
                 mVelocityTracker = null;
                 
                 
-                if (Math.abs(initialVelocity) > mMinVelocity) {
+                if (Math.abs(x - mXOnDown) <= getFullFlipWidth() && Math.abs(initialVelocity) > mMinVelocity) {
                 	fling(-initialVelocity);
                 } else {
                 	finishScroll(true);
                 }
                 
+                mXOnDown = -1;
 				break;
 			}
 		}
@@ -325,7 +377,7 @@ public class FlippableView extends FrameLayout {
     private void fling(int initVelocity) {
     	if (!mScroller.isFinished())
     		mScroller.abortAnimation();
-    	final int width = getWidth();
+    	final int width = getFullFlipWidth();
 		int div = mScrollX / width;
 		int scrollTo = div * width;
 		if (mScrollX < 0) {
@@ -342,7 +394,7 @@ public class FlippableView extends FrameLayout {
     private void finishScroll(boolean invalidate) {
     	if (!mScroller.isFinished())
     		mScroller.abortAnimation();
-    	final int width = getWidth();
+    	final int width = getFullFlipWidth();
     	final int remainder = Math.abs(mScrollX) % width;
     	int div = mScrollX / width;
     	if (remainder != 0) {
@@ -363,7 +415,7 @@ public class FlippableView extends FrameLayout {
     }
     
     private void updateViewVisiblilty() {
-        final int width = getWidth();
+        final int width = getFullFlipWidth();
         final int remainder = Math.abs(mScrollX) % width;
         int div = mScrollX / width;
         if (mScrollX < 0) {
@@ -441,9 +493,9 @@ public class FlippableView extends FrameLayout {
 		
 		final Camera camera = mCamera;
 		
-    	final int width = getWidth();
+    	final int width = getFullFlipWidth();
     	final int adjustedScroll = mScrollX - (width/2);
-    	final int height = getHeight();
+//    	final int height = getHeight();
     	final int remainder = adjustedScroll % width;
     	
     	float percent = (float)remainder / (float)width;
@@ -468,8 +520,8 @@ public class FlippableView extends FrameLayout {
     	
     	
     	mCameraMatrix.reset();
-    	final int centerX = width/2;
-    	final int centerY = height/2;
+    	final int centerX = getWidth()/2;
+    	final int centerY = getHeight()/2;
     	camera.save();
     	camera.rotateY(degrees);
     	camera.getMatrix(mCameraMatrix);
