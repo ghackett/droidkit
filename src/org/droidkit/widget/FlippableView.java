@@ -31,7 +31,7 @@ public class FlippableView extends FrameLayout {
     private int mLastMotionY = 0;
     private VelocityTracker mVelocityTracker;
     
-    private int mXOnDown = -1;
+    private int mDivOnDown = Integer.MIN_VALUE;
     private int mScrollX = 0;
     private boolean mScrollingDisabled = false;
     private boolean mFlippingDisabled = false;
@@ -214,7 +214,7 @@ public class FlippableView extends FrameLayout {
 	protected void setScrollingDisabled(boolean scrollingDisabled) {
 		mScrollingDisabled = scrollingDisabled;
 		if (mScrollingDisabled) {
-			mXOnDown = -1;
+			mDivOnDown = Integer.MIN_VALUE;
 			resetAllowScrollingTimer();
 		} else {
 			cancelAllowScrollingTimer();
@@ -245,8 +245,8 @@ public class FlippableView extends FrameLayout {
 		
 		switch(action) {
 			case MotionEvent.ACTION_MOVE: {
-				if (mXOnDown < 0)
-					mXOnDown = x;
+				if (mDivOnDown == Integer.MIN_VALUE)
+					mDivOnDown = mScrollX / getFullFlipWidth();
 				if (mIsBeingDragged)
 					return true;
 				int dx = mLastMotionX - x;
@@ -265,7 +265,7 @@ public class FlippableView extends FrameLayout {
 				break;
 			}
 			case MotionEvent.ACTION_DOWN: {
-				mXOnDown = x;
+				mDivOnDown = mScrollX / getFullFlipWidth();
 				mLastMotionX = x;
 				mLastMotionY = y;
 				mIsBeingDragged = !mScroller.isFinished();
@@ -297,36 +297,50 @@ public class FlippableView extends FrameLayout {
 		
 		switch(action) {
 			case MotionEvent.ACTION_MOVE: {
-				if (mXOnDown < 0)
-					mXOnDown = x;
+				if (mDivOnDown == Integer.MIN_VALUE)
+					mDivOnDown = mScrollX / getFullFlipWidth();
 				if (!mScroller.isFinished()) {
 					mScroller.abortAnimation();
 				}
 				
-				if (Math.abs(x - mXOnDown) <= getFullFlipWidth()) {
-					int dx = mLastMotionX - x;
-					scrollBy(dx, true);
+				final int width = getFullFlipWidth();
+
+				final int dx = mLastMotionX - x;
+				final int newScroll = mScrollX + dx;
+				final int newDiv = newScroll / width;
+				
+				
+				if (Math.abs(mDivOnDown) == 1 && newDiv == 0) {
+					if (newScroll <= 0 == mDivOnDown <= 0) {
+						scrollBy(dx, true);
+					} else {
+						finishScrollNow();
+					}
 				} else {
-			    	final int width = getFullFlipWidth();
-			    	final int remainder = Math.abs(mScrollX) % width;
-			    	int div = mScrollX / width;
-			    	if (remainder != 0) {
-			    		int scrollTo = div * width;
-			    		if (mScrollX < 0) {
-			    			if (remainder >= (width/2))
-				    			scrollTo -= width;
-			    		} else {
-				    		if (remainder >= (width/2))
-				    			scrollTo += width;
-			    		}
-			    		scrollTo(scrollTo, true);
-			    	}
+				
+					int targetLeft, targetRight;
+					if (mDivOnDown == 0) {
+						targetLeft = mDivOnDown;
+						targetRight = mDivOnDown;
+					} else if (mDivOnDown < 0) {
+						targetLeft = mDivOnDown;
+						targetRight = mDivOnDown+1;
+					} else {
+						targetLeft = mDivOnDown-1;
+						targetRight = mDivOnDown;
+					}
+					
+					if (mDivOnDown != Integer.MIN_VALUE && (newDiv < targetLeft || newDiv > targetRight)) {
+						finishScrollNow();
+					} else {
+						scrollBy(dx, true);
+					}
 				}
 				mLastMotionX = x;
 				break;
 			}
 			case MotionEvent.ACTION_DOWN: {
-				mXOnDown = x;
+				mDivOnDown = mScrollX / getFullFlipWidth();
 				if (!mScroller.isFinished())
 					mScroller.abortAnimation();
 				mLastMotionX = x;
@@ -342,18 +356,62 @@ public class FlippableView extends FrameLayout {
                 mVelocityTracker.recycle();
                 mVelocityTracker = null;
                 
-                
-                if (Math.abs(x - mXOnDown) <= getFullFlipWidth() && Math.abs(initialVelocity) > mMinVelocity) {
-                	fling(-initialVelocity);
+                if (Math.abs(initialVelocity) > mMinVelocity) { 
+	                final int div = mScrollX / getFullFlipWidth();
+	                
+					if (Math.abs(mDivOnDown) == 1 && div == 0) {
+						if (mScrollX < 0 == mDivOnDown < 0) {
+							fling(-initialVelocity);
+						} else {
+							finishScroll(true);
+						}
+					} else {
+					
+						int targetLeft, targetRight;
+						if (mDivOnDown == 0) {
+							targetLeft = mDivOnDown;
+							targetRight = mDivOnDown;
+						} else if (mDivOnDown < 0) {
+							targetLeft = mDivOnDown;
+							targetRight = mDivOnDown+1;
+						} else {
+							targetLeft = mDivOnDown-1;
+							targetRight = mDivOnDown;
+						}
+						
+						if (mDivOnDown != Integer.MIN_VALUE && (div < targetLeft || div > targetRight)) {
+							finishScroll(true);
+						} else {
+							fling(-initialVelocity);
+						}
+					}
                 } else {
                 	finishScroll(true);
                 }
+
                 
-                mXOnDown = -1;
+                mDivOnDown = Integer.MIN_VALUE;
 				break;
 			}
 		}
 		return true;
+	}
+	
+	private void finishScrollNow() {
+		final int width = getFullFlipWidth();
+		final int currentDiv = mScrollX / width;
+		final int remainder = Math.abs(mScrollX) % width;
+    	if (remainder != 0) {
+    		int scrollTo = currentDiv * width;
+    		if (mScrollX < 0) {
+    			if (remainder >= (width/2))
+	    			scrollTo -= width;
+    		} else {
+	    		if (remainder >= (width/2))
+	    			scrollTo += width;
+    		}
+    		scrollTo(scrollTo, true);
+    	}
 	}
 	
     
@@ -375,8 +433,17 @@ public class FlippableView extends FrameLayout {
     }
 	
     private void fling(int initVelocity) {
+    	flingTo(getFlingScrollTo(initVelocity));
+    }
+    
+    private void flingTo(int scrollTo) {
     	if (!mScroller.isFinished())
     		mScroller.abortAnimation();
+		mScroller.startScroll(mScrollX, 0, scrollTo - mScrollX, 0);
+		invalidate();
+    }
+    
+    private int getFlingScrollTo(int initVelocity) {
     	final int width = getFullFlipWidth();
 		int div = mScrollX / width;
 		int scrollTo = div * width;
@@ -387,8 +454,7 @@ public class FlippableView extends FrameLayout {
 			if (initVelocity > 0)
 				scrollTo += width;
 		}
-		mScroller.startScroll(mScrollX, 0, scrollTo - mScrollX, 0);
-		invalidate();
+		return scrollTo;
     }
     
     private void finishScroll(boolean invalidate) {
