@@ -321,6 +321,10 @@ public class DroidKit {
         return sApplicationContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION);
     }
     
+    public static boolean doesDeviceSupportTelephony() {
+        return sApplicationContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+    }
+    
     public static void registerReceiver(BroadcastReceiver receiver, IntentFilter filter, String broadcastPermission) {
         sApplicationContext.registerReceiver(receiver, filter, broadcastPermission, null);
     }
