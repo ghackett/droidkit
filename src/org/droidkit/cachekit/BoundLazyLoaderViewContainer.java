@@ -5,21 +5,27 @@ import java.util.HashSet;
 import android.view.View;
 import android.widget.AbsListView.RecyclerListener;
 
-public class ListRecycleListener implements RecyclerListener {
+public class BoundLazyLoaderViewContainer implements RecyclerListener {
     
     private HashSet<View> mRecycledViews;
     private BoundLazyLoader mLazyLoader;
     
-    public ListRecycleListener(BoundLazyLoader lazyLoader) {
+    public BoundLazyLoaderViewContainer(BoundLazyLoader lazyLoader) {
         mRecycledViews = new HashSet<View>();
         mLazyLoader = lazyLoader;
     }
 
     @Override
     public void onMovedToScrapHeap(View view) {
-        mRecycledViews.add(view);
+        addView(view);
     }
     
+    public void addView(View v) {
+    	mRecycledViews.add(v);
+    }
+    
+    //call this method in your Activity.onDestroy or Fragment.onDestroyView
+    //to flush the bindings
     public void clearBindings(boolean inSync) {
         for (View v : mRecycledViews) {
             mLazyLoader.onViewDestroyed(v, inSync);
