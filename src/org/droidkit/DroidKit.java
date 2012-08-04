@@ -12,6 +12,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.OnAccountsUpdateListener;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -173,6 +174,10 @@ public class DroidKit {
         if (sTelephonyManager == null)
             sTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         return sTelephonyManager;
+    }
+    
+    public static AlarmManager getAlarmManager() {
+    	return (AlarmManager) getSystemService(Context.ALARM_SERVICE);
     }
     
     public static PackageInfo getPackageInfo() {
