@@ -376,6 +376,10 @@ public class DroidKit {
         // of the OS since they are inlined at compile time. This is guaranteed behavior.
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
     }
+    
+    public static boolean isJellyBean() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+    }
 
     public static boolean isHoneycombTablet() {
         // Can use static final constants like HONEYCOMB, declared in later versions
