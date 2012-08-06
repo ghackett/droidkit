@@ -423,7 +423,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     public void showLeft(boolean animated) {
-        if (mDeckMode == MODE_2_SIDES)
+        if (getWidth() == 0 || mDeckMode == MODE_2_SIDES)
             return;
         if (animated)
             smoothScrollTo(getMinScrollX());
@@ -432,7 +432,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     public void showRight(boolean animated) {
-        if (mDeckMode == MODE_2_SIDES)
+        if (getWidth() == 0 || mDeckMode == MODE_2_SIDES)
             return;
         if (animated)
             smoothScrollTo(getMaxScrollX());
@@ -441,7 +441,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     public void showTop(boolean animated) {
-        if (mDeckMode == MODE_2_SIDES || mDeckMode == MODE_1_SIDE)
+        if (getWidth() == 0 || mDeckMode == MODE_2_SIDES || mDeckMode == MODE_1_SIDE)
             return;
         if (animated)
             smoothScrollTo(getCenterScrollX());
@@ -450,7 +450,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     public boolean isTopFocused() {
-        if (mDeckMode == MODE_2_SIDES || mDeckMode == MODE_1_SIDE)
+        if (getWidth() == 0 || mDeckMode == MODE_2_SIDES || mDeckMode == MODE_1_SIDE)
             return true;
         int centerX = getCenterScrollX();
         int scrollX = mTopContainer.getScrollX();
@@ -460,6 +460,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     public boolean isLeftFocused() {
         if (mDeckMode == MODE_2_SIDES)
             return true;
+        if (getWidth() == 0)
+        	return mDeckMode == MODE_1_SIDE;
         int leftX = getMinScrollX();
         int scrollX = mTopContainer.getScrollX();
         return scrollX == leftX;
@@ -468,6 +470,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     public boolean isRightFocused() {
         if (mDeckMode == MODE_2_SIDES)
             return true;
+        if (getWidth() == 0)
+        	return false;
         int rightX = getMaxScrollX();
         int scrollX = mTopContainer.getScrollX();
         return scrollX == rightX;
