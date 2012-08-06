@@ -130,7 +130,7 @@ public class BoundLazyLoader {
         if (mThreadHandler == null) {
             UI_HANDLER.postDelayed(mRetrySendMessageTask, mDelay);
         } else { 
-            if (DroidKit.DEBUG) CLog.v("resetting load timer");
+//            if (DroidKit.DEBUG) CLog.v("resetting load timer");
             if (shortDelay)
                 resetLoadTimer(10);
             else
