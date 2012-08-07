@@ -519,7 +519,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
-	    if (DroidKit.isIceCreamSandwich() && mMaxDimension == 0) {
+	    if (DroidKit.isHoneycomb() && mMaxDimension == 0) {
 	        mMaxDimension = HardwareAccelerationCompat.getCanvasMaxDimension(canvas);
 	        if (DroidKit.DEBUG) CLog.v("CANVAS MAX DIMENSION = " + mMaxDimension);
 	        if (mBitmapDimensionListener != null) {
