@@ -130,7 +130,7 @@ public class BoundCache<K, B, C> implements CacheInterface {
         return obj;
     }
     
-    public void destroyBinder(B binder, boolean cleanOldObject) {
+    public synchronized void destroyBinder(B binder, boolean cleanOldObject) {
         if (binder == null)
             return;
         C oldObject = mBinders.remove(binder);
