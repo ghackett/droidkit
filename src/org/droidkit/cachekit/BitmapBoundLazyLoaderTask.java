@@ -11,7 +11,7 @@ public abstract class BitmapBoundLazyLoaderTask extends BoundLazyLoaderTask {
     }
 
     @Override
-    public Object loadInBackground() {
+    public Object loadInBackground() throws Throwable {
         return loadBitmapInBackground();
     }
 
@@ -32,7 +32,7 @@ public abstract class BitmapBoundLazyLoaderTask extends BoundLazyLoaderTask {
         }
     }
     
-    public abstract Bitmap loadBitmapInBackground();
+    public abstract Bitmap loadBitmapInBackground() throws Throwable;
     
     public abstract void onBitmapLoadingStarted(ImageView v);
 

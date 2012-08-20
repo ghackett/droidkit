@@ -18,6 +18,9 @@ import android.view.ViewGroup;
 @SuppressLint("HandlerLeak")
 public class BoundLazyLoader {
     
+	private static final int MESSAGE_NORMAL = 0;
+	private static final int MESSAGE_CLEAN = 1;
+	
     private static BoundLazyLoader sInstance = null;
     
     private static final Object sLock = new Object();
@@ -187,7 +190,7 @@ public class BoundLazyLoader {
     
     /**
      * This will traverse your view tree and remove any view binders that it
-     * contains (triggering a cleanCache in 500ms).
+     * contains.
      * 
      * ONLY USE THIS METHOD IN YOUR Activity.onDestroy or Fragment.onDestroyView METHODS!
      * @param v the root of your view tree
@@ -267,11 +270,20 @@ public class BoundLazyLoader {
     
     public void resetLoadTimer(long timer) {
         try {
-            mThreadHandler.removeMessages(0);
-            mThreadHandler.sendEmptyMessageDelayed(0, timer);
+            mThreadHandler.removeMessages(MESSAGE_NORMAL);
+            mThreadHandler.sendEmptyMessageDelayed(MESSAGE_NORMAL, timer);
         } catch (Throwable t) {
             t.printStackTrace();
         }
+    }
+    
+    public void triggerClean() {
+    	try {
+    		mThreadHandler.removeMessages(MESSAGE_CLEAN);
+    		mThreadHandler.sendEmptyMessageDelayed(MESSAGE_CLEAN, mDelay);
+    	} catch (Throwable t) {
+    		t.printStackTrace();
+    	}
     }
     
     
@@ -301,6 +313,10 @@ public class BoundLazyLoader {
                 @Override
                 public void handleMessage(Message msg) {
 
+                	if (msg.what == MESSAGE_CLEAN) {
+                		sCache.cleanCache();
+                		return;
+                	}
                     
                     boolean returnNow = false;
                     
@@ -346,13 +362,20 @@ public class BoundLazyLoader {
                     
                     if (task != null && task.getView() != null && task.getObjectKey().equals((String)task.getView().getTag())) {
                         try {
-                            Object obj = sCache.bind(task.getObjectKey(), task.getView(), true);
+                            Object obj = sCache.bind(task.getObjectKey(), task.getView(), false);
                             if (obj != null) {
                                 task.setResultObject(obj);
                             } else {
-                                task.setResultObject(task.loadInBackground());
+                            	try {
+                            		task.setResultObject(task.loadInBackground());
+                            	} catch (OutOfMemoryError oome) {
+                            		oome.printStackTrace();
+                            		CLog.e("CAUGHT OOM ERROR");
+                            		sCache.cleanCache();
+                            		task.setResultObject(task.loadInBackground());
+                            	}
                                 if (task.getResultObject() != null)
-                                    sCache.put(task.getObjectKey(), task.getView(), task.getResultObject(), true);
+                                    sCache.put(task.getObjectKey(), task.getView(), task.getResultObject(), false);
                             }
 //                            sCache.cleanCache();
                             UI_HANDLER.post(new UINotifierTask(task));
@@ -362,7 +385,7 @@ public class BoundLazyLoader {
                         if (mThreadHandler != null)
                             resetLoadTimer(10);
                     } else {
-                        sCache.cleanCache();
+//                        sCache.cleanCache();
                         synchronized (mTaskQueue) {
                             if (mTaskQueue.size() > 0 && mThreadHandler != null)
                                 resetLoadTimer(10);

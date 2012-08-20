@@ -40,7 +40,7 @@ public abstract class BoundLazyLoaderTask {
     /**
      * do the actual lazy loading in this method
      */
-    public abstract Object loadInBackground();
+    public abstract Object loadInBackground() throws Throwable;
     
     public abstract void onLoadingStarted(View v);
     

@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
@@ -227,8 +228,8 @@ public class ImageTricks {
     	return null;
     }
     
-    public static Bitmap scaleDownImageUriToBitmap(Uri imageUri, int maxDimension, boolean deleteOriginal, boolean preferSmaller) {
-    	try {
+    public static Bitmap scaleDownImageUriToBitmap(Uri imageUri, int maxDimension, boolean deleteOriginal, boolean preferSmaller) throws IOException {
+//    	try {
     	    
 //    	    if (DroidKit.DEBUG) CLog.v("SCALE DOWN IMAGE - max dimension = " + maxDimension);
     	    
@@ -277,13 +278,13 @@ public class ImageTricks {
         	
         	return bitmap;
         	
-    	} catch (Throwable e) {
-    		e.printStackTrace();
-    	}
-    	return null;
+//    	} catch (Throwable e) {
+//    		e.printStackTrace();
+//    	}
+//    	return null;
     }
     
-    public static File scaleDownImageUriToFile(Uri imageUri, int maxDimension, CompressFormat format, int quality, boolean deleteOriginal, boolean preferSmaller) {
+    public static File scaleDownImageUriToFile(Uri imageUri, int maxDimension, CompressFormat format, int quality, boolean deleteOriginal, boolean preferSmaller) throws IOException {
     	if (!ImageTricks.checkTempCameraDir())
     		return null;
 
@@ -291,7 +292,7 @@ public class ImageTricks {
     	if (b == null) 
     		return null;
     	
-    	try {
+//    	try {
         	
         	File tmpFile = new File(ImageTricks.CAMERA_TEMP_DIR, "scaledImage." + (format == CompressFormat.JPEG ? "jpg" : "png"));
         	tmpFile.createNewFile();
@@ -303,10 +304,10 @@ public class ImageTricks {
         	
         	
         	return tmpFile;
-    	} catch (Throwable e) {
-    		e.printStackTrace();
-    	}
-    	return null;
+//    	} catch (Throwable e) {
+//    		e.printStackTrace();
+//    	}
+//    	return null;
     	
     }
     

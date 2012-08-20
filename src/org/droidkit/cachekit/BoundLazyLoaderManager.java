@@ -31,7 +31,7 @@ public class BoundLazyLoaderManager {
 	}
 	
 	public void cleanCache() {
-		
+		mLazyLoaders.get(0).triggerClean();
 	}
 	
 	public void onResume(int threadIndex) {
@@ -40,10 +40,12 @@ public class BoundLazyLoaderManager {
 	
 	public void onViewDestroyed(View v) {
 		for (int i =0; i<mLazyLoaders.size(); i++) {
-			if (i == 0)
+			if (i == 0) {
 				mLazyLoaders.get(i).onViewDestroyed(v, false);
-			else
+				mLazyLoaders.get(i).triggerClean();
+			} else {
 				mLazyLoaders.get(i).clearViewHeierarchyFromQueue(v);
+			}
 		}
 	}
 	
