@@ -110,11 +110,7 @@ public class BoundLazyLoader {
         view.setTag(key);
         
         if (shouldAddTask(task)) {
-            synchronized (mTaskQueue) {
-                clearViewFromQueue(view);
-                mTaskQueue.push(task);
-            }
-
+        	clearViewFromQueueAndAddTask(view, task);
         }
         
         if (mThreadHandler == null) {
@@ -129,17 +125,27 @@ public class BoundLazyLoader {
     }
     
     public void clearViewFromQueue(View view) {
-    	for (int i = 0; i<mTaskQueue.size();) {
-            BoundLazyLoaderTask waitingTask = mTaskQueue.get(i);
-            View waitingView = waitingTask.getView();
-            if (waitingView == view) {
-//                if (key.equals(waitingTask.getObjectKey()))
-//                    return;
-                mTaskQueue.remove(i);
-            } else {
-                i++;
-            }
-        }
+    	clearViewFromQueueAndAddTask(view, null);
+    }
+    
+    private void clearViewFromQueueAndAddTask(View view, BoundLazyLoaderTask task) {
+    	synchronized (mTaskQueue) {
+	    	for (int i = 0; i<mTaskQueue.size();) {
+	            BoundLazyLoaderTask waitingTask = mTaskQueue.get(i);
+	            View waitingView = waitingTask.getView();
+	            if (waitingView == view) {
+	//                if (key.equals(waitingTask.getObjectKey()))
+	//                    return;
+	                mTaskQueue.remove(i);
+	            } else {
+	                i++;
+	            }
+	        }
+	    	
+	    	if (task != null) {
+	    		mTaskQueue.push(task);
+	    	}
+    	}
     }
     
     /**
