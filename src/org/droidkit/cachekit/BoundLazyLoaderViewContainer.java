@@ -8,11 +8,11 @@ import android.widget.AbsListView.RecyclerListener;
 public class BoundLazyLoaderViewContainer implements RecyclerListener {
     
     private HashSet<View> mRecycledViews;
-    private BoundLazyLoader mLazyLoader;
+    private BoundLazyLoaderManager mLazyLoaderManager;
     
-    public BoundLazyLoaderViewContainer(BoundLazyLoader lazyLoader) {
+    public BoundLazyLoaderViewContainer(BoundLazyLoaderManager lazyLoaderManager) {
         mRecycledViews = new HashSet<View>();
-        mLazyLoader = lazyLoader;
+        mLazyLoaderManager = lazyLoaderManager;
     }
 
     @Override
@@ -26,9 +26,9 @@ public class BoundLazyLoaderViewContainer implements RecyclerListener {
     
     //call this method in your Activity.onDestroy or Fragment.onDestroyView
     //to flush the bindings
-    public void clearBindings(boolean inSync) {
+    public void clearBindings() {
         for (View v : mRecycledViews) {
-            mLazyLoader.onViewDestroyed(v, inSync);
+            mLazyLoaderManager.onViewDestroyed(v);
         }
         mRecycledViews.clear();
     }
