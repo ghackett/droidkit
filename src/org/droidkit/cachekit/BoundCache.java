@@ -10,6 +10,8 @@ import org.droidkit.DroidKit;
 import org.droidkit.cachekit.CacheManager.CacheInterface;
 import org.droidkit.util.tricks.CLog;
 
+import android.graphics.Bitmap;
+
 /** 
  * The purpose of this class is to provide provide a cache where each cached object is bound to a weakly referenced 
  * binder object. Everytime the cache is cleaned (as opposed to cleared), if any of the binder objects dissapear (due to 
@@ -34,12 +36,14 @@ public class BoundCache<K, B, C> implements CacheInterface {
     protected WeakHashMap<B, C> mBinders;
     protected HashMap<K, C> mKeyMap;
     protected HashMap<C, K> mCacheMap;
+    protected long mByteSize;
     
     public BoundCache() {
         mObjectBindings = new HashMap<C, LinkedList<WeakReference<B>>>();
         mBinders = new WeakHashMap<B, C>();
         mCacheMap = new HashMap<C, K>();
         mKeyMap = new HashMap<K, C>();
+        mByteSize = 0;
         CacheManager.registerCache(this);
     }
     
@@ -47,7 +51,9 @@ public class BoundCache<K, B, C> implements CacheInterface {
         if (key == null || binder == null || object == null)
             throw new NullPointerException("cant use any nulls in " + this.getClass().getSimpleName() + ".put()");
         mKeyMap.put(key, object);
-        mCacheMap.put(object, key);
+        if (mCacheMap.put(object, key) == null) {
+        	addToByteCount(object);
+        }
         C oldObject = mBinders.put(binder, object);
         if (oldObject != null && oldObject == object) {
             return;
@@ -167,6 +173,8 @@ public class BoundCache<K, B, C> implements CacheInterface {
             return;
         }
         
+        if (DroidKit.DEBUG) CLog.e("CURRENT CACHE SIZE IS " + mByteSize);
+        
         System.gc();
         
         LinkedList<C> unboundObjects = new LinkedList<C>();
@@ -194,9 +202,11 @@ public class BoundCache<K, B, C> implements CacheInterface {
             }
         }
         if (DroidKit.DEBUG) CLog.v("cc2 Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
+        if (DroidKit.DEBUG) CLog.e("CURRENT CACHE SIZE IS " + mByteSize);
     }
     
     protected void onObjectUnbound(C object) {
+    	subtractFromByteCount(object);
         K key = mCacheMap.remove(object);
         if (key != null)
             mKeyMap.remove(key);
@@ -212,5 +222,22 @@ public class BoundCache<K, B, C> implements CacheInterface {
             for (C obj : objects)
                 onObjectUnbound(obj);
         }
+    }
+    
+    public long getByteSize() {
+    	if (DroidKit.DEBUG) CLog.e("CURRENT CACHE SIZE IS " + mByteSize);
+    	return mByteSize;
+    }
+    
+    private void addToByteCount(C o) {
+    	if (o != null && o instanceof Bitmap)
+    		mByteSize += ( (long)((Bitmap)o).getRowBytes() * (long)((Bitmap)o).getHeight() );
+    		
+    }
+    
+    private void subtractFromByteCount(C o) {
+    	if (o != null && o instanceof Bitmap)
+    		mByteSize -= ( (long)((Bitmap)o).getRowBytes() * (long)((Bitmap)o).getHeight() );
+    	
     }
 }

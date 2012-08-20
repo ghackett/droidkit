@@ -7,6 +7,8 @@ import org.droidkit.DroidKit;
 import org.droidkit.util.tricks.CLog;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,7 +32,7 @@ public class BoundLazyLoader {
     public static BoundLazyLoader get() {
         synchronized (sLock) {
             if (sInstance == null) {
-                sInstance = new BoundLazyLoader();
+                sInstance = new BoundLazyLoader(10L * 1000L * 1000L);
             }
         }
         return sInstance;
@@ -75,19 +77,21 @@ public class BoundLazyLoader {
     private ArrayList<View> mViewsToDestroy = new ArrayList<View>();
     private int mInOrderCount = 0;
     private boolean mResumeMode = false;
+    private long mMaxCacheSize = 0;
 
     
-    public BoundLazyLoader(int delay) {
+    public BoundLazyLoader(int delay, long maxCacheSize) {
         mDelay = delay;
         mTaskQueue = new Stack<BoundLazyLoaderTask>();
+        mMaxCacheSize = maxCacheSize;
         
         LazyLoaderThread t = new LazyLoaderThread();
         t.setPriority(Math.max(Thread.MIN_PRIORITY, Thread.NORM_PRIORITY-3));
         t.start();
     }
     
-    public BoundLazyLoader() {
-        this(500);
+    public BoundLazyLoader(long maxCacheSize) {
+        this(500, maxCacheSize);
     }
 
     public void setDelay(int delay) {
@@ -382,6 +386,10 @@ public class BoundLazyLoader {
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
+                        
+                        if (sCache.getByteSize() > mMaxCacheSize)
+                        	sCache.cleanCache();
+                        
                         if (mThreadHandler != null)
                             resetLoadTimer(10);
                     } else {
