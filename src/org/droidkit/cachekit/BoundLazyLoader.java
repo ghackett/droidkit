@@ -50,6 +50,10 @@ public class BoundLazyLoader {
         
     };
     
+    public static BoundCache<String, View, Object> getCache() {
+    	return sCache;
+    }
+    
     
     public static void shutdownInstance() {
         synchronized (sLock) {
@@ -208,19 +212,21 @@ public class BoundLazyLoader {
         resetLoadTimer();
     }
     
-    private void destroyView(View v) {
-//        v.setTag(null);
-        synchronized (mTaskQueue) {
-            for (int i = 0; i<mTaskQueue.size();) {
-                BoundLazyLoaderTask waitingTask = mTaskQueue.get(i);
-                if (waitingTask.getView() == v) {
-                    mTaskQueue.remove(i);
-                } else {
-                    i++;
-                }
+    public void clearViewHeierarchyFromQueue(View v) {
+    	if (v == null)
+    		return;
+    	clearViewFromQueue(v);
+        if (v instanceof ViewGroup) {
+            ViewGroup p = (ViewGroup) v;
+            int childCount = p.getChildCount();
+            for (int i = 0; i<childCount; i++) {
+            	clearViewHeierarchyFromQueue(p.getChildAt(i));
             }
         }
-        
+    }
+    
+    private void destroyView(View v) {
+        clearViewFromQueue(v);
         sCache.destroyBinder(v, false);
     }
 
