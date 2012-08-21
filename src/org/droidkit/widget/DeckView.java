@@ -65,7 +65,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
 
     public interface OnDeckFocusChangedListener {
         public void onDeckFocusChanged(int newFocus);
-        public void onVisibilityChanged(int visibleSide);
+        public void onDeckVisibilityChanged(int visibleSide);
+        public void onDeckScrolledOffscreen();
     }
     
     private FrameLayout mTopContainer;
@@ -97,6 +98,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     private FrameLayout mRightShadow = null;
     
     private boolean mScrollingDisabled = false;
+    private boolean mIsScrollingOffscreen = false;
     
     private int mCurrentDeckFocus = DECK_UNKNOWN;
     private int mDeckMode = MODE_0_SIDES;
@@ -241,6 +243,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         
 
         resetScrollBarriers();
+        mIsScrollingOffscreen = false;
         
         switch(mDeckMode) {
             case MODE_0_SIDES: {
@@ -358,7 +361,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
                 }
                 onDeckFocusChanged(newFocus);
                 if (mFocusChangedListener != null) {
-                    mFocusChangedListener.onVisibilityChanged(mCurrentDeckFocus);
+                    mFocusChangedListener.onDeckVisibilityChanged(mCurrentDeckFocus);
                 }
                 
                 break;
@@ -406,8 +409,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
 
                 mTopContainer.scrollTo(0, 0);
                 if (mFocusChangedListener != null) {
-                    mFocusChangedListener.onVisibilityChanged(DECK_LEFT);
-                    mFocusChangedListener.onVisibilityChanged(DECK_RIGHT);
+                    mFocusChangedListener.onDeckVisibilityChanged(DECK_LEFT);
+                    mFocusChangedListener.onDeckVisibilityChanged(DECK_RIGHT);
                 }
                 break;
             }
@@ -422,9 +425,29 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         return mDeckMode;
     }
     
+    public void slideTopOffscreen(boolean goLeft) {
+    	if (getWidth() == 0 || mDeckMode != MODE_0_SIDES) {
+    		return;
+    	}
+    	CLog.e("SLIDING OFF SCREEN");
+    	
+    	mIsScrollingOffscreen = true;
+    	int target = 0;
+    	if (goLeft)
+    		target = getMaxScrollX() + mVisibleSideMarginPx;
+    	else
+    		target = getMinScrollX() - mVisibleSideMarginPx;
+    	smoothScrollTo(target, 100);
+    }
+    
+    public boolean isTopScrolledOffscreen() {
+    	return mIsScrollingOffscreen;
+    }
+    
     public void showLeft(boolean animated) {
         if (getWidth() == 0 || mDeckMode == MODE_2_SIDES)
             return;
+        mIsScrollingOffscreen = false;
         if (animated)
             smoothScrollTo(getMinScrollX());
         else
@@ -434,6 +457,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     public void showRight(boolean animated) {
         if (getWidth() == 0 || mDeckMode == MODE_2_SIDES)
             return;
+        mIsScrollingOffscreen = false;
         if (animated)
             smoothScrollTo(getMaxScrollX());
         else
@@ -443,6 +467,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     public void showTop(boolean animated) {
         if (getWidth() == 0 || mDeckMode == MODE_2_SIDES || mDeckMode == MODE_1_SIDE)
             return;
+        mIsScrollingOffscreen = false;
         if (animated)
             smoothScrollTo(getCenterScrollX());
         else
@@ -478,6 +503,10 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     private boolean isOkToScroll(MotionEvent ev) {
+    	
+    	if (mIsScrollingOffscreen)
+    		return false;
+    	
         int action = ev.getAction() & MotionEvent.ACTION_MASK;
         
         
@@ -680,6 +709,9 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     }
     
     private void finishScroll() {
+    	if (mIsScrollingOffscreen) {
+    		return;
+    	}
         int scrollX = mTopContainer.getScrollX();
         final int maxX = getMaxScrollX();
         final int minX = getMinScrollX();
@@ -752,23 +784,25 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         int minX = getMinScrollX();
         int centerX = getCenterScrollX();
         
-        if (scrollX < minX)
-            scrollX = minX;
-        if (scrollX > maxX)
-            scrollX = maxX;
+        if (!mIsScrollingOffscreen) {
+	        if (scrollX < minX)
+	            scrollX = minX;
+	        if (scrollX > maxX)
+	            scrollX = maxX;
+        }
         
         if (mDeckMode == MODE_0_SIDES) {
             if (scrollX < centerX) {
                 if (mLeftView.getVisibility() != VISIBLE) {
                     if (mFocusChangedListener != null)
-                        mFocusChangedListener.onVisibilityChanged(DECK_LEFT);
+                        mFocusChangedListener.onDeckVisibilityChanged(DECK_LEFT);
                     mLeftView.setVisibility(VISIBLE);
                     mRightView.setVisibility(INVISIBLE);
                 }
             } else if (scrollX > centerX) {
                 if (mRightView.getVisibility() != VISIBLE) {
                     if (mFocusChangedListener != null)
-                        mFocusChangedListener.onVisibilityChanged(DECK_RIGHT);
+                        mFocusChangedListener.onDeckVisibilityChanged(DECK_RIGHT);
                     mLeftView.setVisibility(INVISIBLE);
                     mRightView.setVisibility(VISIBLE);
                 }
@@ -780,7 +814,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             if (scrollX > minX) {
                 if (mLeftView.getVisibility() != VISIBLE) {
                     if (mFocusChangedListener != null)
-                        mFocusChangedListener.onVisibilityChanged(DECK_LEFT);
+                        mFocusChangedListener.onDeckVisibilityChanged(DECK_LEFT);
                     mLeftView.setVisibility(VISIBLE);
 //                    mRightView.setVisibility(INVISIBLE);
                 }
@@ -788,7 +822,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             if (scrollX < maxX) {
                 if (mRightView.getVisibility() != VISIBLE) {
                     if (mFocusChangedListener != null)
-                        mFocusChangedListener.onVisibilityChanged(DECK_RIGHT);
+                        mFocusChangedListener.onDeckVisibilityChanged(DECK_RIGHT);
 //                    mLeftView.setVisibility(INVISIBLE);
                     mRightView.setVisibility(VISIBLE);
                 }
@@ -811,7 +845,11 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
 //        smoothScrollTo(x, 150);
 //    }
     
-    protected void smoothScrollTo(int x) { //, int duration) {
+    protected void smoothScrollTo(int x) {
+    	smoothScrollTo(x, null);
+    }
+    
+    protected void smoothScrollTo(int x, Integer duration) { //, int duration) {
         if (!mScroller.isFinished()) {
             mScroller.abortAnimation();
         }
@@ -819,7 +857,10 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         int scrollX = mTopContainer.getScrollX();
         int dx = x - scrollX;
         
-        mScroller.startScroll(scrollX, 0, dx, 0, calculateScrollDuration(dx));
+        if (duration == null)
+        	duration = calculateScrollDuration(dx);
+        
+        mScroller.startScroll(scrollX, 0, dx, 0, duration);
         invalidate();
     }
     
@@ -916,6 +957,9 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             if (finishScroll) {
                 mScroller.abortAnimation();
                 finishScroll();
+                if (mIsScrollingOffscreen && mFocusChangedListener != null) {
+                	mFocusChangedListener.onDeckScrolledOffscreen();
+                }
             }
         } else if (mIsBeingScrolled) {
             finishScroll();
