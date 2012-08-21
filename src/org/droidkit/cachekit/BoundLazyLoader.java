@@ -7,8 +7,6 @@ import org.droidkit.DroidKit;
 import org.droidkit.util.tricks.CLog;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
@@ -23,20 +21,20 @@ public class BoundLazyLoader {
 	private static final int MESSAGE_NORMAL = 0;
 	private static final int MESSAGE_CLEAN = 1;
 	
-    private static BoundLazyLoader sInstance = null;
-    
-    private static final Object sLock = new Object();
-    
+//    private static BoundLazyLoader sInstance = null;
+//    
+//    private static final Object sLock = new Object();
+//    
     private static final Handler UI_HANDLER = new Handler();
-    
-    public static BoundLazyLoader get() {
-        synchronized (sLock) {
-            if (sInstance == null) {
-                sInstance = new BoundLazyLoader(10L * 1000L * 1000L);
-            }
-        }
-        return sInstance;
-    }
+//    
+//    public static BoundLazyLoader get() {
+//        synchronized (sLock) {
+//            if (sInstance == null) {
+//                sInstance = new BoundLazyLoader(10L * 1000L * 1000L);
+//            }
+//        }
+//        return sInstance;
+//    }
     
     private static BoundCache<String, View, Object> sCache = new BoundCache<String, View, Object>() {
 
@@ -60,14 +58,14 @@ public class BoundLazyLoader {
     }
     
     
-    public static void shutdownInstance() {
-        synchronized (sLock) {
-            if (sInstance != null) {
-                get().shutdown();
-                sInstance = null;
-            }
-        }
-    }
+//    public static void shutdownInstance() {
+//        synchronized (sLock) {
+//            if (sInstance != null) {
+//                get().shutdown();
+//                sInstance = null;
+//            }
+//        }
+//    }
     
     private Handler mThreadHandler = null;
     

@@ -3,7 +3,6 @@ package org.droidkit;
 import java.io.File;
 import java.util.Locale;
 
-import org.droidkit.cachekit.BoundLazyLoader;
 import org.droidkit.cachekit.CacheManager;
 import org.droidkit.net.HttpConnectionMonitor;
 import org.droidkit.util.tricks.StorageTricks;
@@ -95,7 +94,7 @@ public class DroidKit {
         sTelephonyManager = null;
         sConnectionMonitor = null;
         sHandler = null;
-        BoundLazyLoader.shutdownInstance();
+//        BoundLazyLoader.shutdownInstance();
         CacheManager.clearAllCaches();
     }
     
