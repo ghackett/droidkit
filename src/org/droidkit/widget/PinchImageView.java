@@ -23,6 +23,7 @@ import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -40,6 +41,8 @@ import android.view.View.OnTouchListener;
  */
 public class PinchImageView extends View implements OnScaleGestureListener, OnGestureListener, OnDoubleTapListener, OnTouchListener  {
 //	private static final String TAG = "PinchImageView";
+	
+	private static final int DEFAULT_PAINT_FLAGS = Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG;
 	
     public interface OnMaxBitmapDimensionChangedListener {
         public void onMaxBitmapDimensionChanged(int maxBitmapDimension);
@@ -66,6 +69,8 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 	private int mBitmapHeight = 0;
 	
 	private Rect mBitmapRect = null;
+	
+	private Paint mPaint = null;
 	
 	private int mRotation = 0;
 	
@@ -96,6 +101,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		setOnTouchListener(this);
 		mScroller = new Scroller(getContext());
 		mScaler = new Scroller(getContext());
+		mPaint = new Paint(DEFAULT_PAINT_FLAGS);
 	}
 	
 	public void setOnMaxBitmapDimensionChangedListener(OnMaxBitmapDimensionChangedListener listener) {
@@ -537,7 +543,7 @@ public class PinchImageView extends View implements OnScaleGestureListener, OnGe
 		    canvas.rotate(mRotation, mBitmapWidth/2, mBitmapHeight/2);
 		
 		RectF imgRect = getImageRect();
-		canvas.drawBitmap(mBitmap, mBitmapRect, imgRect, null);
+		canvas.drawBitmap(mBitmap, mBitmapRect, imgRect, mPaint);
 		
 		super.onDraw(canvas);
 		

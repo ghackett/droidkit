@@ -3,15 +3,19 @@ package org.droidkit.widget;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 
 public class FullBleedImageView extends HandyImageView {
+	
+	private static final int DEFAULT_PAINT_FLAGS = Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG;
 
 	private Rect mSrcRect = null, mDestRect = null;
 	private boolean mCustomDraw = false;
+	private Paint mPaint = null;
 
 	public FullBleedImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -30,6 +34,7 @@ public class FullBleedImageView extends HandyImageView {
 
 	private void initFullBleedImageView() {
 		setScaleType(ScaleType.CENTER_CROP);
+		mPaint = new Paint(DEFAULT_PAINT_FLAGS);
 	}
 
 	@Override
@@ -113,7 +118,7 @@ public class FullBleedImageView extends HandyImageView {
 					if (srcRect != null) {
 						final Rect destRect = getDestRect();
 						if (destRect != null) {
-							canvas.drawBitmap(b, srcRect, destRect, null);
+							canvas.drawBitmap(b, srcRect, destRect, mPaint);
 							return;
 						}
 					}
