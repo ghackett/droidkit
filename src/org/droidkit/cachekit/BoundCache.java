@@ -214,7 +214,6 @@ public class BoundCache<K, B, C> implements CacheInterface {
     
     public synchronized void clearCache() {
         Set<C> objects = mObjectBindings.keySet();
-        mObjectBindings.clear();
         mBinders.clear();
         mKeyMap.clear();
         mCacheMap.clear();
@@ -222,6 +221,12 @@ public class BoundCache<K, B, C> implements CacheInterface {
             for (C obj : objects)
                 onObjectUnbound(obj);
         }
+        
+        mObjectBindings.clear();
+        
+        if (DroidKit.DEBUG) CLog.e("CACHE CLEARED");
+        if (DroidKit.DEBUG) CLog.v("cc2 Holding onto " + mCacheMap.keySet().size() + " cached objects with " + mBinders.keySet().size() + " binders");
+        if (DroidKit.DEBUG) CLog.e("CURRENT CACHE SIZE IS " + mByteSize);
     }
     
     public long getByteSize() {
@@ -230,14 +235,27 @@ public class BoundCache<K, B, C> implements CacheInterface {
     }
     
     private void addToByteCount(C o) {
-    	if (o != null && o instanceof Bitmap)
-    		mByteSize += ( (long)((Bitmap)o).getRowBytes() * (long)((Bitmap)o).getHeight() );
+    	if (o != null) {
+    		Bitmap b = null;
+    		if (o instanceof Bitmap)
+    			b = (Bitmap) o;
+    		else if (o instanceof BitmapPlus)
+    			b = ((BitmapPlus) o).getBitmap();
+    		if (b != null && !b.isRecycled())
+    			mByteSize += ( (long)b.getRowBytes() * (long)b.getHeight() );
+    	}
     		
     }
     
     private void subtractFromByteCount(C o) {
-    	if (o != null && o instanceof Bitmap)
-    		mByteSize -= ( (long)((Bitmap)o).getRowBytes() * (long)((Bitmap)o).getHeight() );
-    	
+    	if (o != null) {
+    		Bitmap b = null;
+    		if (o instanceof Bitmap)
+    			b = (Bitmap) o;
+    		else if (o instanceof BitmapPlus)
+    			b = ((BitmapPlus) o).getBitmap();
+    		if (b != null && !b.isRecycled())
+    			mByteSize -= ( (long)b.getRowBytes() * (long)b.getHeight() );
+    	}
     }
 }
