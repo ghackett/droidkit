@@ -42,12 +42,17 @@ public class BoundLazyLoader {
         protected void onObjectUnbound(Object object) {
             super.onObjectUnbound(object);
             if (DroidKit.DEBUG) CLog.v("Unbound object");
-            if (object != null && object instanceof Bitmap) {
-                Bitmap b = (Bitmap)object;
-                if (!b.isRecycled()) {
-                    if (DroidKit.DEBUG) CLog.v("RECYCLE!!!");
-                    b.recycle();
-                }
+            if (object != null) {
+	            if (object instanceof Bitmap) {
+	                Bitmap b = (Bitmap)object;
+	                if (!b.isRecycled()) {
+	                    if (DroidKit.DEBUG) CLog.v("RECYCLE!!!");
+	                    b.recycle();
+	                }
+	            } else if (object instanceof BitmapPlus) {
+	            	if (DroidKit.DEBUG) CLog.v("RECYCLE!!!");
+	            	((BitmapPlus)object).recycleBitmap();
+	            }
             }
         }
         
