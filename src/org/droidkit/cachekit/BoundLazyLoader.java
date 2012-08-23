@@ -36,31 +36,31 @@ public class BoundLazyLoader {
 //        return sInstance;
 //    }
     
-    private static BoundCache<String, View, Object> sCache = new BoundCache<String, View, Object>() {
-
-        @Override
-        protected void onObjectUnbound(Object object) {
-            super.onObjectUnbound(object);
-            if (DroidKit.DEBUG) CLog.v("Unbound object");
-            if (object != null) {
-	            if (object instanceof Bitmap) {
-	                Bitmap b = (Bitmap)object;
-	                if (!b.isRecycled()) {
-	                    if (DroidKit.DEBUG) CLog.v("RECYCLE!!!");
-	                    b.recycle();
-	                }
-	            } else if (object instanceof BitmapPlus) {
-	            	if (DroidKit.DEBUG) CLog.v("RECYCLE!!!");
-	            	((BitmapPlus)object).recycleBitmap();
-	            }
-            }
-        }
-        
-    };
-    
-    public static BoundCache<String, View, Object> getCache() {
-    	return sCache;
-    }
+//    private static BoundCache<String, View, Object> mCache = new BoundCache<String, View, Object>() {
+//
+//        @Override
+//        protected void onObjectUnbound(Object object) {
+//            super.onObjectUnbound(object);
+//            if (DroidKit.DEBUG) CLog.v("Unbound object");
+//            if (object != null) {
+//	            if (object instanceof Bitmap) {
+//	                Bitmap b = (Bitmap)object;
+//	                if (!b.isRecycled()) {
+//	                    if (DroidKit.DEBUG) CLog.v("RECYCLE!!!");
+//	                    b.recycle();
+//	                }
+//	            } else if (object instanceof BitmapPlus) {
+//	            	if (DroidKit.DEBUG) CLog.v("RECYCLE!!!");
+//	            	((BitmapPlus)object).recycleBitmap();
+//	            }
+//            }
+//        }
+//        
+//    };
+//    
+//    public static BoundCache<String, View, Object> getCache() {
+//    	return mCache;
+//    }
     
     
 //    public static void shutdownInstance() {
@@ -81,9 +81,11 @@ public class BoundLazyLoader {
     private int mInOrderCount = 0;
     private boolean mResumeMode = false;
     private long mMaxCacheSize = 0;
+    private BoundLazyLoaderCache mCache = null;
 
     
-    public BoundLazyLoader(int delay, long maxCacheSize) {
+    public BoundLazyLoader(BoundLazyLoaderCache cache, int delay, long maxCacheSize) {
+    	mCache = cache;
         mDelay = delay;
         mTaskQueue = new Stack<BoundLazyLoaderTask>();
         mMaxCacheSize = maxCacheSize;
@@ -93,8 +95,8 @@ public class BoundLazyLoader {
         t.start();
     }
     
-    public BoundLazyLoader(long maxCacheSize) {
-        this(500, maxCacheSize);
+    public BoundLazyLoader(BoundLazyLoaderCache cache, long maxCacheSize) {
+        this(cache, 500, maxCacheSize);
     }
 
     public void setDelay(int delay) {
@@ -182,7 +184,7 @@ public class BoundLazyLoader {
     
     private boolean shouldAddTask(BoundLazyLoaderTask task) {
         if (!mPaused) {
-            Object obj = sCache.bind(task.getObjectKey(), task.getView(), false);
+            Object obj = mCache.bind(task.getObjectKey(), task.getView(), false);
             if (obj != null) {
                 task.setResultObject(obj);
                 task.onLoadComplete(task.getView(), obj);
@@ -237,7 +239,7 @@ public class BoundLazyLoader {
     
     private void destroyView(View v) {
         clearViewFromQueue(v);
-        sCache.destroyBinder(v, false);
+        mCache.destroyBinder(v, false);
     }
 
 
@@ -321,7 +323,7 @@ public class BoundLazyLoader {
                 public void handleMessage(Message msg) {
 
                 	if (msg.what == MESSAGE_CLEAN) {
-                		sCache.cleanCache();
+                		mCache.cleanCache();
                 		return;
                 	}
                     
@@ -369,7 +371,7 @@ public class BoundLazyLoader {
                     
                     if (task != null && task.getView() != null && task.getObjectKey().equals((String)task.getView().getTag())) {
                         try {
-                            Object obj = sCache.bind(task.getObjectKey(), task.getView(), false);
+                            Object obj = mCache.bind(task.getObjectKey(), task.getView(), false);
                             if (obj != null) {
                                 task.setResultObject(obj);
                             } else {
@@ -378,25 +380,25 @@ public class BoundLazyLoader {
                             	} catch (OutOfMemoryError oome) {
                             		oome.printStackTrace();
                             		CLog.e("CAUGHT OOM ERROR");
-                            		sCache.cleanCache();
+                            		mCache.cleanCache();
                             		task.setResultObject(task.loadInBackground());
                             	}
                                 if (task.getResultObject() != null)
-                                    sCache.put(task.getObjectKey(), task.getView(), task.getResultObject(), false);
+                                    mCache.put(task.getObjectKey(), task.getView(), task.getResultObject(), false);
                             }
-//                            sCache.cleanCache();
+//                            mCache.cleanCache();
                             UI_HANDLER.post(new UINotifierTask(task));
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
                         
-                        if (sCache.getByteSize() > mMaxCacheSize)
-                        	sCache.cleanCache();
+                        if (mCache.getByteSize() > mMaxCacheSize)
+                        	mCache.cleanCache();
                         
                         if (mThreadHandler != null)
                             resetLoadTimer(10);
                     } else {
-//                        sCache.cleanCache();
+//                        mCache.cleanCache();
                         synchronized (mTaskQueue) {
                             if (mTaskQueue.size() > 0 && mThreadHandler != null)
                                 resetLoadTimer(10);
@@ -429,6 +431,27 @@ public class BoundLazyLoader {
                 }
             } catch (Throwable t) {
                 t.printStackTrace();
+            }
+        }
+    }
+    
+    public static class BoundLazyLoaderCache extends BoundCache<String, View, Object> {
+        
+    	@Override
+        protected void onObjectUnbound(Object object) {
+            super.onObjectUnbound(object);
+            if (DroidKit.DEBUG) CLog.v("Unbound object");
+            if (object != null) {
+	            if (object instanceof Bitmap) {
+	                Bitmap b = (Bitmap)object;
+	                if (!b.isRecycled()) {
+	                    if (DroidKit.DEBUG) CLog.v("RECYCLE!!!");
+	                    b.recycle();
+	                }
+	            } else if (object instanceof BitmapPlus) {
+	            	if (DroidKit.DEBUG) CLog.v("RECYCLE!!!");
+	            	((BitmapPlus)object).recycleBitmap();
+	            }
             }
         }
     }
