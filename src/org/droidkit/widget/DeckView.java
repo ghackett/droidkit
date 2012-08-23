@@ -502,6 +502,12 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         return scrollX == rightX;
     }
     
+    public int getDeckFocus() {
+    	if (getWidth() == 0 || mDeckMode == MODE_2_SIDES)
+    		return DECK_TOP;
+    	return mCurrentDeckFocus;
+    }
+    
     private boolean isOkToScroll(MotionEvent ev) {
     	
     	if (mIsScrollingOffscreen)

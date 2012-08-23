@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import org.droidkit.DroidKit;
 import org.droidkit.cachekit.BoundLazyLoader.BoundLazyLoaderCache;
+import org.droidkit.util.tricks.AsyncTricks;
 import org.droidkit.util.tricks.CLog;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.View;
 
 
@@ -56,6 +58,27 @@ public class BoundLazyLoaderManager {
 	public void onResume(int threadIndex) {
 		mLazyLoaders.get(threadIndex).onResume();
 	}
+	
+	public void setSingleActiveLoader(int activeThreadId) {
+		for (int i = 0; i<mLazyLoaders.size(); i++)
+			mLazyLoaders.get(i).setPaused(i != activeThreadId);
+	}
+	
+	public void setMultipleActiveLoaders(int... activeThreads) {
+		for (int i = 0; i<mLazyLoaders.size(); i++) {
+			mLazyLoaders.get(i).setPaused(!isIntInArray(i, activeThreads));
+		}
+	}
+	
+	
+	private boolean isIntInArray(int var, int[] array) {
+		for (int i = 0; i<array.length; i++)
+			if (var == array[i])
+				return true;
+		return false;
+	}
+	
+
 	
 	public void onViewDestroyed(View v) {
 		for (int i =0; i<mLazyLoaders.size(); i++) {
