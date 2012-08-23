@@ -183,16 +183,16 @@ public class BoundLazyLoader {
     }
     
     private boolean shouldAddTask(BoundLazyLoaderTask task) {
-        if (!mPaused) {
-            Object obj = mCache.bind(task.getObjectKey(), task.getView(), false);
-            if (obj != null) {
-                task.setResultObject(obj);
-                task.onLoadComplete(task.getView(), obj);
-                if (mInOrderCount > 0)
-                    mInOrderCount--;
-                return false;
-            }
+//        if (!mPaused) {
+        Object obj = mCache.bind(task.getObjectKey(), task.getView(), false);
+        if (obj != null) {
+            task.setResultObject(obj);
+            task.onLoadComplete(task.getView(), obj);
+            if (mInOrderCount > 0)
+                mInOrderCount--;
+            return false;
         }
+//        }
         task.onLoadingStarted(task.getView());
         return task.isTaskValid();
     }
