@@ -4,12 +4,10 @@ import java.util.ArrayList;
 
 import org.droidkit.DroidKit;
 import org.droidkit.cachekit.BoundLazyLoader.BoundLazyLoaderCache;
-import org.droidkit.util.tricks.AsyncTricks;
 import org.droidkit.util.tricks.CLog;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.view.View;
 
 
@@ -31,7 +29,7 @@ public class BoundLazyLoaderManager {
 		if (DroidKit.DEBUG) CLog.e("MEMORY CLASS = " + heapMb + ", max cache size = " + maxSize);
 		
 		for (int i = 0; i<numLoaders; i++)
-			mLazyLoaders.add(new BoundLazyLoader(mCache, maxSize));
+			mLazyLoaders.add(onCreateLoader(mCache, maxSize, i));
 	}
 	
 	public void addTask(BoundLazyLoaderTask task, int threadIndex) {
@@ -70,6 +68,9 @@ public class BoundLazyLoaderManager {
 		}
 	}
 	
+	protected BoundLazyLoader onCreateLoader(BoundLazyLoaderCache cache, long maxCacheSize, int threadId) {
+		return new BoundLazyLoader(cache, maxCacheSize);
+	}
 	
 	private boolean isIntInArray(int var, int[] array) {
 		for (int i = 0; i<array.length; i++)
