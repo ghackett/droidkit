@@ -242,7 +242,9 @@ public class ImageTricks {
         	    b.recycle();
         	mediaStream.close();
         	mediaStream = null;
-        	int maxSideSize = Math.max(opts.outWidth, opts.outHeight);
+        	int origWidth = opts.outWidth;
+        	int origHeight = opts.outHeight;
+        	int maxSideSize = Math.max(origWidth, origHeight);
         	
 //        	if (DroidKit.DEBUG) CLog.v("SCALE DOWN IMAGE - max original side = " + maxSideSize);
         	
@@ -252,8 +254,7 @@ public class ImageTricks {
         	opts.inSampleSize = maxSideSize / maxDimension;
         	
         	if (preferSmaller) {
-            	float finalSize = (float)maxSideSize / (float) opts.inSampleSize;
-            	if (finalSize > maxDimension)
+            	while (maxSideSize / opts.inSampleSize > maxDimension)
             	    opts.inSampleSize++;
         	}
         	
@@ -270,6 +271,14 @@ public class ImageTricks {
         	
         	mediaStream.close();
         	mediaStream = null;
+        	
+        	if (bitmap != null && preferSmaller && (bitmap.getWidth() > maxDimension || bitmap.getHeight() > maxDimension)) {
+        		int newHeight = origHeight / opts.inSampleSize;
+        		int newWidth = origWidth / opts.inSampleSize;
+        		Bitmap bm2 = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, false);
+        		bitmap.recycle();
+        		bitmap = bm2;
+        	}
         	
 //        	if (DroidKit.DEBUG) CLog.v("SCALE DOWN IMAGE - new bitmap width = " + bitmap.getWidth() + ", height = " + bitmap.getHeight());
         	
