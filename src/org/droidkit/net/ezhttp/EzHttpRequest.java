@@ -177,6 +177,8 @@ public class EzHttpRequest implements ProgressListener {
 //	private int mTimeoutSecs;
 	private boolean mIsRaw;
 	private int mNumberOfRetrysToAttempt;
+	private boolean mUseBackoffForRetries;
+	private int mLastBackoff;
 	
 	private String mStringEntity;
 	private String mStringEntityType;
@@ -226,6 +228,8 @@ public class EzHttpRequest implements ProgressListener {
 		mCurrentFile = 0;
 		mUploadingFiles = false;
 		mNumberOfRetrysToAttempt = 1;
+		mUseBackoffForRetries = false;
+		mLastBackoff = 0;
 	}
 	
 	
@@ -243,7 +247,12 @@ public class EzHttpRequest implements ProgressListener {
 		mIsRaw = isRaw;
 	}
 	public void setNumberOfRetrysToAttempt(int numberOfRetrysToAttempt) {
+	    setNumberOfRetrysToAttempt(numberOfRetrysToAttempt, false);
+	}
+	
+	public void setNumberOfRetrysToAttempt(int numberOfRetrysToAttempt, boolean useBackoffForRetries) {
 	    mNumberOfRetrysToAttempt = numberOfRetrysToAttempt;
+	    mUseBackoffForRetries = useBackoffForRetries;
 	}
 	
 	public String getUrl() {
@@ -460,6 +469,19 @@ public class EzHttpRequest implements ProgressListener {
 		        if (tryCount == mNumberOfRetrysToAttempt) {
 		            response = generateExceptionResponse(t);
 		        }
+		    }
+		    
+		    if (mUseBackoffForRetries) {
+		    	if (mLastBackoff == 0) {
+		    		mLastBackoff = 500;
+		    	} else {
+		    		mLastBackoff += 500;
+		    	}
+		    	try {
+					Thread.sleep(mLastBackoff);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 		    }
 		}
 
