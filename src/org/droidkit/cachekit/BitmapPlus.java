@@ -37,7 +37,7 @@ public class BitmapPlus {
 	
 	public boolean isBitmapRecycled() {
 		if (mBitmap == null)
-			return false;
+			return true;
 		return mBitmap.isRecycled();
 	}
 	
