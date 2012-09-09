@@ -437,7 +437,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     		target = getMaxScrollX() + mVisibleSideMarginPx;
     	else
     		target = getMinScrollX() - mVisibleSideMarginPx;
-    	smoothScrollTo(target, 100);
+    	smoothScrollTo(target, 150);
     }
     
     public boolean isTopScrolledOffscreen() {
@@ -875,7 +875,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         
         int maxWidth = getWidth()-mVisibleSideMarginPx;
 //        float millisPerPixel = 0.35714287f;
-        float millisPerPixel = 200f/(float)maxWidth;
+        float millisPerPixel = 250f/(float)maxWidth;
 //        CLog.v("millisPerPixel = " + millisPerPixel);
         float duration = millisPerPixel*dxf;
         return (int)duration;
