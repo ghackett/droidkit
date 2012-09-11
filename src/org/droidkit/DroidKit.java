@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -61,8 +62,10 @@ public class DroidKit {
     private static OnAccountsUpdateListener sAccountListener = null;
     private static HttpConnectionMonitor sConnectionMonitor = null;
     private static TelephonyManager sTelephonyManager = null;
+    private static AudioManager sAudioManager = null;
     private static Handler sHandler = null;
     private static Boolean mGoogleMapsSupported = null;
+    
     
     public static void onApplicationCreate(Context context) {
         if (sApplicationContext == null) {
@@ -173,6 +176,12 @@ public class DroidKit {
         if (sTelephonyManager == null)
             sTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         return sTelephonyManager;
+    }
+    
+    public static AudioManager getAudioManager() {
+    	if(sAudioManager == null)
+    		sAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+    	return sAudioManager;
     }
     
     public static AlarmManager getAlarmManager() {
