@@ -450,8 +450,10 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         mIsScrollingOffscreen = false;
         if (animated)
             smoothScrollTo(getMinScrollX());
-        else
+        else {
             scrollTo(getMinScrollX(), true);
+            finishScroll();
+        }
     }
     
     public void showRight(boolean animated) {
@@ -460,8 +462,10 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         mIsScrollingOffscreen = false;
         if (animated)
             smoothScrollTo(getMaxScrollX());
-        else
+        else {
             scrollTo(getMaxScrollX(), true);
+            finishScroll();
+        }
     }
     
     public void showTop(boolean animated) {
@@ -470,8 +474,10 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         mIsScrollingOffscreen = false;
         if (animated)
             smoothScrollTo(getCenterScrollX());
-        else
+        else {
             scrollTo(getCenterScrollX(), true);
+            finishScroll();
+        }
     }
     
     public boolean isTopFocused() {
