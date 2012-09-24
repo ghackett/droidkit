@@ -11,6 +11,7 @@ import java.util.HashMap;
 import org.droidkit.DroidKit;
 import org.droidkit.image.ImageRequest;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -202,9 +203,9 @@ public class ImageTricks {
     	}
     }
     
-    public static Bitmap scaleDownContactPhoto(Uri contactUri, int maxDimension) {
+    public static Bitmap scaleDownContactPhoto(Uri contactUri, int maxDimension, boolean fromHiRes) {
     	try {
-    		InputStream mediaStream = Contacts.openContactPhotoInputStream(DroidKit.getContentResolver(), contactUri);
+    		InputStream mediaStream = openContactPhotoStream(contactUri, fromHiRes);
     		if (mediaStream == null)
     			return null;
     		BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -213,7 +214,7 @@ public class ImageTricks {
         	mediaStream.close();
             int outWidth = opts.outWidth;
         	
-            mediaStream = Contacts.openContactPhotoInputStream(DroidKit.getContentResolver(), contactUri);
+            mediaStream = openContactPhotoStream(contactUri, fromHiRes);
 
         	opts = new BitmapFactory.Options();
         	opts.inSampleSize = outWidth / maxDimension;
@@ -226,6 +227,15 @@ public class ImageTricks {
     	}
         	
     	return null;
+    }
+    
+	private static InputStream openContactPhotoStream(Uri contactUri, boolean fromHiRes) {
+    	if (DroidKit.isIceCreamSandwich()) {
+    		if (DroidKit.DEBUG && fromHiRes) CLog.e("OPENING HIGH RES CONTACT PHOTO STREAM");
+    		return Contacts.openContactPhotoInputStream(DroidKit.getContentResolver(), contactUri, fromHiRes);
+    	} else {
+    		return Contacts.openContactPhotoInputStream(DroidKit.getContentResolver(), contactUri);
+    	}
     }
     
     public static Bitmap scaleDownImageUriToBitmap(Uri imageUri, int maxDimension, boolean deleteOriginal, boolean preferSmaller) throws IOException {
