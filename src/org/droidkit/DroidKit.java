@@ -540,5 +540,31 @@ public class DroidKit {
         return getResources().getDimensionPixelSize(dimenId);
     }
     
+    public static void showToast(int textResId) {
+    	Toast.makeText(sApplicationContext, textResId, Toast.LENGTH_SHORT).show();
+    }
     
+    public static void showToast(CharSequence text) {
+    	Toast.makeText(sApplicationContext, text, Toast.LENGTH_SHORT).show();
+    }
+    
+    public static void postToast(final int textResId) {
+    	sHandler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				showToast(textResId);
+			}
+		});
+    }
+    
+    public static void postToast(final CharSequence text) {
+    	sHandler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				showToast(text);
+			}
+		});
+    }
 }
