@@ -52,6 +52,8 @@ public class CLog {
                 for (int j = 0; j<intentDesc.length; j++) {
                     android.util.Log.e(LOG_TAG, intentDesc[j]);
                 }
+            } else {
+            	android.util.Log.e(LOG_TAG, "NULL INTENT");
             }
         }
     }
