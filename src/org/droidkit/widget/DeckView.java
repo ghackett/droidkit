@@ -106,6 +106,9 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     private int mVisibleSideMarginPx; //only used for MODE_0_SIDES
     private int mLeftPanelWidth; //only used for MODE_1_SIDE and MODE_2_SIDES
     private int mRightPanelWidth; //only used for MODE_2_SIDES
+    
+    private boolean mCanShowRight = true;
+    private boolean mCanShowLeft = true;
 
     public DeckView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -425,6 +428,28 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         return mDeckMode;
     }
     
+    public boolean canShowRight() {
+    	return mCanShowRight;
+    }
+    
+    public boolean canShowLeft() {
+    	return mCanShowLeft;
+    }
+    
+    public void setCanShowLeft(boolean canShowLeft) {
+    	if (mCanShowLeft != canShowLeft) {
+	    	mCanShowLeft = canShowLeft;
+	    	resetScrollBarriers();
+    	}
+    }
+    
+    public void setCanShowRight(boolean canShowRight) {
+    	if (mCanShowRight != canShowRight) {
+	    	mCanShowRight = canShowRight;
+	    	resetScrollBarriers();
+    	}
+    }
+    
     public void slideTopOffscreen(boolean goLeft) {
     	if (getWidth() == 0 || mDeckMode != MODE_0_SIDES) {
     		return;
@@ -439,6 +464,8 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     		target = getMinScrollX() - mVisibleSideMarginPx;
     	smoothScrollTo(target, 150);
     }
+    
+    
     
     public boolean isTopScrolledOffscreen() {
     	return mIsScrollingOffscreen;
@@ -459,6 +486,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     public void showRight(boolean animated) {
         if (getWidth() == 0 || mDeckMode == MODE_2_SIDES)
             return;
+        
         mIsScrollingOffscreen = false;
         if (animated)
             smoothScrollTo(getMaxScrollX());
@@ -734,10 +762,10 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             mScrollXOnDown = null;
             setTopScrollingAllowed(true);
             int newFocus = DECK_UNKNOWN;
-            if (scrollX == centerX) {
-                newFocus = DECK_TOP;
-            } else if (scrollX == minX) {
-                newFocus = DECK_LEFT;
+            if (scrollX == minX) {
+            	newFocus = DECK_LEFT;
+            } else if (scrollX == centerX) {
+            	newFocus = DECK_TOP;
             } else if (scrollX == maxX) {
                 newFocus = DECK_RIGHT;
             }
@@ -839,9 +867,9 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
                     mRightView.setVisibility(VISIBLE);
                 }
             }
-            if (scrollX == maxX)
+            if (scrollX == maxX && canShowRight())
                 mLeftView.setVisibility(INVISIBLE);
-            if (scrollX == minX) 
+            if (scrollX == minX && canShowLeft()) 
                 mRightView.setVisibility(INVISIBLE);
         }
         
@@ -881,7 +909,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         
         int maxWidth = getWidth()-mVisibleSideMarginPx;
 //        float millisPerPixel = 0.35714287f;
-        float millisPerPixel = 250f/(float)maxWidth;
+        float millisPerPixel = 200f/(float)maxWidth;
 //        CLog.v("millisPerPixel = " + millisPerPixel);
         float duration = millisPerPixel*dxf;
         return (int)duration;
@@ -928,12 +956,26 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
         mMaxScrollX = 0;
         switch(mDeckMode) {
             case MODE_0_SIDES:
-                mMinScrollX = -((getWidth() * 2) - (mVisibleSideMarginPx * 2));
-                mCenterScrollX = -(getWidth() - mVisibleSideMarginPx);
+            	mCenterScrollX = -(getWidth() - mVisibleSideMarginPx);
+            	if (!canShowLeft()) {
+            		mMinScrollX = mCenterScrollX;
+            	} else {
+            		mMinScrollX = -((getWidth() * 2) - (mVisibleSideMarginPx * 2));
+            	}
+            	if (!canShowRight()) {
+            		mMaxScrollX = mCenterScrollX;
+            	}
+                
                 break;
             case MODE_1_SIDE:
-                mMinScrollX = -mLeftPanelWidth;
+            	mMinScrollX = -mLeftPanelWidth;
                 mCenterScrollX = Integer.MIN_VALUE;
+
+            	if (!canShowLeft()) {
+            		mMinScrollX = 0;
+            	} else if (!canShowRight()) {
+            		mMaxScrollX = mMinScrollX;
+            	}
                 break;
             case MODE_2_SIDES:
                 mMinScrollX = 0;
