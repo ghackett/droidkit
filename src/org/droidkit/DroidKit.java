@@ -567,4 +567,17 @@ public class DroidKit {
 			}
 		});
     }
+    
+    @SuppressWarnings("deprecation")
+	public static void copyTextToClipboard(String text, String label, boolean toastUser) {
+    	if (isHoneycomb()) {
+    		android.content.ClipboardManager mgr = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+    		mgr.setPrimaryClip(android.content.ClipData.newPlainText(label, text));
+    	} else {
+    		android.text.ClipboardManager mgr = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+    		mgr.setText(text);
+    	}
+    	if (toastUser) 
+    		showToast(R.string.toast_text_copied_to_clipboard);
+    }
 }
