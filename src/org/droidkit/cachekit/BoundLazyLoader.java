@@ -21,6 +21,8 @@ public class BoundLazyLoader {
 	private static final int MESSAGE_NORMAL = 0;
 	private static final int MESSAGE_CLEAN = 1;
 	
+	//just a comment so i can make a new branch
+	
 //    private static BoundLazyLoader sInstance = null;
 //    
 //    private static final Object sLock = new Object();
