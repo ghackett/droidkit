@@ -223,7 +223,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
             int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (changed) {
-            CLog.v("ON LAYOUT - CHANGED");
+        	if (DroidKit.DEBUG) CLog.v("ON LAYOUT - CHANGED");
             getHandler().post(mUpdateLayoutRunnable);
         }
     }
@@ -454,7 +454,7 @@ public class DeckView extends FrameLayout implements StoppableScrollView {
     	if (getWidth() == 0 || mDeckMode != MODE_0_SIDES) {
     		return;
     	}
-    	CLog.e("SLIDING OFF SCREEN");
+    	if (DroidKit.DEBUG) CLog.e("SLIDING OFF SCREEN");
     	
     	mIsScrollingOffscreen = true;
     	int target = 0;
