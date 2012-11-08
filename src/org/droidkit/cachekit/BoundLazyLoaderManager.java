@@ -24,7 +24,7 @@ public class BoundLazyLoaderManager {
 		
 		ActivityManager am = (ActivityManager) DroidKit.getSystemService(Context.ACTIVITY_SERVICE);
 		int heapMb = am.getMemoryClass();
-		long maxSize = (long)(heapMb/2) * 1000L * 1000L; 
+		long maxSize = (long)(heapMb/3) * 1000L * 1000L; 
 		
 		if (DroidKit.DEBUG) CLog.e("MEMORY CLASS = " + heapMb + ", max cache size = " + maxSize);
 		

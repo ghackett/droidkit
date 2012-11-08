@@ -381,7 +381,7 @@ public class BoundLazyLoader {
                             		task.setResultObject(task.loadInBackground());
                             	} catch (OutOfMemoryError oome) {
                             		oome.printStackTrace();
-                            		CLog.e("CAUGHT OOM ERROR");
+                            		if (DroidKit.DEBUG) CLog.e("CAUGHT OOM ERROR");
                             		mCache.cleanCache();
                             		task.setResultObject(task.loadInBackground());
                             	}
