@@ -10,6 +10,8 @@ import org.droidkit.util.tricks.StorageTricks;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.OnAccountsUpdateListener;
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
@@ -566,6 +568,7 @@ public class DroidKit {
 		});
 	}
 
+	@SuppressLint("NewApi")
 	@SuppressWarnings("deprecation")
 	public static void copyTextToClipboard(String text, String label, boolean toastUser) {
 		if (isHoneycomb()) {
