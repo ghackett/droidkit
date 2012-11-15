@@ -27,11 +27,11 @@ public class CacheManager {
         }
     }
     
-    public static void clearNonBoundCaches() {
-        for (CacheInterface cache : getInstances()) {
-            if (!(cache instanceof BoundCache))
-                cache.clearCache();
-        }
-    }
+//    public static void clearNonBoundCaches() {
+//        for (CacheInterface cache : getInstances()) {
+//            if (!(cache instanceof BoundCache))
+//                cache.clearCache();
+//        }
+//    }
     
 }
