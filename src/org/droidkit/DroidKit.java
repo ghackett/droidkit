@@ -337,15 +337,16 @@ public class DroidKit {
 
 	public static boolean doesDeviceSupportTelephony() {
 		boolean hasTelephony = sApplicationContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
-		boolean hasValidSim = false;
-		if (getTelephonyManager().getSimState() == TelephonyManager.SIM_STATE_READY) {
-			hasValidSim = true;
-		}
-		if (hasTelephony && hasValidSim) {
-			return true;
-		} else {
-			return false;
-		}
+//		boolean hasValidSim = false;
+//		if (getTelephonyManager().getSimState() == TelephonyManager.SIM_STATE_READY) {
+//			hasValidSim = true;
+//		}
+//		if (hasTelephony && hasValidSim) {
+//			return true;
+//		} else {
+//			return false;
+//		}
+		return hasTelephony;
 	}
 
 	public static void registerReceiver(BroadcastReceiver receiver, IntentFilter filter, String broadcastPermission) {
