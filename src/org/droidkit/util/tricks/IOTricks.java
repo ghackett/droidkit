@@ -181,6 +181,11 @@ public class IOTricks {
         copyInputStreamToFile(from, to, DEFAULT_BUFFER_SIZE, true, overwrite, null);
     }
     
+    public static void copyTextToStream(String text, OutputStream to, boolean closeOutput) {
+    	ByteArrayInputStream from = new ByteArrayInputStream(text.getBytes());
+    	copyInputStreamToOutputStream(from, to, DEFAULT_BUFFER_SIZE, true, closeOutput, null);
+    }
+    
     public static void appendTextToFile(String text, File to) {
         try {
             if (!to.exists()) {

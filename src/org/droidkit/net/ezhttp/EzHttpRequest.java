@@ -1,5 +1,6 @@
 package org.droidkit.net.ezhttp;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -23,6 +25,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -196,7 +199,7 @@ public class EzHttpRequest implements ProgressListener {
 	
 	private Handler mResponseHandler;
 	
-	
+	private boolean mGzipBody = false;
 	
 	private long mTotalBytes;
 	private int mCurrentFile;
@@ -302,6 +305,13 @@ public class EzHttpRequest implements ProgressListener {
 		mResponseHandler = handler;
 	}
 	
+	/**
+	 * Most people shouldn't use this, its just temporary until the whole class switches to Url connection which supports gzipping transparently
+	 * @param gzipBody
+	 */
+	public void setGzipBody(boolean gzipBody) {
+		mGzipBody = gzipBody;
+	}
 	
 	public void setHeaders(HashMap<String, String> headers) {
 		mHeaders = headers;
@@ -546,9 +556,19 @@ public class EzHttpRequest implements ProgressListener {
 				}
 				case REQ_POST_STRING_ENT: {
 					message = new HttpPost(url);
-					StringEntity ent = new StringEntity(mStringEntity, mStringEntityEncoding);
-					ent.setContentType(mStringEntityType);
-					((HttpPost)message).setEntity(ent);
+					if (mGzipBody) {
+						ByteArrayOutputStream out = new ByteArrayOutputStream();
+						GZIPOutputStream zipOut = new GZIPOutputStream(out);
+						IOTricks.copyTextToStream(mStringEntity, zipOut, true);
+						ByteArrayEntity ent = new ByteArrayEntity(out.toByteArray());
+						ent.setContentEncoding(mStringEntityEncoding);
+						ent.setContentType(mStringEntityType);
+						((HttpPost)message).setEntity(ent);
+					} else {
+						StringEntity ent = new StringEntity(mStringEntity, mStringEntityEncoding);
+						ent.setContentType(mStringEntityType);
+						((HttpPost)message).setEntity(ent);
+					}
 					break;
 				}
 			}
@@ -561,6 +581,8 @@ public class EzHttpRequest implements ProgressListener {
 			}
 			
 			processMessage(message);
+			
+			//TODO: GZIPPING
 			
 			DroidKit.getHttpConnectionMonitor().onRequestStart(message);
 			HttpResponse response = HttpClientFactory.getInstance().getSharedClient().execute(message);
