@@ -34,6 +34,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
+import android.telephony.SmsManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -65,6 +66,7 @@ public class DroidKit {
 	private static HttpConnectionMonitor sConnectionMonitor = null;
 	private static TelephonyManager sTelephonyManager = null;
 	private static AudioManager sAudioManager = null;
+	private static SmsManager sSmsManager = null;
 	private static Handler sHandler = null;
 	private static Boolean mGoogleMapsSupported = null;
 
@@ -97,6 +99,7 @@ public class DroidKit {
 		sPackageInfo = null;
 		sTelephonyManager = null;
 		sConnectionMonitor = null;
+		sSmsManager = null;
 		sHandler = null;
 //        BoundLazyLoader.shutdownInstance();
 		CacheManager.clearAllCaches();
@@ -203,6 +206,12 @@ public class DroidKit {
 		if (sAccountManager == null)
 			sAccountManager = AccountManager.get(getContext());
 		return sAccountManager;
+	}
+	
+	public static SmsManager getSmsManager() {
+		if (sSmsManager == null)
+			sSmsManager = SmsManager.getDefault();
+		return sSmsManager;
 	}
 
 	public static HttpConnectionMonitor getHttpConnectionMonitor() {
