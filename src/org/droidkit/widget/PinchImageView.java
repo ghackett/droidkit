@@ -18,7 +18,6 @@ package org.droidkit.widget;
 
 import org.droidkit.DroidKit;
 import org.droidkit.util.tricks.CLog;
-import org.droidkit.widget.ScaleGestureDetector.OnScaleGestureListener;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -31,6 +30,8 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnTouchListener;
 
