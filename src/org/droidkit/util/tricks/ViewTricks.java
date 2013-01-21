@@ -27,7 +27,12 @@ public class ViewTricks {
 		
 		tv.setLinksClickable(false);
 		tv.setMovementMethod(LinkMovementMethod.getInstance());
+		int paddLeft = tv.getPaddingLeft();
+		int paddRight = tv.getPaddingRight();
+		int paddTop = tv.getPaddingTop();
+		int paddBottom = tv.getPaddingBottom();
 		tv.setBackgroundResource(selectorBgResId);
+		tv.setPadding(paddLeft, paddTop, paddRight, paddBottom);
 		tv.setText(spanString);
 		tv.setOnClickListener(onClickListener);
 	}
