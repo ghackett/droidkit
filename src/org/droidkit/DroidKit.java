@@ -600,4 +600,15 @@ public class DroidKit {
 		if (toastUser)
 			showToast(R.string.toast_text_copied_to_clipboard);
 	}
+	
+	public static int getStatusBarHeight() {
+	      int result = 0; 
+	      int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+	      if (resourceId > 0) {
+	          result = getResources().getDimensionPixelSize(resourceId);
+	      } else {
+	    	  result = getPixels(25); //use 25dp as a default height in case some version of android doesn't have this resource available
+	      }
+	      return result;
+	}
 }
